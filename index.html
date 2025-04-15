@@ -6,7 +6,6 @@
   <title>VinSocial.vin</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" type="image/png" href="logo.png" />
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
 </head>
 <body>
   <div class="container">
@@ -26,6 +25,7 @@
       <input type="text" id="nicknameInput" placeholder="Enter your nickname" />
       <button id="registerBtn" class="button">Register & Pay 0.05 VIN</button>
     </div>
+
     <div id="main-app" class="hidden">
       <div class="top-bar">
         <div class="balance-info">
@@ -70,6 +70,7 @@
         </ul>
       </section>
     </div>
+
     <footer class="footer">
       <p>&copy; 2025 VinSocial.vin – Built on VIC Blockchain</p>
       <a href="https://t.me/vinplayvin" target="_blank">Telegram</a> |
@@ -78,6 +79,8 @@
     </footer>
   </div>
 
+  <!-- 🧠 Load ethers.js trước app.js -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

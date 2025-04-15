@@ -26,6 +26,28 @@ window.addEventListener("load", async () => {
   }
 });
 
+document.getElementById("registerBtn").addEventListener("click", async () => {
+  const name = document.getElementById("nameInput").value.trim();
+  const bio = document.getElementById("bioInput").value.trim();
+  const avatar = document.getElementById("avatarInput").value.trim();
+  const website = document.getElementById("websiteInput").value.trim();
+
+  if (!name) return alert("Please enter a name");
+
+  try {
+    const tx = await vinSocialContract.register(name, bio, avatar, website, {
+      value: ethers.utils.parseEther("0.05")
+    });
+    await tx.wait();
+    alert("✅ Registration successful!");
+    document.getElementById("registerForm").classList.add("hidden");
+    await checkRegistration();
+  } catch (err) {
+    console.error("Registration failed", err);
+    alert("❌ Registration failed. Make sure you have enough VIN and VIC.");
+  }
+});
+
 // 👉 Kết nối ví
 async function connectWallet() {
   try {

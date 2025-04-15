@@ -1,1 +1,231 @@
+/* Thiết lập mặc định cho toàn bộ trang */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f6f9;
+  color: #333;
+  line-height: 1.6;
+}
+
+/* Khối căn giữa trang */
+.container {
+  width: 90%;
+  max-width: 960px;
+  margin: auto;
+  padding: 20px 0;
+}
+
+/* Header – logo, tiêu đề, menu */
+header {
+  background-color: #ffffff;
+  padding: 15px 0;
+  border-bottom: 1px solid #ddd;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.logo img {
+  width: 40px;
+  height: 40px;
+}
+
+.logo h1 {
+  font-size: 1.6rem;
+  color: #1a73e8;
+  margin: 0;
+}
+
+/* Giá VIN */
+.vin-price {
+  font-weight: bold;
+  color: #2b8a3e;
+  margin-bottom: 10px;
+}
+
+/* Thanh menu */
+nav ul {
+  list-style: none;
+  display: flex;
+  gap: 15px;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  padding-left: 0;
+}
+
+nav ul li a,
+nav ul li button {
+  text-decoration: none;
+  background: none;
+  border: none;
+  color: #1a73e8;
+  font-weight: bold;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+nav ul li button:hover,
+nav ul li a:hover {
+  background-color: #e3f2fd;
+}
+/* Thông tin ví người dùng */
+.wallet-box {
+  margin-bottom: 15px;
+  padding: 12px;
+  border: 1px dashed #1a73e8;
+  background-color: #f0f8ff;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.wallet-box p {
+  margin-bottom: 6px;
+}
+
+.disconnect {
+  background-color: #ef5350;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 5px;
+}
+
+.disconnect:hover {
+  background-color: #d32f2f;
+}
+
+/* Thẻ dùng cho post, form, feed... */
+.card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Tiêu đề trong các card */
+.card h2 {
+  margin-bottom: 15px;
+  color: #1a73e8;
+}
+
+/* Form tạo bài viết */
+form input[type="text"],
+form input[type="url"],
+form textarea {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: #fcfcfc;
+}
+
+form textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+form button {
+  background-color: #1a73e8;
+  color: white;
+  font-weight: bold;
+  padding: 10px 20px;
+  border: none;
+  font-size: 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+form button:hover {
+  background-color: #1669c1;
+}
+/* Feed bài viết */
+#feedContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Mỗi bài viết */
+.post {
+  padding: 16px;
+  background-color: #fcfcfc;
+  border-left: 4px solid #1a73e8;
+  border-radius: 8px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.04);
+}
+
+.post h3 {
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+  color: #1a1a1a;
+}
+
+.post p {
+  margin-bottom: 8px;
+}
+
+.post .meta {
+  font-size: 0.85rem;
+  color: #777;
+  margin-top: 10px;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  margin: 40px 0 20px;
+  color: #999;
+  font-size: 0.9rem;
+}
+
+/* Ẩn các phần khi chưa cần hiển thị */
+.hidden {
+  display: none;
+}
+
+/* Responsive cho điện thoại */
+@media (max-width: 600px) {
+  nav ul {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .logo h1 {
+    font-size: 1.3rem;
+  }
+
+  .vin-price {
+    font-size: 0.95rem;
+  }
+
+  form input[type="text"],
+  form input[type="url"],
+  form textarea,
+  form button {
+    font-size: 0.95rem;
+  }
+
+  .post h3 {
+    font-size: 1.05rem;
+  }
+}
 

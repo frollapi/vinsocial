@@ -3,106 +3,80 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VinSocial.vin – Decentralized Social Network</title>
-
-  <!-- Gắn style và logo -->
+  <title>VinSocial.vin</title>
   <link rel="stylesheet" href="style.css" />
   <link rel="icon" type="image/png" href="logo.png" />
 </head>
 <body>
+  <div class="container">
+    <header class="header">
+      <img src="logo.png" alt="VinSocial Logo" class="logo" />
+      <h1 class="title">VinSocial.vin</h1>
+      <p class="slogan">Decentralized. Uncensored. Free Speech.</p>
+    </header>
 
-  <!-- PHẦN HEADER -->
-  <header>
-    <div class="container">
-      <div class="logo">
-        <img src="logo.png" alt="VinSocial Logo" />
-        <h1>VinSocial.vin - Decentralized. Uncensored. Free Speech.</h1>
-      </div>
-
-      <!-- Hiển thị giá VIN -->
-      <div class="vin-price" id="vinPrice">1 VIN ≈ $--</div>
-
-      <!-- Nút mua VIN -->
-      <div class="vin-trade">
-        <a href="https://VinSwap.vin" target="_blank" class="trade-btn">Trade VIN/VIC</a>
-      </div>
-
-      <!-- Thông tin ví -->
-      <div id="walletInfo" class="wallet-box hidden">
-        <p><strong>Wallet:</strong> <span id="walletAddress">Not connected</span></p>
-        <p><strong>Balance:</strong> <span id="vinBalance">-- VIN</span> | <span id="vicBalance">-- VIC</span></p>
-        <button id="disconnectBtn" class="disconnect hidden">Disconnect</button>
-      </div>
-
-      <!-- Menu điều hướng -->
-      <nav>
-        <ul>
-          <li><a href="#" id="homeBtn">Home</a></li>
-          <li><a href="#" id="createBtn" class="hidden">Create Post</a></li>
-          <li><a href="#" id="profileBtn" class="hidden">My Profile</a></li>
-          <li><button id="connectBtn">Connect Wallet</button></li>
-        </ul>
-      </nav>
+    <div id="wallet-section" class="wallet-section">
+      <button id="connectWalletBtn" class="button">Connect Wallet</button>
+      <p id="walletAddress" class="info-text"></p>
     </div>
-  </header>
 
-  <!-- PHẦN NỘI DUNG CHÍNH -->
-  <main class="container">
-
-    <!-- Khu vực Đăng ký (chỉ hiện sau khi kết nối ví, và chưa đăng ký) -->
-    <section id="registerSection" class="card hidden">
-      <h2>Register Account</h2>
-      <form id="registerForm">
-        <input type="text" id="nickname" placeholder="Nickname (required)" required />
-        <input type="text" id="bio" placeholder="Bio (optional)" />
-        <input type="url" id="avatarUrl" placeholder="Avatar URL (optional)" />
-        <input type="url" id="website" placeholder="Website (optional)" />
-        <button type="submit">Register – Pay 0.05 VIN</button>
-      </form>
-    </section>
-
-    <!-- Khu vực tạo bài viết (chỉ hiện nếu đã đăng ký) -->
-    <section id="createPostSection" class="card hidden">
-      <h2>Create New Post</h2>
-      <form id="postForm">
-        <input type="text" id="postTitle" placeholder="Title" required />
-        <textarea id="postContent" placeholder="What's on your mind?" required></textarea>
-        <input type="url" id="mediaUrl" placeholder="Optional media URL (image/video)" />
-        <button type="submit">Publish</button>
-      </form>
-    </section>
-
-    <!-- Khu vực hiển thị danh sách bài viết -->
-    <section id="feedSection" class="card">
-      <h2>Latest Posts</h2>
-      <div id="feedContainer">
-        <!-- Bài viết sẽ được render bằng JS -->
+    <div id="registration-section" class="hidden">
+      <p>To continue, register your wallet by paying 0.05 VIN</p>
+      <input type="text" id="nicknameInput" placeholder="Enter your nickname" />
+      <button id="registerBtn" class="button">Register & Pay 0.05 VIN</button>
+    </div>
+    <div id="main-app" class="hidden">
+      <div class="top-bar">
+        <div class="balance-info">
+          <span id="vinBalance">VIN: --</span> |
+          <span id="vicBalance">VIC: --</span> |
+          <span id="vinPrice">1 VIN ≈ $-- USD</span>
+        </div>
+        <a href="https://vinswap.vin" target="_blank" class="trade-link">🔁 Trade VIN/VIC</a>
+        <button id="disconnectBtn" class="button small">Disconnect</button>
       </div>
-    </section>
 
-  </main>
+      <nav class="nav-menu">
+        <button class="nav-btn" onclick="showSection('home')">🏠 Home</button>
+        <button class="nav-btn" onclick="showSection('create')">✍️ Create Post</button>
+        <button class="nav-btn" onclick="showSection('myposts')">📄 My Posts</button>
+        <button class="nav-btn" onclick="showSection('howto')">📘 How to Use</button>
+      </nav>
 
-  <!-- PHẦN CHÂN TRANG -->
-  <footer>
-    <p>&copy; 2025 VinSocial.vin – 100% On-Chain, Freedom First.</p>
-  </footer>
+      <section id="create-post-section" class="section hidden">
+        <h2>Create a New Post</h2>
+        <textarea id="postContent" rows="4" placeholder="What's on your mind?"></textarea>
+        <button id="submitPostBtn" class="button">Post</button>
+      </section>
 
-  <!-- Nhúng JS -->
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+      <section id="feed-section" class="section">
+        <h2>Community Feed</h2>
+        <div id="postList" class="post-list"></div>
+      </section>
+
+      <section id="myposts-section" class="section hidden">
+        <h2>My Posts</h2>
+        <div id="myPostList" class="post-list"></div>
+      </section>
+
+      <section id="howto-section" class="section hidden">
+        <h2>How to Use VinSocial.vin</h2>
+        <ul>
+          <li>🔐 Connect your MetaMask wallet on VIC network</li>
+          <li>💰 Register with a one-time payment of 0.05 VIN</li>
+          <li>📝 Create posts, like, comment, share, follow others</li>
+          <li>🌍 All data is stored on the blockchain</li>
+        </ul>
+      </section>
+    </div>
+    <footer class="footer">
+      <p>&copy; 2025 VinSocial.vin – Built on VIC Blockchain</p>
+      <a href="https://t.me/vinplayvin" target="_blank">Telegram</a> |
+      <a href="https://x.com/vinplayvin" target="_blank">X (Twitter)</a> |
+      <a href="https://drive.google.com/your-vin-guide-link" target="_blank">User Guide</a>
+    </footer>
+  </div>
+
   <script src="app.js"></script>
-  <script>
-    // Lấy giá VIC từ Binance và tính giá VIN
-    async function updateVinPrice() {
-      try {
-        const res = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=VICUSDT");
-        const data = await res.json();
-        const vinPrice = parseFloat(data.price) * 100;
-        document.getElementById("vinPrice").innerText = `1 VIN ≈ $${vinPrice.toFixed(2)} USD`;
-      } catch (err) {
-        console.error("Failed to fetch VIN price:", err);
-      }
-    }
-    updateVinPrice();
-  </script>
 </body>
 </html>

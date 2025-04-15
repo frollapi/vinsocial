@@ -1,198 +1,207 @@
-/* ---------- RESET & BASE ---------- */
+/* ==== Layout chung ==== */
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background-color: #f8f9fa;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f9f9f9;
   color: #333;
 }
 
 .container {
-  width: 90%;
-  max-width: 1000px;
-  margin: auto;
-  padding: 20px 0;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
+/* ==== Header, Logo, Slogan ==== */
+.header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.logo {
+  width: 80px;
+  height: 80px;
+}
+
+.title {
+  font-size: 2rem;
+  margin: 10px 0;
+}
+
+.slogan {
+  font-size: 1rem;
+  color: #666;
+}
+
+/* ==== Nút chung ==== */
+.button {
+  background-color: #0077ff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.button:hover {
+  background-color: #005fcc;
+}
+
+.button.small {
+  padding: 6px 14px;
+  font-size: 0.9rem;
+}
+
+/* ==== Input ==== */
+input[type="text"],
+textarea {
+  width: 100%;
+  padding: 10px;
+  margin-top: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+/* ==== Top-bar ==== */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #eaeaea;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.balance-info {
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+}
+
+.trade-link {
+  text-decoration: none;
+  color: #0077ff;
+  font-weight: bold;
+  margin-left: 10px;
+}
+
+.trade-link:hover {
+  text-decoration: underline;
+}
+
+/* ==== Menu điều hướng ==== */
+.nav-menu {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.nav-btn {
+  background: #f0f0f0;
+  border: 1px solid #ccc;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  margin: 4px;
+}
+
+.nav-btn:hover {
+  background: #dceeff;
+  border-color: #0077ff;
+}
+
+/* ==== Bài viết ==== */
+.section {
+  margin-bottom: 30px;
+}
+
+.post-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.post {
+  border: 1px solid #ddd;
+  background: #fff;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.post-header {
+  font-weight: bold;
+  margin-bottom: 6px;
+}
+
+.post-actions {
+  display: flex;
+  gap: 12px;
+  font-size: 0.9rem;
+  color: #0077ff;
+  margin-top: 8px;
+  cursor: pointer;
+}
+
+.post-actions span:hover {
+  text-decoration: underline;
+}
+/* ==== Footer ==== */
+.footer {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #777;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid #ddd;
+}
+
+.footer a {
+  color: #0077ff;
+  text-decoration: none;
+  margin: 0 6px;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+/* ==== Ẩn/Hiện vùng ==== */
 .hidden {
   display: none;
 }
 
-/* ---------- HEADER ---------- */
-header {
-  background-color: #ffffff;
-  border-bottom: 1px solid #ddd;
-  padding: 20px 0;
+/* ==== Wallet Section ==== */
+#wallet-section {
   text-align: center;
+  margin-bottom: 20px;
 }
 
-.logo img {
-  width: 48px;
-  height: 48px;
-  vertical-align: middle;
-}
-
-.logo h1 {
-  display: inline-block;
-  font-size: 1.5em;
-  margin-left: 10px;
-  color: #333;
-}
-
-.vin-price, .vin-trade {
+#walletAddress {
   margin-top: 10px;
-  font-weight: bold;
+  font-size: 0.95rem;
+  color: #444;
 }
 
-.trade-btn {
-  background-color: #ff9800;
-  color: white;
-  font-weight: bold;
-  padding: 8px 16px;
-  text-decoration: none;
-  border-radius: 6px;
-  display: inline-block;
-}
-
-.trade-btn:hover {
-  background-color: #fb8c00;
-}
-
-/* ---------- WALLET INFO ---------- */
-#walletInfo {
-  margin-top: 10px;
-}
-
-.wallet-box p {
-  margin: 4px 0;
-}
-
-.disconnect {
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 6px;
-}
-
-/* ---------- NAVIGATION ---------- */
-nav ul {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin: 20px 0 10px;
-}
-
-nav ul li {
-  display: inline;
-}
-
-nav ul li a, nav ul li button {
-  text-decoration: none;
-  color: #333;
-  font-weight: bold;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 6px 12px;
-}
-
-nav ul li button:hover, nav ul li a:hover {
-  color: #007bff;
-}
-
-/* ---------- CARDS ---------- */
-.card {
-  background: white;
-  border: 1px solid #ccc;
-  padding: 16px;
-  border-radius: 8px;
-  margin-top: 20px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-}
-
-.card h2 {
-  margin-top: 0;
-}
-
-/* ---------- FORMS ---------- */
-form input, form textarea {
-  display: block;
-  width: 100%;
-  margin-bottom: 12px;
-  padding: 10px;
-  font-size: 1em;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-form button {
-  background-color: #007bff;
-  color: white;
-  font-weight: bold;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-form button:hover {
-  background-color: #0056b3;
-}
-
-/* ---------- POSTS ---------- */
-.post {
-  background: #fff;
-  padding: 12px;
-  border: 1px solid #ddd;
-  margin-top: 16px;
-  border-radius: 6px;
-}
-
-.post h3 {
-  margin-top: 0;
-}
-
-.meta {
-  font-size: 0.85em;
-  color: #777;
-  margin-top: 8px;
-}
-
-.translate-btn {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 6px;
-}
-
-.translate-btn:hover {
-  background-color: #218838;
-}
-
-/* ---------- FOOTER ---------- */
-footer {
-  margin-top: 40px;
-  text-align: center;
-  font-size: 0.9em;
-  color: #555;
-  padding-bottom: 20px;
-}
-
-/* ---------- RESPONSIVE ---------- */
+/* ==== Responsive ==== */
 @media (max-width: 600px) {
-  nav ul {
+  .top-bar, .nav-menu {
     flex-direction: column;
     align-items: center;
   }
 
-  .wallet-box p {
+  .nav-btn {
+    width: 90%;
     text-align: center;
+  }
+
+  .trade-link {
+    margin: 10px 0;
   }
 }

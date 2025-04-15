@@ -91,5 +91,22 @@
   <!-- ETHERS + APP SCRIPT -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script src="app.js"></script>
+  <script>
+  async function showVinPriceDirectly() {
+    try {
+      const res = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=VICUSDT");
+      const data = await res.json();
+      const vicPrice = parseFloat(data.price);
+      const vinPrice = vicPrice * 100;
+      document.getElementById("vinPrice").innerText = `1 VIN ≈ $${vinPrice.toFixed(2)} USD`;
+    } catch (err) {
+      console.error("Cannot load VIN price", err);
+    }
+  }
+
+  // Gọi ngay khi trang tải
+  window.addEventListener("load", showVinPriceDirectly);
+</script>
+
 </body>
 </html>

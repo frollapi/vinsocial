@@ -21,12 +21,11 @@
 
       <!-- Hiển thị giá VIN -->
       <div class="vin-price" id="vinPrice">1 VIN ≈ $--</div>
-      
+
       <!-- Nút mua VIN dẫn sang VinSwap -->
       <div class="vin-trade">
         <a href="https://VinSwap.vin" target="_blank" class="trade-btn">Trade VIN/VIC</a>
       </div>
-
 
       <!-- Thông tin ví -->
       <div id="walletInfo" class="wallet-box hidden">
@@ -46,10 +45,23 @@
       </nav>
     </div>
   </header>
-  <!-- PHẦN NỘI DUNG CHÍNH -->
+
+    <!-- PHẦN NỘI DUNG CHÍNH -->
   <main class="container">
 
-    <!-- Khu vực tạo bài viết (ẩn mặc định) -->
+    <!-- Nếu ví CHƯA ĐĂNG KÝ, hiển thị form đăng ký -->
+    <section id="registerSection" class="card hidden">
+      <h2>Register Account</h2>
+      <form id="registerForm">
+        <input type="text" id="regName" placeholder="Nickname" required />
+        <input type="text" id="regBio" placeholder="Bio (optional)" />
+        <input type="url" id="regAvatar" placeholder="Avatar URL (optional)" />
+        <input type="url" id="regWebsite" placeholder="Website (optional)" />
+        <button type="submit">Register – Pay 0.05 VIN</button>
+      </form>
+    </section>
+
+    <!-- Nếu ví ĐÃ ĐĂNG KÝ, hiển thị form tạo bài viết -->
     <section id="createPostSection" class="card hidden">
       <h2>Create New Post</h2>
       <form id="postForm">
@@ -60,11 +72,11 @@
       </form>
     </section>
 
-    <!-- Khu vực feed bài viết -->
+    <!-- Hiển thị bài viết (cho mọi người, không cần đăng ký) -->
     <section id="feedSection" class="card">
       <h2>Latest Posts</h2>
       <div id="feedContainer">
-        <!-- Bài viết sẽ được hiển thị ở đây bằng app.js -->
+        <!-- Các bài viết sẽ được thêm tại đây bằng app.js -->
       </div>
     </section>
 
@@ -74,26 +86,26 @@
     <p>&copy; 2025 VinSocial.vin – 100% On-Chain, Freedom First.</p>
   </footer>
 
-  <!-- Nhúng JavaScript -->
+  <!-- Nhúng thư viện Ethers + app.js -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script src="app.js"></script>
+
+  <!-- Tự động lấy giá VIN (VIN = VIC × 100) -->
   <script>
-
-    // 👇 Tự động lấy giá VIC từ Binance và tính giá VIN
-  async function updateVinPrice() {
-    try {
-      const res = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=VICUSDT");
-      const data = await res.json();
-      const vicPrice = parseFloat(data.price);
-      const vinPrice = vicPrice * 100;
-      document.getElementById("vinPrice").innerText = `1 VIN ≈ $${vinPrice.toFixed(2)} USD`;
-    } catch (err) {
-      console.error("Failed to fetch VIN price:", err);
+    async function updateVinPrice() {
+      try {
+        const res = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=VICUSDT");
+        const data = await res.json();
+        const vicPrice = parseFloat(data.price);
+        const vinPrice = vicPrice * 100;
+        document.getElementById("vinPrice").innerText = `1 VIN ≈ $${vinPrice.toFixed(2)} USD`;
+      } catch (err) {
+        console.error("Failed to fetch VIN price:", err);
+      }
     }
-  }
 
-  updateVinPrice(); // Gọi ngay khi trang tải
-</script>
+    updateVinPrice();
+  </script>
 
 </body>
 </html>

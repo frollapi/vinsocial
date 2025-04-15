@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VinSocial.vin – Decentralized Social Network</title>
+
+  <!-- Gắn file CSS -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Biểu tượng trình duyệt -->
+  <link rel="icon" type="image/png" href="logo.png" />
+</head>
+<body>
+
+  <!-- PHẦN ĐẦU TRANG: Logo và thanh menu -->
+  <header>
+    <div class="container">
+      <div class="logo">
+        <img src="logo.png" alt="VinSocial Logo" />
+        <h1>VinSocial.vin</h1>
+      </div>
+      <nav>
+        <ul>
+          <li><a href="#" id="homeBtn">Home</a></li>
+          <li><a href="#" id="createBtn">Create Post</a></li>
+          <li><a href="#" id="profileBtn">My Profile</a></li>
+          <li><button id="connectBtn">Connect Wallet</button></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- PHẦN THÂN TRANG: Kết nối ví + tạo bài viết + xem feed -->
+  <main class="container">
+
+    <!-- Hiển thị trạng thái ví đang kết nối -->
+    <section id="walletStatus" class="card">
+      <p id="walletAddress">Wallet: Not connected</p>
+    </section>
+
+    <!-- Form tạo bài viết mới (ẩn khi chưa nhấn Create) -->
+    <section id="createPostSection" class="card hidden">
+      <h2>Create New Post</h2>
+      <form id="postForm">
+        <input type="text" id="postTitle" placeholder="Title" required />
+        <textarea id="postContent" placeholder="What's on your mind?" required></textarea>
+        <input type="url" id="mediaUrl" placeholder="Optional media URL (image/video)" />
+        <button type="submit">Publish</button>
+      </form>
+    </section>
+    <!-- Danh sách bài viết mới nhất -->
+    <section id="feedSection" class="card">
+      <h2>Latest Posts</h2>
+      <div id="feedContainer">
+        <!-- Các bài viết sẽ được hiển thị bằng JavaScript -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- PHẦN CHÂN TRANG -->
+  <footer>
+    <p>&copy; 2025 VinSocial.vin – 100% On-Chain, Freedom First.</p>
+  </footer>
+
+  <!-- Gắn file JavaScript điều khiển -->
+  <script src="app.js"></script>
+</body>
+</html>

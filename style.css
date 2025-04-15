@@ -1,57 +1,46 @@
-/* --- RESET & CƠ BẢN --- */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
+/* ---------- RESET & BASE ---------- */
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f4f4f4;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f8f9fa;
   color: #333;
-  line-height: 1.6;
 }
 
-/* --- CONTAINER CHUNG --- */
 .container {
+  width: 90%;
   max-width: 1000px;
   margin: auto;
-  padding: 20px;
-}
-
-/* --- HEADER & LOGO --- */
-header {
-  background-color: #222;
-  color: white;
   padding: 20px 0;
-  border-bottom: 4px solid #ff9800;
 }
 
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 15px;
+.hidden {
+  display: none;
+}
+
+/* ---------- HEADER ---------- */
+header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #ddd;
+  padding: 20px 0;
+  text-align: center;
 }
 
 .logo img {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
+  vertical-align: middle;
 }
 
 .logo h1 {
-  font-size: 20px;
-  font-weight: bold;
+  display: inline-block;
+  font-size: 1.5em;
+  margin-left: 10px;
+  color: #333;
 }
 
-/* --- GIÁ VIN & TRADE --- */
-.vin-price {
-  margin: 10px 0;
+.vin-price, .vin-trade {
+  margin-top: 10px;
   font-weight: bold;
-  font-size: 16px;
-}
-
-.vin-trade {
-  margin: 10px 0;
 }
 
 .trade-btn {
@@ -62,20 +51,15 @@ header {
   text-decoration: none;
   border-radius: 6px;
   display: inline-block;
-  transition: background-color 0.3s ease;
 }
 
 .trade-btn:hover {
   background-color: #fb8c00;
 }
 
-/* --- VÍ --- */
-.wallet-box {
-  background-color: #eee;
-  padding: 10px;
-  border-radius: 8px;
-  margin-bottom: 10px;
-  font-size: 14px;
+/* ---------- WALLET INFO ---------- */
+#walletInfo {
+  margin-top: 10px;
 }
 
 .wallet-box p {
@@ -83,77 +67,103 @@ header {
 }
 
 .disconnect {
-  background-color: #c62828;
+  background-color: #dc3545;
   color: white;
   border: none;
   padding: 6px 12px;
-  margin-top: 5px;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: pointer;
+  margin-top: 6px;
 }
 
-.disconnect:hover {
-  background-color: #b71c1c;
-}
-
-/* --- MENU --- */
+/* ---------- NAVIGATION ---------- */
 nav ul {
   list-style: none;
+  padding: 0;
   display: flex;
-  gap: 10px;
-  margin-top: 10px;
-  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  margin: 20px 0 10px;
 }
 
-nav li {
+nav ul li {
   display: inline;
 }
 
-nav a, nav button {
+nav ul li a, nav ul li button {
   text-decoration: none;
-  color: white;
-  background-color: #555;
+  color: #333;
+  font-weight: bold;
+  background: none;
+  border: none;
+  cursor: pointer;
   padding: 6px 12px;
-  border-radius: 5px;
+}
+
+nav ul li button:hover, nav ul li a:hover {
+  color: #007bff;
+}
+
+/* ---------- CARDS ---------- */
+.card {
+  background: white;
+  border: 1px solid #ccc;
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.card h2 {
+  margin-top: 0;
+}
+
+/* ---------- FORMS ---------- */
+form input, form textarea {
+  display: block;
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 10px;
+  font-size: 1em;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+form button {
+  background-color: #007bff;
+  color: white;
   font-weight: bold;
   border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
   cursor: pointer;
 }
 
-nav a:hover, nav button:hover {
-  background-color: #444;
+form button:hover {
+  background-color: #0056b3;
 }
 
-/* --- THẺ BÀI VIẾT --- */
-.card {
-  background-color: #fff;
-  padding: 15px;
-  margin: 20px 0;
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
+/* ---------- POSTS ---------- */
 .post {
-  border-bottom: 1px solid #ccc;
-  padding: 10px 0;
+  background: #fff;
+  padding: 12px;
+  border: 1px solid #ddd;
+  margin-top: 16px;
+  border-radius: 6px;
 }
 
 .post h3 {
-  margin: 0 0 5px;
-  color: #333;
-}
-
-.post p {
-  margin: 6px 0;
+  margin-top: 0;
 }
 
 .meta {
-  font-size: 12px;
-  color: gray;
+  font-size: 0.85em;
+  color: #777;
+  margin-top: 8px;
 }
 
 .translate-btn {
-  background-color: #00897b;
+  background-color: #28a745;
   color: white;
   border: none;
   padding: 6px 10px;
@@ -163,54 +173,26 @@ nav a:hover, nav button:hover {
 }
 
 .translate-btn:hover {
-  background-color: #00796b;
+  background-color: #218838;
 }
 
-/* --- FORM TẠO BÀI --- */
-form input, form textarea {
-  width: 100%;
-  padding: 8px;
-  margin: 8px 0;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+/* ---------- FOOTER ---------- */
+footer {
+  margin-top: 40px;
+  text-align: center;
+  font-size: 0.9em;
+  color: #555;
+  padding-bottom: 20px;
 }
 
-form button {
-  background-color: #4CAF50;
-  color: white;
-  padding: 10px 16px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-form button:hover {
-  background-color: #45a049;
-}
-
-/* --- ĐĂNG KÝ NGƯỜI DÙNG --- */
-#registerSection input {
-  margin-bottom: 10px;
-}
-
-/* --- RESPONSIVE --- */
-@media (max-width: 768px) {
-  .logo {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 600px) {
   nav ul {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
   }
 
-  .wallet-box {
-    font-size: 13px;
-  }
-
-  form input, form textarea {
-    font-size: 14px;
+  .wallet-box p {
+    text-align: center;
   }
 }

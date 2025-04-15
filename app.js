@@ -486,3 +486,103 @@ function disconnectWallet() {
 // 👉 Gán sự kiện nút
 document.getElementById("connectBtn").addEventListener("click", connectWallet);
 document.getElementById("disconnectBtn").addEventListener("click", disconnectWallet);
+
+// 👉 Hiển thị số dư VIN và VIC
+async function updateBalances() {
+  try {
+    // Số dư VIN từ hợp đồng
+    const vinBal = await vinToken.balanceOf(currentAccount);
+    const vinReadable = ethers.utils.formatUnits(vinBal, 18);
+    document.getElementById("vinBalance").innerText = `${parseFloat(vinReadable).toFixed(2)} VIN`;
+
+    // Số dư VIC từ provider
+    const vicBal = await provider.getBalance(currentAccount);
+    const vicReadable = ethers.utils.formatEther(vicBal);
+    document.getElementById("vicBalance").innerText = `${parseFloat(vicReadable).toFixed(4)} VIC`;
+  } catch (err) {
+    console.error("❌ Error fetching balances:", err);
+  }
+}
+
+// 👉 Gửi bài viết mới
+document.getElementById("postForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const title = document.getElementById("postTitle").value.trim();
+  const content = document.getElementById("postContent").value.trim();
+  const media = document.getElementById("mediaUrl").value.trim();
+
+  if (!title || !content) {
+    alert("Please enter both title and content.");
+    return;
+  }
+
+  try {
+    const tx = await contract.createPost(title, content, media);
+    await tx.wait();
+    alert("✅ Post published successfully!");
+    document.getElementById("postForm").reset();
+    loadPosts(); // Refresh feed
+  } catch (err) {
+    console.error("❌ Post creation failed:", err);
+    alert("Failed to publish post.");
+  }
+});
+
+// 👉 Load bài viết
+async function loadPosts() {
+  const container = document.getElementById("feedContainer");
+  container.innerHTML = "";
+
+  try {
+    const nextId = await contract.nextPostId();
+    const latest = nextId.toNumber() - 1;
+
+    for (let id = latest; id > 0 && id > latest - 50; id--) {
+      const post = await contract.posts(id);
+      const postHtml = `
+        <div class="post">
+          <h3>${post.title}</h3>
+          <p id="post-content-${id}">${post.content}</p>
+          ${post.media ? `<p><a href="${post.media}" target="_blank">Media Link</a></p>` : ""}
+          <button class="translate-btn" onclick="translatePost(${id})">🌐 Translate</button>
+          <div class="meta">Posted by ${shortAddress(post.author)} at ${formatDate(post.timestamp)}</div>
+        </div>
+      `;
+      container.innerHTML += postHtml;
+    }
+
+    if (latest === 0) {
+      container.innerHTML = "<p>No posts yet.</p>";
+    }
+
+  } catch (err) {
+    console.error("❌ Error loading posts:", err);
+    container.innerHTML = "<p>Error loading posts.</p>";
+  }
+}
+
+// 👉 Format địa chỉ ví rút gọn
+function shortAddress(addr) {
+  return addr.slice(0, 6) + "..." + addr.slice(-4);
+}
+
+// 👉 Định dạng ngày giờ từ timestamp
+function formatDate(timestamp) {
+  const date = new Date(timestamp * 1000);
+  return date.toLocaleString();
+}
+
+// 👉 Hàm dịch nội dung bài viết qua Google Translate
+function translatePost(postId) {
+  const content = document.getElementById(`post-content-${postId}`).innerText;
+  const url = `https://translate.google.com/?sl=auto&tl=en&text=${encodeURIComponent(content)}`;
+  window.open(url, "_blank");
+}
+
+// 👉 Khi trang tải xong: nếu đã từng kết nối ví thì tự kết nối lại
+window.addEventListener("load", async () => {
+  if (window.ethereum && window.ethereum.selectedAddress) {
+    await connectWallet();
+  }
+});

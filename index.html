@@ -22,7 +22,7 @@
       <!-- Hiển thị giá VIN -->
       <div class="vin-price" id="vinPrice">1 VIN ≈ $--</div>
 
-      <!-- Nút mua VIN dẫn sang VinSwap -->
+      <!-- Nút mua VIN -->
       <div class="vin-trade">
         <a href="https://VinSwap.vin" target="_blank" class="trade-btn">Trade VIN/VIC</a>
       </div>
@@ -34,34 +34,34 @@
         <button id="disconnectBtn" class="disconnect hidden">Disconnect</button>
       </div>
 
-      <!-- Menu -->
+      <!-- Menu điều hướng -->
       <nav>
         <ul>
           <li><a href="#" id="homeBtn">Home</a></li>
-          <li><a href="#" id="createBtn">Create Post</a></li>
-          <li><a href="#" id="profileBtn">My Profile</a></li>
+          <li><a href="#" id="createBtn" class="hidden">Create Post</a></li>
+          <li><a href="#" id="profileBtn" class="hidden">My Profile</a></li>
           <li><button id="connectBtn">Connect Wallet</button></li>
         </ul>
       </nav>
     </div>
   </header>
 
-    <!-- PHẦN NỘI DUNG CHÍNH -->
+  <!-- PHẦN NỘI DUNG CHÍNH -->
   <main class="container">
 
-    <!-- Nếu ví CHƯA ĐĂNG KÝ, hiển thị form đăng ký -->
+    <!-- Khu vực Đăng ký (chỉ hiện sau khi kết nối ví, và chưa đăng ký) -->
     <section id="registerSection" class="card hidden">
       <h2>Register Account</h2>
       <form id="registerForm">
-        <input type="text" id="regName" placeholder="Nickname" required />
-        <input type="text" id="regBio" placeholder="Bio (optional)" />
-        <input type="url" id="regAvatar" placeholder="Avatar URL (optional)" />
-        <input type="url" id="regWebsite" placeholder="Website (optional)" />
+        <input type="text" id="nickname" placeholder="Nickname (required)" required />
+        <input type="text" id="bio" placeholder="Bio (optional)" />
+        <input type="url" id="avatarUrl" placeholder="Avatar URL (optional)" />
+        <input type="url" id="website" placeholder="Website (optional)" />
         <button type="submit">Register – Pay 0.05 VIN</button>
       </form>
     </section>
 
-    <!-- Nếu ví ĐÃ ĐĂNG KÝ, hiển thị form tạo bài viết -->
+    <!-- Khu vực tạo bài viết (chỉ hiện nếu đã đăng ký) -->
     <section id="createPostSection" class="card hidden">
       <h2>Create New Post</h2>
       <form id="postForm">
@@ -72,40 +72,37 @@
       </form>
     </section>
 
-    <!-- Hiển thị bài viết (cho mọi người, không cần đăng ký) -->
+    <!-- Khu vực hiển thị danh sách bài viết -->
     <section id="feedSection" class="card">
       <h2>Latest Posts</h2>
       <div id="feedContainer">
-        <!-- Các bài viết sẽ được thêm tại đây bằng app.js -->
+        <!-- Bài viết sẽ được render bằng JS -->
       </div>
     </section>
 
   </main>
+
   <!-- PHẦN CHÂN TRANG -->
   <footer>
     <p>&copy; 2025 VinSocial.vin – 100% On-Chain, Freedom First.</p>
   </footer>
 
-  <!-- Nhúng thư viện Ethers + app.js -->
+  <!-- Nhúng JS -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script src="app.js"></script>
-
-  <!-- Tự động lấy giá VIN (VIN = VIC × 100) -->
   <script>
+    // Lấy giá VIC từ Binance và tính giá VIN
     async function updateVinPrice() {
       try {
         const res = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=VICUSDT");
         const data = await res.json();
-        const vicPrice = parseFloat(data.price);
-        const vinPrice = vicPrice * 100;
+        const vinPrice = parseFloat(data.price) * 100;
         document.getElementById("vinPrice").innerText = `1 VIN ≈ $${vinPrice.toFixed(2)} USD`;
       } catch (err) {
         console.error("Failed to fetch VIN price:", err);
       }
     }
-
     updateVinPrice();
   </script>
-
 </body>
 </html>

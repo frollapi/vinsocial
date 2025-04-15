@@ -433,3 +433,78 @@ const vinSocialAbi =[
 let provider, signer, userAddress;
 let vinTokenContract, vinSocialContract;
 
+// 👉 Tự động khi load trang
+window.addEventListener("load", async () => {
+  if (window.ethereum) {
+    provider = new ethers.providers.Web3Provider(window.ethereum);
+  } else {
+    alert("Please install MetaMask!");
+    return;
+  }
+
+  // Gán sự kiện nút
+  document.getElementById("connectWalletBtn").addEventListener("click", connectWallet);
+  document.getElementById("disconnectBtn").addEventListener("click", disconnectWallet);
+});
+
+// 👉 Hàm kết nối ví
+async function connectWallet() {
+  try {
+    await provider.send("eth_requestAccounts", []);
+    signer = provider.getSigner();
+    userAddress = await signer.getAddress();
+
+    vinTokenContract = new ethers.Contract(vinTokenAddress, vinAbi, signer);
+    vinSocialContract = new ethers.Contract(vinSocialAddress, vinSocialAbi, signer);
+
+    document.getElementById("walletAddress").innerText = `Wallet: ${userAddress}`;
+    document.getElementById("connectWalletBtn").style.display = "none";
+    document.getElementById("disconnectBtn").style.display = "inline-block";
+
+    await showVinAndVicBalance();
+  } catch (error) {
+    console.error("Wallet connection failed", error);
+    alert("❌ Failed to connect wallet.");
+  }
+}
+
+// 👉 Ngắt kết nối ví
+function disconnectWallet() {
+  signer = null;
+  userAddress = null;
+
+  document.getElementById("walletAddress").innerText = "";
+  document.getElementById("connectWalletBtn").style.display = "inline-block";
+  document.getElementById("disconnectBtn").style.display = "none";
+
+  document.getElementById("registration-section").classList.add("hidden");
+  document.getElementById("main-app").classList.add("hidden");
+}
+
+// 👉 Hiển thị số dư VIN, VIC và giá VIN
+async function showVinAndVicBalance() {
+  try {
+    // VIN balance
+    const vinRaw = await vinTokenContract.balanceOf(userAddress);
+    const vin = parseFloat(ethers.utils.formatEther(vinRaw));
+    document.getElementById("vinBalance").innerText = `VIN: ${vin.toFixed(3)}`;
+
+    // VIC balance
+    const vicRaw = await provider.getBalance(userAddress);
+    const vic = parseFloat(ethers.utils.formatEther(vicRaw));
+    document.getElementById("vicBalance").innerText = `VIC: ${vic.toFixed(3)}`;
+
+    // Giá VIN ≈ USD (từ giá VIC trên Binance)
+    const res = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=VICUSDT");
+    const data = await res.json();
+    const vicPrice = parseFloat(data.price);
+    const vinPrice = vicPrice * 100;
+
+    document.getElementById("vinPrice").innerText = `1 VIN ≈ $${vinPrice.toFixed(2)} USD`;
+  } catch (err) {
+    console.error("Error loading balances or price", err);
+    document.getElementById("vinBalance").innerText = "VIN: --";
+    document.getElementById("vicBalance").innerText = "VIC: --";
+    document.getElementById("vinPrice").innerText = "1 VIN ≈ $-- USD";
+  }
+}

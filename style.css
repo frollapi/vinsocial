@@ -229,3 +229,21 @@ footer {
   }
 }
 
+.vin-trade {
+  margin: 10px 0;
+}
+
+.trade-btn {
+  background-color: #ff9800;
+  color: white;
+  font-weight: bold;
+  padding: 8px 16px;
+  text-decoration: none;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.trade-btn:hover {
+  background-color: #fb8c00;
+}
+

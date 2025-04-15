@@ -432,3 +432,120 @@ const vinSocialAbi =[
 // 👉 Biến toàn cục
 let provider, signer, userAddress;
 let vinTokenContract, vinSocialContract;
+
+// 👉 Kết nối ví MetaMask và khởi tạo contract
+async function connectWallet() {
+  if (!window.ethereum) {
+    alert("Please install MetaMask extension.");
+    return;
+  }
+
+  try {
+    provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
+    signer = provider.getSigner();
+    userAddress = await signer.getAddress();
+
+    const network = await provider.getNetwork();
+    if (network.chainId !== 88) {
+      alert("Please switch to the VIC network.");
+      return;
+    }
+
+    // 👉 Gán contract sau khi có signer
+    vinTokenContract = new ethers.Contract(vinTokenAddress, vinAbi, signer);
+    vinSocialContract = new ethers.Contract(vinSocialAddress, vinSocialAbi, signer);
+
+    // 👉 Hiện địa chỉ ví
+    document.getElementById("walletAddress").innerText = "Wallet: " + userAddress;
+
+    // 👉 Bỏ ẩn khu vực chính
+    document.getElementById("main-app").classList.remove("hidden");
+
+    // 👉 Tải số dư
+    await loadBalances();
+  } catch (error) {
+    console.error("Wallet connection error:", error);
+    alert("Failed to connect wallet.");
+  }
+}
+
+// 👉 Gắn nút connect ví
+document.getElementById("connectWalletBtn").addEventListener("click", connectWallet);
+
+// 👉 Tải số dư VIN, VIC và giá VIN theo USD
+async function loadBalances() {
+  try {
+    // 👉 Lấy số dư VIN
+    const vinBalance = await vinTokenContract.balanceOf(userAddress);
+    const vinAmount = ethers.utils.formatUnits(vinBalance, 18);
+    document.getElementById("vinBalance").innerText = `VIN: ${parseFloat(vinAmount).toFixed(4)}`;
+
+    // 👉 Lấy số dư VIC (native)
+    const vicBalance = await provider.getBalance(userAddress);
+    const vicAmount = ethers.utils.formatEther(vicBalance);
+    document.getElementById("vicBalance").innerText = `VIC: ${parseFloat(vicAmount).toFixed(4)}`;
+
+    // 👉 Lấy giá VIC từ Binance API và tính giá VIN = VIC × 100
+    const res = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=VICUSDT");
+    const data = await res.json();
+    const priceVin = parseFloat(data.price) * 100;
+    document.getElementById("vinPrice").innerText = `1 VIN ≈ $${priceVin.toFixed(2)} USD`;
+  } catch (err) {
+    console.error("Balance load error:", err);
+  }
+}
+
+// 👉 Kiểm tra ví đã đăng ký tài khoản trên VinSocial chưa
+async function checkRegistration() {
+  try {
+    const registered = await vinSocialContract.isRegistered(userAddress);
+    if (registered) {
+      document.getElementById("main-app").classList.remove("hidden");
+      document.getElementById("registration-section").classList.add("hidden");
+      await loadBalances();
+      await loadFeed(); // sẽ thêm sau
+    } else {
+      document.getElementById("registration-section").classList.remove("hidden");
+    }
+  } catch (err) {
+    console.error("Error checking registration:", err);
+  }
+}
+
+// 👉 Đăng ký tài khoản bằng cách trả 0.05 VIN
+document.getElementById("registerBtn").addEventListener("click", async () => {
+  const nickname = document.getElementById("nicknameInput").value.trim();
+  if (!nickname) {
+    alert("Please enter a nickname.");
+    return;
+  }
+
+  try {
+    const vinAmount = ethers.utils.parseUnits("0.05", 18);
+    const balance = await vinTokenContract.balanceOf(userAddress);
+
+    if (balance.lt(vinAmount)) {
+      alert("Insufficient VIN to register.");
+      return;
+    }
+
+    // 👉 Chuyển 0.05 VIN cho contract
+    const tx = await vinTokenContract.transfer(vinSocialAddress, vinAmount);
+    await tx.wait();
+
+    // 👉 Gọi hàm register(nickname, bio, avatar, website) — dùng dữ liệu đơn giản
+    const registerTx = await vinSocialContract.register(nickname, "", "", "");
+    await registerTx.wait();
+
+    alert("Registration successful!");
+    document.getElementById("registration-section").classList.add("hidden");
+    document.getElementById("main-app").classList.remove("hidden");
+    await loadBalances();
+    await loadFeed(); // sẽ thêm ở phần 5
+  } catch (err) {
+    console.error("Registration error:", err);
+    alert("Registration failed.");
+  }
+});
+

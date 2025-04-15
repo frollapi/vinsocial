@@ -75,3 +75,59 @@ async function showVinAndVic() {
   }
 }
 
+// 👉 Địa chỉ hợp đồng VinSocial
+const vinSocialAddress = "0x2DB5a0Dcf2942d552EF02D683b4d5852A7431a87"; // cập nhật đúng nếu khác
+
+// 👉 ABI rút gọn của VinSocial
+const vinSocialAbi = [
+  {
+    "inputs": [{"internalType":"address","name":"user","type":"address"}],
+    "name":"users",
+    "outputs":[
+      {"internalType":"bool","name":"isRegistered","type":"bool"},
+      {"internalType":"string","name":"name","type":"string"},
+      {"internalType":"string","name":"bio","type":"string"},
+      {"internalType":"string","name":"avatar","type":"string"},
+      {"internalType":"string","name":"website","type":"string"}
+    ],
+    "stateMutability":"view",
+    "type":"function"
+  },
+  {
+    "inputs":[
+      {"internalType":"string","name":"name","type":"string"},
+      {"internalType":"string","name":"bio","type":"string"},
+      {"internalType":"string","name":"avatar","type":"string"},
+      {"internalType":"string","name":"website","type":"string"}
+    ],
+    "name":"register",
+    "outputs":[],
+    "stateMutability":"payable",
+    "type":"function"
+  }
+];
+
+let vinSocialContract;
+
+// 👉 Gọi sau khi kết nối ví
+async function checkRegistration() {
+  vinSocialContract = new ethers.Contract(vinSocialAddress, vinSocialAbi, signer);
+
+  try {
+    const user = await vinSocialContract.users(userAddress);
+    const registered = user.isRegistered;
+
+    if (registered) {
+      document.getElementById("registerForm").classList.add("hidden");
+      loadUserProfile(user); // Hiện thông tin người dùng
+    } else {
+      document.getElementById("registerForm").classList.remove("hidden");
+      showSection("profile-section");
+    }
+  } catch (err) {
+    console.error("Error checking registration:", err);
+  }
+}
+
+// 👉 Gọi hàm checkRegistration() sau khi connectWallet()
+await checkRegistration();

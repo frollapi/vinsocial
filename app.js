@@ -2,657 +2,288 @@
 const vinSocialAddress = "0x2DB5a0Dcf2942d552EF02D683b4d5852A7431a87";
 const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";
 
-// 👉 ABI rút gọn của VIN token
+// 👉 ABI rút gọn của VIN token (cần thiết cho balanceOf và transfer)
 const vinAbi = [
-  {
-    "inputs": [{"internalType":"address","name":"owner","type":"address"}],
-    "name": "balanceOf",
-    "outputs": [{"internalType":"uint256","name":"","type":"uint256"}],
-    "stateMutability": "view",
-    "type": "function"
+  { "inputs": [{"internalType":"address","name":"owner","type":"address"}],
+    "name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],
+    "stateMutability":"view","type":"function"
   },
   {
-    "inputs": [{"internalType":"uint256","name":"amount","type":"uint256"}],
-    "name": "estimateFee",
-    "outputs": [{"internalType":"uint256","name":"","type":"uint256"}],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs":[
-      {"internalType":"address","name":"owner","type":"address"},
-      {"internalType":"address","name":"spender","type":"address"}
-    ],
-    "name":"allowance",
-    "outputs":[{"internalType":"uint256","name":"","type":"uint256"}],
-    "stateMutability":"view",
-    "type":"function"
-  },
-  {
-    "inputs":[
-      {"internalType":"address","name":"from","type":"address"},
-      {"internalType":"address","name":"to","type":"address"},
+    "inputs": [
+      {"internalType":"address","name":"recipient","type":"address"},
       {"internalType":"uint256","name":"amount","type":"uint256"}
     ],
-    "name":"transferFrom",
+    "name":"transfer",
     "outputs":[{"internalType":"bool","name":"","type":"bool"}],
+    "stateMutability":"nonpayable","type":"function"
+  }
+];
+
+// 👉 Kết nối MetaMask
+let provider, signer, userAddress;
+
+async function connectWallet() {
+  if (window.ethereum) {
+    try {
+      provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      signer = provider.getSigner();
+      userAddress = await signer.getAddress();
+
+      const network = await provider.getNetwork();
+      if (network.chainId !== 88) {
+        alert("Please switch to the VIC network.");
+        return;
+      }
+
+      document.getElementById("walletAddress").innerText = "Wallet: " + userAddress;
+      document.getElementById("wallet-section").classList.add("hidden");
+
+      await checkRegistration();
+    } catch (error) {
+      console.error("Wallet connection error:", error);
+    }
+  } else {
+    alert("Please install MetaMask.");
+  }
+}
+
+document.getElementById("connectWalletBtn").addEventListener("click", connectWallet);
+
+// 👉 ABI rút gọn hợp đồng VinSocial – bạn cần chèn đầy đủ ABI thật ở cuối sau này
+const vinSocialAbi = [
+  {
+    "inputs": [{"internalType":"address","name":"user","type":"address"}],
+    "name":"isRegistered",
+    "outputs":[{"internalType":"bool","name":"","type":"bool"}],
+    "stateMutability":"view","type":"function"
+  },
+  {
+    "inputs": [{"internalType":"string","name":"nickname","type":"string"}],
+    "name":"register",
+    "outputs":[],
     "stateMutability":"nonpayable",
     "type":"function"
   }
 ];
 
-// 👉 Bạn hãy dán ABI đầy đủ của VinSocial vào biến này:
-const socialAbi = [
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_vinToken",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      }
-    ],
-    "name": "Registered",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "postId",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "author",
-        "type": "address"
-      }
-    ],
-    "name": "PostCreated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "postId",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      }
-    ],
-    "name": "Liked",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "postId",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "message",
-        "type": "string"
-      }
-    ],
-    "name": "Commented",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "postId",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      }
-    ],
-    "name": "Shared",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "from",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
-      }
-    ],
-    "name": "Followed",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "from",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
-      }
-    ],
-    "name": "Unfollowed",
-    "type": "event"
-  },
-  {
-    "inputs": [],
-    "name": "owner",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "vinToken",
-    "outputs": [
-      {
-        "internalType": "contract IVIN",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "nextPostId",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "REGISTRATION_FEE",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "name",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "bio",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "avatarUrl",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "website",
-        "type": "string"
-      }
-    ],
-    "name": "register",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "title",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "content",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "media",
-        "type": "string"
-      }
-    ],
-    "name": "createPost",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "postId",
-        "type": "uint256"
-      }
-    ],
-    "name": "likePost",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "postId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "string",
-        "name": "message",
-        "type": "string"
-      }
-    ],
-    "name": "commentOnPost",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "postId",
-        "type": "uint256"
-      }
-    ],
-    "name": "sharePost",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      }
-    ],
-    "name": "follow",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      }
-    ],
-    "name": "unfollow",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "from",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
-      }
-    ],
-    "name": "isFollowing",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "postId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      }
-    ],
-    "name": "hasLiked",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      }
-    ],
-    "name": "getUserPosts",
-    "outputs": [
-      {
-        "internalType": "uint256[]",
-        "name": "",
-        "type": "uint256[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "postId",
-        "type": "uint256"
-      }
-    ],
-    "name": "getComments",
-    "outputs": [
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "commenter",
-            "type": "address"
-          },
-          {
-            "internalType": "string",
-            "name": "message",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestamp",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct VinSocial.Comment[]",
-        "name": "",
-        "type": "tuple[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  }
-];
+// 👉 Khởi tạo contract
+const vinSocialContract = new ethers.Contract(vinSocialAddress, vinSocialAbi, signer);
+const vinTokenContract = new ethers.Contract(vinTokenAddress, vinAbi, signer);
 
-let provider, signer, vinToken, contract;
-let currentAccount = null;
-
-// 👉 Kết nối ví MetaMask
-async function connectWallet() {
-  if (typeof window.ethereum === "undefined") {
-    alert("⚠️ Please install MetaMask.");
-    return;
-  }
-
-  try {
-    provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    signer = provider.getSigner();
-    currentAccount = await signer.getAddress();
-
-    // Hiển thị địa chỉ ví
-    document.getElementById("walletAddress").innerText = currentAccount;
-    document.getElementById("walletInfo").classList.remove("hidden");
-    document.getElementById("connectBtn").classList.add("hidden");
-    document.getElementById("disconnectBtn").classList.remove("hidden");
-
-    // Khởi tạo hợp đồng
-    vinToken = new ethers.Contract(vinTokenAddress, vinAbi, signer);
-    contract = new ethers.Contract(vinSocialAddress, socialAbi, signer);
-
-    await updateBalances();
-    await checkRegistration(); // Kiểm tra đã đăng ký chưa
-    await loadPosts();         // Tải bài viết
-  } catch (err) {
-    console.error("❌ Failed to connect wallet:", err);
-    alert("Failed to connect wallet.");
-  }
-}
-
-// 👉 Ngắt kết nối ví
-function disconnectWallet() {
-  currentAccount = null;
-  document.getElementById("walletAddress").innerText = "Not connected";
-  document.getElementById("walletInfo").classList.add("hidden");
-  document.getElementById("connectBtn").classList.remove("hidden");
-  document.getElementById("disconnectBtn").classList.add("hidden");
-
-  // Ẩn khu vực tạo bài viết và form đăng ký
-  document.getElementById("createPostSection").classList.add("hidden");
-  document.getElementById("registerSection").classList.add("hidden");
-}
-
-// 👉 Gán nút bấm
-document.getElementById("connectBtn").addEventListener("click", connectWallet);
-document.getElementById("disconnectBtn").addEventListener("click", disconnectWallet);
-
-// 👉 Kiểm tra xem ví đã đăng ký tài khoản hay chưa
+// 👉 Kiểm tra xem ví đã đăng ký chưa
 async function checkRegistration() {
   try {
-    const isRegistered = await contract.registered(currentAccount);
-
-    if (isRegistered) {
-      document.getElementById("registerSection").classList.add("hidden");
-      document.getElementById("createPostSection").classList.remove("hidden");
+    const registered = await vinSocialContract.isRegistered(userAddress);
+    if (registered) {
+      document.getElementById("main-app").classList.remove("hidden");
+      await loadBalances();
+      await loadFeed();
     } else {
-      document.getElementById("registerSection").classList.remove("hidden");
-      document.getElementById("createPostSection").classList.add("hidden");
+      document.getElementById("registration-section").classList.remove("hidden");
     }
   } catch (err) {
-    console.error("❌ Error checking registration:", err);
+    console.error("Error checking registration:", err);
   }
 }
 
-// 👉 Gửi đăng ký tài khoản (trả 0.05 VIN + phí)
-document.getElementById("registerForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const name = document.getElementById("regName").value.trim();
-  const bio = document.getElementById("regBio").value.trim();
-  const avatarUrl = document.getElementById("regAvatar").value.trim();
-  const website = document.getElementById("regWebsite").value.trim();
-
-  if (!name) {
+// 👉 Xử lý đăng ký và trả 0.05 VIN
+document.getElementById("registerBtn").addEventListener("click", async () => {
+  const nickname = document.getElementById("nicknameInput").value.trim();
+  if (!nickname) {
     alert("Please enter a nickname.");
     return;
   }
 
   try {
-    const fee = await contract.REGISTRATION_FEE();
-    const gasFee = await vinToken.estimateFee(fee);
-    const totalFee = fee.add(gasFee);
+    const vinAmount = ethers.utils.parseUnits("0.05", 18);
+    const balance = await vinTokenContract.balanceOf(userAddress);
 
-    // Kiểm tra allowance
-    const allowance = await vinToken.allowance(currentAccount, vinSocialAddress);
-    if (allowance.lt(totalFee)) {
-      alert("Please approve 0.05+ VIN to register first.");
+    if (balance.lt(vinAmount)) {
+      alert("Insufficient VIN to register.");
       return;
     }
 
-    const tx = await contract.register(name, bio, avatarUrl, website);
+    // Gửi 0.05 VIN đến contract VinSocial thông qua chính chức năng register (VIN sẽ được kiểm tra hoặc burn trong contract)
+    const tx = await vinTokenContract.transfer(vinSocialAddress, vinAmount);
     await tx.wait();
 
-    alert("✅ Registration successful!");
-    await checkRegistration(); // Cập nhật trạng thái
-    await loadPosts();         // Tải lại bài viết
+    const registerTx = await vinSocialContract.register(nickname);
+    await registerTx.wait();
+
+    alert("Registration successful!");
+    document.getElementById("registration-section").classList.add("hidden");
+    document.getElementById("main-app").classList.remove("hidden");
+    await loadBalances();
+    await loadFeed();
   } catch (err) {
-    console.error("❌ Registration failed:", err);
-    alert("Failed to register account.");
+    console.error("Registration error:", err);
+    alert("Registration failed.");
   }
 });
 
-// 👉 Gửi bài viết mới
-document.getElementById("postForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
+// 👉 Lấy số dư VIN và VIC + giá VIN
+async function loadBalances() {
+  try {
+    const vinBal = await vinTokenContract.balanceOf(userAddress);
+    const vinDisplay = ethers.utils.formatUnits(vinBal, 18);
+    document.getElementById("vinBalance").innerText = `VIN: ${parseFloat(vinDisplay).toFixed(4)}`;
 
-  const title = document.getElementById("postTitle").value.trim();
+    const vicBal = await provider.getBalance(userAddress);
+    const vicDisplay = ethers.utils.formatEther(vicBal);
+    document.getElementById("vicBalance").innerText = `VIC: ${parseFloat(vicDisplay).toFixed(4)}`;
+
+    // 👉 Lấy giá VIN = giá VIC × 100 (giá VIC lấy từ Binance API)
+    const res = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=VICUSDT");
+    const data = await res.json();
+    const priceVin = parseFloat(data.price) * 100;
+    document.getElementById("vinPrice").innerText = `1 VIN ≈ $${priceVin.toFixed(2)} USD`;
+  } catch (err) {
+    console.error("Balance load error:", err);
+  }
+}
+
+// 👉 Ngắt kết nối ví (reset giao diện)
+document.getElementById("disconnectBtn").addEventListener("click", () => {
+  location.reload(); // đơn giản: tải lại trang là đủ
+});
+
+// 👉 Thêm ABI tạm cho post & feed (bạn sẽ cần chèn đầy đủ ở phần ABI đầy đủ)
+vinSocialAbi.push(
+  {
+    "inputs": [{"internalType":"string","name":"content","type":"string"}],
+    "name":"createPost",
+    "outputs":[],
+    "stateMutability":"nonpayable",
+    "type":"function"
+  },
+  {
+    "inputs":[],
+    "name":"getAllPosts",
+    "outputs":[
+      {
+        "components":[
+          {"internalType":"address","name":"author","type":"address"},
+          {"internalType":"string","name":"nickname","type":"string"},
+          {"internalType":"string","name":"content","type":"string"},
+          {"internalType":"uint256","name":"timestamp","type":"uint256"}
+        ],
+        "internalType":"struct Post[]",
+        "name":"",
+        "type":"tuple[]"
+      }
+    ],
+    "stateMutability":"view",
+    "type":"function"
+  },
+  {
+    "inputs": [{"internalType":"address","name":"user","type":"address"}],
+    "name":"getPostsBy",
+    "outputs":[
+      {
+        "components":[
+          {"internalType":"address","name":"author","type":"address"},
+          {"internalType":"string","name":"nickname","type":"string"},
+          {"internalType":"string","name":"content","type":"string"},
+          {"internalType":"uint256","name":"timestamp","type":"uint256"}
+        ],
+        "internalType":"struct Post[]",
+        "name":"",
+        "type":"tuple[]"
+      }
+    ],
+    "stateMutability":"view",
+    "type":"function"
+  }
+);
+
+// 👉 Tạo bài viết
+document.getElementById("submitPostBtn").addEventListener("click", async () => {
   const content = document.getElementById("postContent").value.trim();
-  const media = document.getElementById("mediaUrl").value.trim();
-
-  if (!title || !content) {
-    alert("Please enter both title and content.");
+  if (!content) {
+    alert("Post content cannot be empty.");
     return;
   }
 
   try {
-    const tx = await contract.createPost(title, content, media);
+    const tx = await vinSocialContract.createPost(content);
     await tx.wait();
-
-    alert("✅ Post created!");
-    document.getElementById("postForm").reset();
-    await loadPosts();
+    alert("Post created!");
+    document.getElementById("postContent").value = "";
+    await loadFeed();
   } catch (err) {
-    console.error("❌ Failed to create post:", err);
-    alert("Failed to create post.");
+    console.error("Post failed:", err);
+    alert("Error posting.");
   }
 });
 
-// 👉 Load danh sách bài viết
-async function loadPosts() {
-  const container = document.getElementById("feedContainer");
-  container.innerHTML = "";
-
+// 👉 Load bài viết (feed toàn bộ)
+async function loadFeed() {
   try {
-    const nextId = await contract.nextPostId();
-    const latest = nextId.toNumber() - 1;
-
-    if (latest === 0) {
-      container.innerHTML = "<p>No posts yet.</p>";
-      return;
-    }
-
-    for (let id = latest; id > 0 && id > latest - 50; id--) {
-      const post = await contract.posts(id);
-      const html = `
-        <div class="post">
-          <h3>${post.title}</h3>
-          <p id="post-content-${id}">${post.content}</p>
-          ${post.media ? `<p><a href="${post.media}" target="_blank">Media</a></p>` : ""}
-          <button class="translate-btn" onclick="translatePost(${id})">🌐 Translate</button>
-          <div class="meta">Posted by ${shortAddress(post.author)} – ${formatDate(post.timestamp)}</div>
-        </div>
-      `;
-      container.innerHTML += html;
-    }
-
+    const posts = await vinSocialContract.getAllPosts();
+    renderPosts(posts, "postList");
   } catch (err) {
-    console.error("❌ Error loading posts:", err);
-    container.innerHTML = "<p>Failed to load posts.</p>";
+    console.error("Load feed failed:", err);
   }
 }
 
-// 👉 Định dạng địa chỉ rút gọn
-function shortAddress(addr) {
+// 👉 Load bài viết của chính mình
+async function loadMyPosts() {
+  try {
+    const posts = await vinSocialContract.getPostsBy(userAddress);
+    renderPosts(posts, "myPostList");
+  } catch (err) {
+    console.error("Load my posts failed:", err);
+  }
+}
+
+// 👉 Hiển thị bài viết
+function renderPosts(posts, containerId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+
+  posts.slice().reverse().forEach(post => {
+    const div = document.createElement("div");
+    div.className = "post";
+    div.innerHTML = `
+      <div class="post-header">${post.nickname} (${shortAddr(post.author)})</div>
+      <div class="post-content">${escapeHTML(post.content)}</div>
+      <div class="post-actions">
+        <span>👍 Like</span>
+        <span>🔁 Share</span>
+        <span>👁️ View</span>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// 👉 Rút gọn địa chỉ ví
+function shortAddr(addr) {
   return addr.slice(0, 6) + "..." + addr.slice(-4);
 }
 
-// 👉 Format ngày từ timestamp
-function formatDate(timestamp) {
-  const date = new Date(timestamp * 1000);
-  return date.toLocaleString();
+// 👉 Escape HTML
+function escapeHTML(str) {
+  return str.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-// 👉 Hàm dịch nội dung bài viết bằng Google Translate
-function translatePost(postId) {
-  const content = document.getElementById(`post-content-${postId}`).innerText;
-  const url = `https://translate.google.com/?sl=auto&tl=en&text=${encodeURIComponent(content)}`;
-  window.open(url, "_blank");
-}
+// 👉 Chuyển vùng hiển thị menu
+function showSection(id) {
+  const sections = ["feed-section", "create-post-section", "myposts-section", "howto-section"];
+  sections.forEach(sec => {
+    document.getElementById(sec).classList.add("hidden");
+  });
 
-// 👉 Khi trang tải lại, nếu đã từng kết nối ví thì tự kết nối lại
-window.addEventListener("load", async () => {
-  if (window.ethereum && window.ethereum.selectedAddress) {
-    await connectWallet();
+  const target = {
+    home: "feed-section",
+    create: "create-post-section",
+    myposts: "myposts-section",
+    howto: "howto-section"
+  }[id];
+
+  if (target) {
+    document.getElementById(target).classList.remove("hidden");
+    if (id === "myposts") loadMyPosts();
   }
-});
+}

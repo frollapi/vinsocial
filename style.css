@@ -1,4 +1,4 @@
-/* ==== Layout chung ==== */
+/* ==== CƠ BẢN ==== */
 body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
@@ -12,7 +12,7 @@ body {
   padding: 20px;
 }
 
-/* ==== Header, Logo, Slogan ==== */
+/* ==== HEADER ==== */
 .header {
   text-align: center;
   margin-bottom: 20px;
@@ -33,13 +33,6 @@ body {
   color: #666;
 }
 
-/* ==== VIN Price & Trade Link ==== */
-.vin-info {
-  margin-top: 10px;
-  font-size: 0.95rem;
-  color: #444;
-}
-
 .trade-link {
   display: inline-block;
   margin-top: 5px;
@@ -52,24 +45,25 @@ body {
   text-decoration: underline;
 }
 
-/* ==== Wallet Section ==== */
-.wallet-section {
-  text-align: center;
-  margin-bottom: 20px;
+/* ==== GIỚI THIỆU ==== */
+.intro-text {
+  margin-top: 20px;
+  font-size: 1rem;
 }
 
-#walletAddress {
-  margin-top: 10px;
-  font-size: 0.95rem;
-  color: #444;
+.intro-text ul {
+  padding-left: 20px;
 }
 
-#balance-area {
-  margin-top: 10px;
-  font-size: 0.95rem;
+.intro-text pre {
+  background: #f0f0f0;
+  padding: 10px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  overflow-x: auto;
 }
 
-/* ==== Nút ==== */
+/* ==== NÚT CHUNG ==== */
 .button {
   background-color: #0077ff;
   color: white;
@@ -90,7 +84,7 @@ body {
   font-size: 0.9rem;
 }
 
-/* ==== Input, Textarea ==== */
+/* ==== INPUT ==== */
 input[type="text"],
 textarea {
   width: 100%;
@@ -102,11 +96,11 @@ textarea {
   box-sizing: border-box;
 }
 
-/* ==== Menu ==== */
+/* ==== MENU ==== */
 .nav-menu {
   display: flex;
   justify-content: space-around;
-  margin-bottom: 20px;
+  margin: 20px 0;
   flex-wrap: wrap;
 }
 
@@ -125,7 +119,7 @@ textarea {
   border-color: #0077ff;
 }
 
-/* ==== Sections ==== */
+/* ==== SECTIONS ==== */
 .section {
   margin-bottom: 30px;
 }
@@ -134,7 +128,7 @@ textarea {
   display: none;
 }
 
-/* ==== Post List ==== */
+/* ==== DANH SÁCH BÀI VIẾT ==== */
 .post-list {
   display: flex;
   flex-direction: column;
@@ -179,7 +173,12 @@ textarea {
   text-decoration: underline;
 }
 
-/* ==== Footer ==== */
+/* ==== PROFILE ==== */
+#profileArea {
+  margin-bottom: 20px;
+}
+
+/* ==== FOOTER ==== */
 .footer {
   text-align: center;
   font-size: 0.85rem;
@@ -199,7 +198,7 @@ textarea {
   text-decoration: underline;
 }
 
-/* ==== Responsive ==== */
+/* ==== RESPONSIVE ==== */
 @media (max-width: 600px) {
   .nav-menu {
     flex-direction: column;
@@ -213,5 +212,10 @@ textarea {
 
   .trade-link {
     margin: 10px 0;
+  }
+
+  .post-actions {
+    flex-direction: column;
+    gap: 6px;
   }
 }

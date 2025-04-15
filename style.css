@@ -1,4 +1,4 @@
-/* === CƠ BẢN === */
+/* ==== Layout chung ==== */
 body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
@@ -12,10 +12,10 @@ body {
   padding: 20px;
 }
 
-/* === HEADER === */
+/* ==== Header, Logo, Slogan ==== */
 .header {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 .logo {
@@ -33,7 +33,43 @@ body {
   color: #666;
 }
 
-/* === NÚT CHUNG === */
+/* ==== VIN Price & Trade Link ==== */
+.vin-info {
+  margin-top: 10px;
+  font-size: 0.95rem;
+  color: #444;
+}
+
+.trade-link {
+  display: inline-block;
+  margin-top: 5px;
+  text-decoration: none;
+  color: #0077ff;
+  font-weight: bold;
+}
+
+.trade-link:hover {
+  text-decoration: underline;
+}
+
+/* ==== Wallet Section ==== */
+.wallet-section {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+#walletAddress {
+  margin-top: 10px;
+  font-size: 0.95rem;
+  color: #444;
+}
+
+#balance-area {
+  margin-top: 10px;
+  font-size: 0.95rem;
+}
+
+/* ==== Nút ==== */
 .button {
   background-color: #0077ff;
   color: white;
@@ -54,7 +90,7 @@ body {
   font-size: 0.9rem;
 }
 
-/* === INPUT & TEXTAREA === */
+/* ==== Input, Textarea ==== */
 input[type="text"],
 textarea {
   width: 100%;
@@ -66,47 +102,7 @@ textarea {
   box-sizing: border-box;
 }
 
-/* === VÙNG KẾT NỐI VÍ === */
-#wallet-section {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-#walletAddress {
-  margin-top: 10px;
-  font-size: 0.95rem;
-  color: #444;
-}
-
-/* === THANH TRÊN CÙNG === */
-.top-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #eaeaea;
-  padding: 10px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
-
-.balance-info {
-  font-size: 0.95rem;
-  margin-bottom: 6px;
-}
-
-.trade-link {
-  text-decoration: none;
-  color: #0077ff;
-  font-weight: bold;
-  margin-left: 10px;
-}
-
-.trade-link:hover {
-  text-decoration: underline;
-}
-
-/* === MENU ĐIỀU HƯỚNG === */
+/* ==== Menu ==== */
 .nav-menu {
   display: flex;
   justify-content: space-around;
@@ -129,7 +125,7 @@ textarea {
   border-color: #0077ff;
 }
 
-/* === PHẦN CHÍNH (SECTIONS) === */
+/* ==== Sections ==== */
 .section {
   margin-bottom: 30px;
 }
@@ -138,7 +134,7 @@ textarea {
   display: none;
 }
 
-/* === DANH SÁCH BÀI VIẾT === */
+/* ==== Post List ==== */
 .post-list {
   display: flex;
   flex-direction: column;
@@ -183,7 +179,7 @@ textarea {
   text-decoration: underline;
 }
 
-/* === CHÂN TRANG === */
+/* ==== Footer ==== */
 .footer {
   text-align: center;
   font-size: 0.85rem;
@@ -203,9 +199,8 @@ textarea {
   text-decoration: underline;
 }
 
-/* === RESPONSIVE === */
+/* ==== Responsive ==== */
 @media (max-width: 600px) {
-  .top-bar,
   .nav-menu {
     flex-direction: column;
     align-items: center;

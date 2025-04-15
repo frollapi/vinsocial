@@ -15,17 +15,20 @@
       <p class="slogan">Decentralized. Uncensored. Free Speech.</p>
     </header>
 
+    <!-- KẾT NỐI VÍ -->
     <div id="wallet-section" class="wallet-section">
       <button id="connectWalletBtn" class="button">Connect Wallet</button>
       <p id="walletAddress" class="info-text"></p>
     </div>
 
+    <!-- ĐĂNG KÝ TÀI KHOẢN -->
     <div id="registration-section" class="hidden">
       <p>To continue, register your wallet by paying 0.05 VIN</p>
       <input type="text" id="nicknameInput" placeholder="Enter your nickname" />
       <button id="registerBtn" class="button">Register & Pay 0.05 VIN</button>
     </div>
 
+    <!-- GIAO DIỆN CHÍNH -->
     <div id="main-app" class="hidden">
       <div class="top-bar">
         <div class="balance-info">
@@ -37,29 +40,34 @@
         <button id="disconnectBtn" class="button small">Disconnect</button>
       </div>
 
+      <!-- MENU -->
       <nav class="nav-menu">
-        <button class="nav-btn" onclick="showSection('home')">🏠 Home</button>
-        <button class="nav-btn" onclick="showSection('create')">✍️ Create Post</button>
-        <button class="nav-btn" onclick="showSection('myposts')">📄 My Posts</button>
-        <button class="nav-btn" onclick="showSection('howto')">📘 How to Use</button>
+        <button class="nav-btn" onclick="showSection('feed-section')">🏠 Home</button>
+        <button class="nav-btn" onclick="showSection('create-post-section')">✍️ Create Post</button>
+        <button class="nav-btn" onclick="showSection('myposts-section')">📄 My Posts</button>
+        <button class="nav-btn" onclick="showSection('howto-section')">📘 How to Use</button>
       </nav>
 
+      <!-- TẠO BÀI VIẾT -->
       <section id="create-post-section" class="section hidden">
         <h2>Create a New Post</h2>
         <textarea id="postContent" rows="4" placeholder="What's on your mind?"></textarea>
         <button id="submitPostBtn" class="button">Post</button>
       </section>
 
+      <!-- BÀI VIẾT CỘNG ĐỒNG -->
       <section id="feed-section" class="section">
         <h2>Community Feed</h2>
         <div id="postList" class="post-list"></div>
       </section>
 
+      <!-- BÀI VIẾT CÁ NHÂN -->
       <section id="myposts-section" class="section hidden">
         <h2>My Posts</h2>
         <div id="myPostList" class="post-list"></div>
       </section>
 
+      <!-- HƯỚNG DẪN -->
       <section id="howto-section" class="section hidden">
         <h2>How to Use VinSocial.vin</h2>
         <ul>
@@ -71,6 +79,7 @@
       </section>
     </div>
 
+    <!-- CHÂN TRANG -->
     <footer class="footer">
       <p>&copy; 2025 VinSocial.vin – Built on VIC Blockchain</p>
       <a href="https://t.me/vinplayvin" target="_blank">Telegram</a> |
@@ -79,7 +88,7 @@
     </footer>
   </div>
 
-   <!-- ✅ Load đúng phiên bản ethers -->
+  <!-- ✅ TẢI THƯ VIỆN ETHERS -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script src="app.js"></script>
 </body>

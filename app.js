@@ -153,3 +153,13 @@ async function checkRegistration() {
 
 // 👉 Gọi hàm checkRegistration() sau khi connectWallet()
 await checkRegistration();
+
+function loadUserProfile(user) {
+  const profile = `
+    <p><strong>Name:</strong> ${user.name}</p>
+    <p><strong>Bio:</strong> ${user.bio}</p>
+    ${user.avatar ? `<img src="${user.avatar}" alt="Avatar" style="max-width:80px;border-radius:8px;">` : ""}
+    ${user.website ? `<p><a href="${user.website}" target="_blank">🌐 Website</a></p>` : ""}
+  `;
+  document.getElementById("profileArea").innerHTML = profile;
+}

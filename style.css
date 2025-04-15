@@ -252,3 +252,13 @@ footer {
   box-shadow: 0 4px 12px rgba(255, 87, 34, 0.5);
   transform: translateY(-2px);
 }
+
+.slogan {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #555;
+  margin-top: 4px;
+  margin-bottom: 12px;
+  font-style: italic;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+}

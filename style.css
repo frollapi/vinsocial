@@ -234,16 +234,21 @@ footer {
 }
 
 .trade-btn {
-  background-color: #ff9800;
-  color: white;
-  font-weight: bold;
-  padding: 8px 16px;
+  background-color: #ff6f00; /* Cam rực rỡ hơn */
+  color: #fff;
+  font-weight: 800;
+  font-size: 1rem;
+  padding: 10px 20px;
   text-decoration: none;
-  border-radius: 6px;
+  border-radius: 8px;
   display: inline-block;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(255, 111, 0, 0.3);
+  transition: all 0.2s ease-in-out;
 }
 
 .trade-btn:hover {
-  background-color: #fb8c00;
+  background-color: #e65100;
+  box-shadow: 0 4px 12px rgba(255, 87, 34, 0.5);
+  transform: translateY(-2px);
 }
-

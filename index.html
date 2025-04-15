@@ -5,21 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>VinSocial.vin – Decentralized Social Network</title>
 
-  <!-- Gắn file CSS -->
+  <!-- Gắn style và logo -->
   <link rel="stylesheet" href="style.css" />
-
-  <!-- Biểu tượng trình duyệt -->
   <link rel="icon" type="image/png" href="logo.png" />
 </head>
 <body>
 
-  <!-- PHẦN ĐẦU TRANG: Logo và thanh menu -->
+  <!-- PHẦN HEADER -->
   <header>
     <div class="container">
       <div class="logo">
         <img src="logo.png" alt="VinSocial Logo" />
         <h1>VinSocial.vin</h1>
       </div>
+
+      <!-- Hiển thị giá VIN -->
+      <div class="vin-price" id="vinPrice">1 VIN ≈ $--</div>
+
+      <!-- Thông tin ví -->
+      <div id="walletInfo" class="wallet-box hidden">
+        <p><strong>Wallet:</strong> <span id="walletAddress">Not connected</span></p>
+        <p><strong>Balance:</strong> <span id="vinBalance">-- VIN</span> | <span id="vicBalance">-- VIC</span></p>
+        <button id="disconnectBtn" class="disconnect hidden">Disconnect</button>
+      </div>
+
+      <!-- Menu -->
       <nav>
         <ul>
           <li><a href="#" id="homeBtn">Home</a></li>
@@ -30,16 +40,10 @@
       </nav>
     </div>
   </header>
-
-  <!-- PHẦN THÂN TRANG: Kết nối ví + tạo bài viết + xem feed -->
+  <!-- PHẦN NỘI DUNG CHÍNH -->
   <main class="container">
 
-    <!-- Hiển thị trạng thái ví đang kết nối -->
-    <section id="walletStatus" class="card">
-      <p id="walletAddress">Wallet: Not connected</p>
-    </section>
-
-    <!-- Form tạo bài viết mới (ẩn khi chưa nhấn Create) -->
+    <!-- Khu vực tạo bài viết (ẩn mặc định) -->
     <section id="createPostSection" class="card hidden">
       <h2>Create New Post</h2>
       <form id="postForm">
@@ -49,22 +53,41 @@
         <button type="submit">Publish</button>
       </form>
     </section>
-    <!-- Danh sách bài viết mới nhất -->
+
+    <!-- Khu vực feed bài viết -->
     <section id="feedSection" class="card">
       <h2>Latest Posts</h2>
       <div id="feedContainer">
-        <!-- Các bài viết sẽ được hiển thị bằng JavaScript -->
+        <!-- Bài viết sẽ được hiển thị ở đây bằng app.js -->
       </div>
     </section>
 
   </main>
-
   <!-- PHẦN CHÂN TRANG -->
   <footer>
     <p>&copy; 2025 VinSocial.vin – 100% On-Chain, Freedom First.</p>
   </footer>
 
-  <!-- Gắn file JavaScript điều khiển -->
+  <!-- Nhúng JavaScript -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script src="app.js"></script>
+  <script>
+
+    // 👇 Tự động lấy giá VIC từ Binance và tính giá VIN
+  async function updateVinPrice() {
+    try {
+      const res = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=VICUSDT");
+      const data = await res.json();
+      const vicPrice = parseFloat(data.price);
+      const vinPrice = vicPrice * 100;
+      document.getElementById("vinPrice").innerText = `1 VIN ≈ $${vinPrice.toFixed(2)} USD`;
+    } catch (err) {
+      console.error("Failed to fetch VIN price:", err);
+    }
+  }
+
+  updateVinPrice(); // Gọi ngay khi trang tải
+</script>
+
 </body>
 </html>

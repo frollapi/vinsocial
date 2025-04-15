@@ -35,6 +35,9 @@ async function connectWallet() {
 
     document.getElementById("walletAddress").innerText = "Wallet: " + userAddress;
 
+    // 👉 Hiện phần giao diện chính
+    document.getElementById("main-app").classList.remove("hidden");
+
     vinContract = new ethers.Contract(vinTokenAddress, vinAbi, provider);
     await showBalances();
   } catch (err) {

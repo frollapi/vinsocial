@@ -1,4 +1,4 @@
-/* ==== Layout chung ==== */
+/* === CƠ BẢN === */
 body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
@@ -12,7 +12,7 @@ body {
   padding: 20px;
 }
 
-/* ==== Header, Logo, Slogan ==== */
+/* === HEADER === */
 .header {
   text-align: center;
   margin-bottom: 30px;
@@ -33,7 +33,7 @@ body {
   color: #666;
 }
 
-/* ==== Nút chung ==== */
+/* === NÚT CHUNG === */
 .button {
   background-color: #0077ff;
   color: white;
@@ -54,7 +54,7 @@ body {
   font-size: 0.9rem;
 }
 
-/* ==== Input ==== */
+/* === INPUT & TEXTAREA === */
 input[type="text"],
 textarea {
   width: 100%;
@@ -66,7 +66,19 @@ textarea {
   box-sizing: border-box;
 }
 
-/* ==== Top-bar ==== */
+/* === VÙNG KẾT NỐI VÍ === */
+#wallet-section {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+#walletAddress {
+  margin-top: 10px;
+  font-size: 0.95rem;
+  color: #444;
+}
+
+/* === THANH TRÊN CÙNG === */
 .top-bar {
   display: flex;
   justify-content: space-between;
@@ -94,7 +106,7 @@ textarea {
   text-decoration: underline;
 }
 
-/* ==== Menu điều hướng ==== */
+/* === MENU ĐIỀU HƯỚNG === */
 .nav-menu {
   display: flex;
   justify-content: space-around;
@@ -117,11 +129,16 @@ textarea {
   border-color: #0077ff;
 }
 
-/* ==== Bài viết ==== */
+/* === PHẦN CHÍNH (SECTIONS) === */
 .section {
   margin-bottom: 30px;
 }
 
+.hidden {
+  display: none;
+}
+
+/* === DANH SÁCH BÀI VIẾT === */
 .post-list {
   display: flex;
   flex-direction: column;
@@ -140,19 +157,33 @@ textarea {
   margin-bottom: 6px;
 }
 
+.post-header a {
+  color: #0077ff;
+  text-decoration: none;
+}
+
+.post-header a:hover {
+  text-decoration: underline;
+}
+
+.post-content {
+  white-space: pre-wrap;
+  margin-bottom: 8px;
+}
+
 .post-actions {
   display: flex;
   gap: 12px;
   font-size: 0.9rem;
   color: #0077ff;
-  margin-top: 8px;
   cursor: pointer;
 }
 
 .post-actions span:hover {
   text-decoration: underline;
 }
-/* ==== Footer ==== */
+
+/* === CHÂN TRANG === */
 .footer {
   text-align: center;
   font-size: 0.85rem;
@@ -172,26 +203,10 @@ textarea {
   text-decoration: underline;
 }
 
-/* ==== Ẩn/Hiện vùng ==== */
-.hidden {
-  display: none;
-}
-
-/* ==== Wallet Section ==== */
-#wallet-section {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-#walletAddress {
-  margin-top: 10px;
-  font-size: 0.95rem;
-  color: #444;
-}
-
-/* ==== Responsive ==== */
+/* === RESPONSIVE === */
 @media (max-width: 600px) {
-  .top-bar, .nav-menu {
+  .top-bar,
+  .nav-menu {
     flex-direction: column;
     align-items: center;
   }

@@ -433,10 +433,10 @@ const vinSocialAbi =[
 let provider, signer, userAddress;
 let vinTokenContract, vinSocialContract;
 
-// 👉 Kết nối ví MetaMask và khởi tạo contract
+// 👉 Kết nối ví
 async function connectWallet() {
   if (!window.ethereum) {
-    alert("Please install MetaMask extension.");
+    alert("Please install MetaMask!");
     return;
   }
 
@@ -452,41 +452,32 @@ async function connectWallet() {
       return;
     }
 
-    // 👉 Gán contract sau khi có signer
     vinTokenContract = new ethers.Contract(vinTokenAddress, vinAbi, signer);
     vinSocialContract = new ethers.Contract(vinSocialAddress, vinSocialAbi, signer);
 
-    // 👉 Hiện địa chỉ ví
     document.getElementById("walletAddress").innerText = "Wallet: " + userAddress;
-
-    // 👉 Bỏ ẩn khu vực chính
     document.getElementById("main-app").classList.remove("hidden");
 
-    // 👉 Tải số dư
-    await loadBalances();
+    await checkRegistration();
   } catch (error) {
     console.error("Wallet connection error:", error);
     alert("Failed to connect wallet.");
   }
 }
 
-// 👉 Gắn nút connect ví
 document.getElementById("connectWalletBtn").addEventListener("click", connectWallet);
 
-// 👉 Tải số dư VIN, VIC và giá VIN theo USD
+// 👉 Hiển thị số dư VIN/VIC và giá VIN ≈ USD
 async function loadBalances() {
   try {
-    // 👉 Lấy số dư VIN
-    const vinBalance = await vinTokenContract.balanceOf(userAddress);
-    const vinAmount = ethers.utils.formatUnits(vinBalance, 18);
+    const vinBal = await vinTokenContract.balanceOf(userAddress);
+    const vinAmount = ethers.utils.formatUnits(vinBal, 18);
     document.getElementById("vinBalance").innerText = `VIN: ${parseFloat(vinAmount).toFixed(4)}`;
 
-    // 👉 Lấy số dư VIC (native)
-    const vicBalance = await provider.getBalance(userAddress);
-    const vicAmount = ethers.utils.formatEther(vicBalance);
+    const vicBal = await provider.getBalance(userAddress);
+    const vicAmount = ethers.utils.formatEther(vicBal);
     document.getElementById("vicBalance").innerText = `VIC: ${parseFloat(vicAmount).toFixed(4)}`;
 
-    // 👉 Lấy giá VIC từ Binance API và tính giá VIN = VIC × 100
     const res = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=VICUSDT");
     const data = await res.json();
     const priceVin = parseFloat(data.price) * 100;
@@ -496,7 +487,7 @@ async function loadBalances() {
   }
 }
 
-// 👉 Kiểm tra ví đã đăng ký tài khoản trên VinSocial chưa
+// 👉 Kiểm tra đăng ký tài khoản
 async function checkRegistration() {
   try {
     const registered = await vinSocialContract.isRegistered(userAddress);
@@ -504,7 +495,7 @@ async function checkRegistration() {
       document.getElementById("main-app").classList.remove("hidden");
       document.getElementById("registration-section").classList.add("hidden");
       await loadBalances();
-      await loadFeed(); // sẽ thêm sau
+      await loadFeed();
     } else {
       document.getElementById("registration-section").classList.remove("hidden");
     }
@@ -513,7 +504,7 @@ async function checkRegistration() {
   }
 }
 
-// 👉 Đăng ký tài khoản bằng cách trả 0.05 VIN
+// 👉 Đăng ký và trả 0.05 VIN
 document.getElementById("registerBtn").addEventListener("click", async () => {
   const nickname = document.getElementById("nicknameInput").value.trim();
   if (!nickname) {
@@ -530,11 +521,9 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
       return;
     }
 
-    // 👉 Chuyển 0.05 VIN cho contract
     const tx = await vinTokenContract.transfer(vinSocialAddress, vinAmount);
     await tx.wait();
 
-    // 👉 Gọi hàm register(nickname, bio, avatar, website) — dùng dữ liệu đơn giản
     const registerTx = await vinSocialContract.register(nickname, "", "", "");
     await registerTx.wait();
 
@@ -542,10 +531,84 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
     document.getElementById("registration-section").classList.add("hidden");
     document.getElementById("main-app").classList.remove("hidden");
     await loadBalances();
-    await loadFeed(); // sẽ thêm ở phần 5
+    await loadFeed();
   } catch (err) {
     console.error("Registration error:", err);
     alert("Registration failed.");
   }
 });
 
+// 👉 Gửi bài viết
+document.getElementById("submitPostBtn").addEventListener("click", async () => {
+  const content = document.getElementById("postContent").value.trim();
+  if (!content) {
+    alert("Post content cannot be empty.");
+    return;
+  }
+
+  try {
+    const tx = await vinSocialContract.createPost("Post", content, "");
+    await tx.wait();
+    alert("Post created!");
+    document.getElementById("postContent").value = "";
+    await loadFeed();
+  } catch (err) {
+    console.error("Post creation error:", err);
+    alert("Failed to create post.");
+  }
+});
+
+// 👉 Load feed đơn giản (hiện tại hiển thị các post ID như mẫu)
+async function loadFeed() {
+  try {
+    const postIds = await vinSocialContract.getUserPosts(userAddress);
+    renderPosts(postIds, "postList");
+  } catch (err) {
+    console.error("Feed load error:", err);
+  }
+}
+
+// 👉 Hiển thị danh sách bài viết
+function renderPosts(posts, containerId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+
+  posts.slice().reverse().forEach(postId => {
+    const div = document.createElement("div");
+    div.className = "post";
+    div.innerHTML = `
+      <div class="post-header">🧑‍💻 User: ${shortAddr(userAddress)}</div>
+      <div class="post-content">📝 Post ID: ${postId}</div>
+      <div class="post-actions">
+        <span>👍 Like</span>
+        <span>🔁 Share</span>
+        <span>👁️ View</span>
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// 👉 Chuyển tab giao diện
+function showSection(id) {
+  const sections = ["feed-section", "create-post-section", "myposts-section", "howto-section"];
+  sections.forEach(sec => {
+    document.getElementById(sec).classList.add("hidden");
+  });
+
+  const target = {
+    home: "feed-section",
+    create: "create-post-section",
+    myposts: "myposts-section",
+    howto: "howto-section"
+  }[id];
+
+  if (target) {
+    document.getElementById(target).classList.remove("hidden");
+  }
+}
+
+// 👉 Rút gọn địa chỉ ví
+function shortAddr(addr) {
+  return addr.slice(0, 6) + "..." + addr.slice(-4);
+}

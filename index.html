@@ -9,16 +9,27 @@
 </head>
 <body>
   <div class="container">
+    <!-- LOGO + SLOGAN + GIÁ VIN + LINK TRADE -->
     <header class="header">
       <img src="logo.png" alt="VinSocial Logo" class="logo" />
       <h1 class="title">VinSocial.vin</h1>
       <p class="slogan">Decentralized. Uncensored. Free Speech.</p>
+
+      <div class="vin-info">
+        <p id="vinPrice">1 VIN ≈ $-- USD</p>
+        <a href="https://vinswap.vin" target="_blank" class="trade-link">🔁 Trade VIN/VIC</a>
+      </div>
     </header>
 
     <!-- KẾT NỐI VÍ -->
     <div id="wallet-section" class="wallet-section">
       <button id="connectWalletBtn" class="button">Connect Wallet</button>
       <p id="walletAddress" class="info-text"></p>
+
+      <div id="balance-area" class="hidden">
+        <p><span id="vinBalance">VIN: --</span> | <span id="vicBalance">VIC: --</span></p>
+        <button id="disconnectBtn" class="button small">Disconnect</button>
+      </div>
     </div>
 
     <!-- ĐĂNG KÝ TÀI KHOẢN -->
@@ -30,17 +41,6 @@
 
     <!-- GIAO DIỆN CHÍNH -->
     <div id="main-app" class="hidden">
-      <div class="top-bar">
-        <div class="balance-info">
-          <span id="vinBalance">VIN: --</span> |
-          <span id="vicBalance">VIC: --</span> |
-          <span id="vinPrice">1 VIN ≈ $-- USD</span>
-        </div>
-        <a href="https://vinswap.vin" target="_blank" class="trade-link">🔁 Trade VIN/VIC</a>
-        <button id="disconnectBtn" class="button small">Disconnect</button>
-      </div>
-
-      <!-- MENU -->
       <nav class="nav-menu">
         <button class="nav-btn" onclick="showSection('feed-section')">🏠 Home</button>
         <button class="nav-btn" onclick="showSection('create-post-section')">✍️ Create Post</button>
@@ -88,7 +88,7 @@
     </footer>
   </div>
 
-  <!-- ✅ TẢI THƯ VIỆN ETHERS -->
+  <!-- ETHERS + APP SCRIPT -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script src="app.js"></script>
 </body>

@@ -1,13 +1,13 @@
 // 👉 Địa chỉ hợp đồng
-const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4"; // Token VIN
-const vinSocialAddress = "0x2DB5a0Dcf2942d552EF02D683b4d5852A7431a87"; // Hợp đồng VinSocial
+const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";
+const vinSocialAddress = "0x2DB5a0Dcf2942d552EF02D683b4d5852A7431a87";
 
 // 👉 ABI rút gọn
 const vinAbi = [
   {
-    "inputs": [{"internalType": "address","name": "owner","type": "address"}],
+    "inputs": [{"internalType": "address", "name": "owner", "type": "address"}],
     "name": "balanceOf",
-    "outputs": [{"internalType": "uint256","name": "","type": "uint256"}],
+    "outputs": [{"internalType": "uint256", "name": "", "type": "uint256"}],
     "stateMutability": "view",
     "type": "function"
   }
@@ -40,17 +40,17 @@ const vinSocialAbi = [
     "type":"function"
   },
   {
-    "inputs": [{"internalType":"string","name":"content","type":"string"}],
-    "name": "createPost",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
+    "inputs":[{"internalType":"string","name":"content","type":"string"}],
+    "name":"createPost",
+    "outputs":[],
+    "stateMutability":"payable",
+    "type":"function"
   },
   {
-    "inputs": [],
-    "name": "getAllPosts",
-    "outputs": [{
-      "components": [
+    "inputs":[],
+    "name":"getAllPosts",
+    "outputs":[{
+      "components":[
         {"internalType":"address","name":"author","type":"address"},
         {"internalType":"string","name":"content","type":"string"},
         {"internalType":"uint256","name":"timestamp","type":"uint256"}
@@ -148,8 +148,7 @@ async function checkRegistration() {
     console.error("Error checking registration:", err);
   }
 }
-
-// 👉 Đăng ký
+// 👉 Đăng ký tài khoản
 async function registerAccount() {
   const name = document.getElementById("nameInput").value.trim();
   const bio = document.getElementById("bioInput").value.trim();
@@ -168,11 +167,11 @@ async function registerAccount() {
     await checkRegistration();
   } catch (err) {
     console.error("Registration failed", err);
-    alert("❌ Registration failed. Do you have at least 0.05 VIN and some VIC for gas?");
+    alert("❌ Registration failed. Make sure you have 0.05 VIN and enough VIC for gas.");
   }
 }
 
-// 👉 Hiển thị thông tin hồ sơ
+// 👉 Hiển thị hồ sơ người dùng
 function loadUserProfile(user) {
   const profile = `
     <p><strong>Name:</strong> ${user.name}</p>
@@ -183,17 +182,18 @@ function loadUserProfile(user) {
   document.getElementById("profileArea").innerHTML = profile;
 }
 
-// 👉 Chuyển section
+// 👉 Chuyển vùng hiển thị (menu)
 function showSection(id) {
   const sections = document.querySelectorAll(".section");
   sections.forEach(sec => sec.classList.add("hidden"));
   document.getElementById(id).classList.remove("hidden");
 }
 
-// 👉 Tạo bài viết
+// 👉 Tạo bài viết mới
 async function createPost() {
   const content = document.getElementById("postContent").value.trim();
   if (!content) return alert("Content cannot be empty");
+
   try {
     const tx = await vinSocialContract.createPost(content, {
       value: ethers.utils.parseEther("0.001") // phí viết bài
@@ -204,11 +204,11 @@ async function createPost() {
     loadAllPosts();
   } catch (err) {
     console.error("Post failed", err);
-    alert("❌ Post failed. Maybe not enough VIN or VIC?");
+    alert("❌ Post failed. Make sure you have VIN and VIC for gas.");
   }
 }
 
-// 👉 Tải tất cả bài viết
+// 👉 Tải tất cả bài viết từ hợp đồng
 async function loadAllPosts() {
   try {
     const posts = await vinSocialContract.getAllPosts();
@@ -222,9 +222,9 @@ async function loadAllPosts() {
         <div class="post-header">Author: ${post.author}</div>
         <div class="post-content">${post.content}</div>
         <div class="post-actions">
-          <span onclick="alert('Please register to interact.')">👍 Like</span>
-          <span onclick="alert('Please register to interact.')">💬 Comment</span>
-          <span onclick="alert('Please register to interact.')">🔁 Share</span>
+          <span onclick="alert('🔒 Please register to like')">👍 Like</span>
+          <span onclick="alert('🔒 Please register to comment')">💬 Comment</span>
+          <span onclick="alert('🔒 Please register to share')">🔁 Share</span>
           <a href="https://translate.google.com/?sl=auto&tl=en&text=${encodeURIComponent(post.content)}" target="_blank">🌐 Translate</a>
         </div>
       `;

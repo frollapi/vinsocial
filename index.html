@@ -9,8 +9,6 @@
 </head>
 <body>
   <div class="container">
-
-    <!-- 🌐 PHẦN GIỚI THIỆU (nếu chưa kết nối ví) -->
     <section id="intro-section">
       <header class="header">
         <img src="logo.png" class="logo" alt="VinSocial Logo" />
@@ -19,7 +17,6 @@
         <p id="vinPrice">1 VIN ≈ $-- USD</p>
         <a href="https://vinswap.vin" target="_blank" class="trade-link">🔁 Trade VIN/VIC</a>
       </header>
-
       <div class="intro-text">
         <h3> A censorship-resistant social network</h3>
         <ul>
@@ -40,14 +37,12 @@ Explorer: https://vicscan.xyz
       </div>
     </section>
 
-    <!-- 👛 THÔNG TIN VÍ (sau khi kết nối) -->
     <section id="wallet-section" class="hidden">
       <p id="walletAddress"></p>
       <p><span id="vinBalance">VIN: --</span> | <span id="vicBalance">VIC: --</span></p>
       <button id="disconnectBtn" class="button small">Disconnect</button>
     </section>
 
-    <!-- 🧭 MENU CHÍNH -->
     <nav id="main-menu" class="nav-menu hidden">
       <button class="nav-btn" onclick="showSection('feed-section')">🏠 Home</button>
       <button class="nav-btn" onclick="showSection('create-post-section')">✍️ Create Post</button>
@@ -55,31 +50,27 @@ Explorer: https://vicscan.xyz
       <button class="nav-btn" onclick="showSection('profile-section')">👤 My Profile</button>
     </nav>
 
-    <!-- ✍️ TẠO BÀI VIẾT -->
     <section id="create-post-section" class="section hidden">
       <h2>Create a Post</h2>
+      <input type="text" id="postTitle" placeholder="Post Title" />
       <textarea id="postContent" rows="4" placeholder="What's on your mind?"></textarea>
+      <input type="text" id="postMedia" placeholder="Media URL (optional)" />
       <button id="submitPostBtn" class="button">Post</button>
     </section>
 
-    <!-- 📰 DANH SÁCH BÀI VIẾT CỘNG ĐỒNG -->
     <section id="feed-section" class="section hidden">
       <h2>Community Feed</h2>
       <div id="postList" class="post-list"></div>
     </section>
 
-    <!-- 📄 DANH SÁCH BÀI VIẾT CÁ NHÂN -->
     <section id="myposts-section" class="section hidden">
       <h2>My Posts</h2>
       <div id="myPostList" class="post-list"></div>
     </section>
 
-    <!-- 👤 TRANG CÁ NHÂN -->
     <section id="profile-section" class="section hidden">
       <h2>My Profile</h2>
       <div id="profileArea"></div>
-
-      <!-- Nếu chưa đăng ký -->
       <div id="registerForm" class="hidden">
         <p>Register your account to post, like, comment & more</p>
         <input type="text" id="nameInput" placeholder="Name" />
@@ -90,33 +81,28 @@ Explorer: https://vicscan.xyz
       </div>
     </section>
 
-    <!-- ⚙️ CHÂN TRANG -->
     <footer class="footer">
       <p>&copy; 2025 VinSocial.vin – Built on VIC Blockchain</p>
       <a href="https://t.me/vinplayvin" target="_blank">Telegram</a> |
       <a href="https://x.com/vinplayvin" target="_blank">X (Twitter)</a> |
       <a href="https://drive.google.com/your-vin-guide-link" target="_blank">User Guide</a>
     </footer>
-
   </div>
 
-  <!-- 📦 THƯ VIỆN + SCRIPT -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script src="app.js"></script>
-<script>
-  async function showVinPriceDirectly() {
-    try {
-      const res = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=VICUSDT");
-      const data = await res.json();
-      const vicPrice = parseFloat(data.price);
-      const vinPrice = vicPrice * 100;
-      document.getElementById("vinPrice").innerText = `1 VIN ≈ $${vinPrice.toFixed(2)} USD`;
-    } catch (err) {
-      console.error("Unable to fetch VIN price", err);
+  <script>
+    async function showVinPriceDirectly() {
+      try {
+        const res = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=VICUSDT");
+        const data = await res.json();
+        const vinPrice = parseFloat(data.price) * 100;
+        document.getElementById("vinPrice").innerText = `1 VIN ≈ $${vinPrice.toFixed(2)} USD`;
+      } catch (err) {
+        console.error("Unable to fetch VIN price", err);
+      }
     }
-  }
-  window.addEventListener("load", showVinPriceDirectly);
-</script>
-
+    window.addEventListener("load", showVinPriceDirectly);
+  </script>
 </body>
 </html>

@@ -26,41 +26,6 @@ const vinSocialAbi = [
     ],
     "stateMutability":"view",
     "type":"function"
-  },
-  {
-    "inputs":[
-      {"internalType":"string","name":"name","type":"string"},
-      {"internalType":"string","name":"bio","type":"string"},
-      {"internalType":"string","name":"avatar","type":"string"},
-      {"internalType":"string","name":"website","type":"string"}
-    ],
-    "name":"register",
-    "outputs":[],
-    "stateMutability":"payable",
-    "type":"function"
-  },
-  {
-    "inputs":[{"internalType":"string","name":"content","type":"string"}],
-    "name":"createPost",
-    "outputs":[],
-    "stateMutability":"payable",
-    "type":"function"
-  },
-  {
-    "inputs":[],
-    "name":"getAllPosts",
-    "outputs":[{
-      "components":[
-        {"internalType":"address","name":"author","type":"address"},
-        {"internalType":"string","name":"content","type":"string"},
-        {"internalType":"uint256","name":"timestamp","type":"uint256"}
-      ],
-      "internalType":"struct VinSocial.Post[]",
-      "name":"",
-      "type":"tuple[]"
-    }],
-    "stateMutability":"view",
-    "type":"function"
   }
 ];
 
@@ -74,8 +39,6 @@ window.addEventListener("load", () => {
     provider = new ethers.providers.Web3Provider(window.ethereum);
     document.getElementById("connectWalletBtn").addEventListener("click", connectWallet);
     document.getElementById("disconnectBtn").addEventListener("click", disconnectWallet);
-    document.getElementById("registerBtn").addEventListener("click", registerAccount);
-    document.getElementById("submitPostBtn").addEventListener("click", createPost);
   } else {
     alert("Please install MetaMask to use VinSocial.vin");
   }
@@ -98,14 +61,14 @@ async function connectWallet() {
     document.getElementById("intro-section").classList.add("hidden");
 
     await showVinAndVic();
-    await checkRegistration();
+    await checkRegistration(); // phần sau sẽ viết
   } catch (err) {
     console.error("Wallet connection failed", err);
     alert("❌ Failed to connect wallet.");
   }
 }
 
-// 👉 Ngắt kết nối
+// 👉 Ngắt kết nối ví
 function disconnectWallet() {
   signer = null;
   userAddress = null;
@@ -117,7 +80,7 @@ function disconnectWallet() {
   document.getElementById("intro-section").classList.remove("hidden");
 }
 
-// 👉 Hiển thị số dư
+// 👉 Hiển thị số dư VIN & VIC
 async function showVinAndVic() {
   try {
     const vinRaw = await vinTokenContract.balanceOf(userAddress);
@@ -135,43 +98,33 @@ async function showVinAndVic() {
 // 👉 Kiểm tra đăng ký
 async function checkRegistration() {
   try {
-    const user = await vinSocialContract.users(userAddress);
+    const raw = await vinSocialContract.users(userAddress);
+
+    // Chuẩn hóa dữ liệu người dùng, dùng try-catch để tránh lỗi UTF-8
+    let user = {
+      isRegistered: raw.isRegistered,
+      name: "", bio: "", avatar: "", website: ""
+    };
+    try { user.name = raw.name; } catch {}
+    try { user.bio = raw.bio; } catch {}
+    try { user.avatar = raw.avatar; } catch {}
+    try { user.website = raw.website; } catch {}
+
     if (user.isRegistered) {
       document.getElementById("registerForm").classList.add("hidden");
       loadUserProfile(user);
-      loadAllPosts();
+      loadAllPosts(); // phần sau sẽ viết
     } else {
       document.getElementById("registerForm").classList.remove("hidden");
       showSection("profile-section");
     }
-  } catch (err) {
-    console.error("Error checking registration:", err);
-  }
-}
-// 👉 Đăng ký tài khoản
-async function registerAccount() {
-  const name = document.getElementById("nameInput").value.trim();
-  const bio = document.getElementById("bioInput").value.trim();
-  const avatar = document.getElementById("avatarInput").value.trim();
-  const website = document.getElementById("websiteInput").value.trim();
 
-  if (!name) return alert("Please enter a name");
-
-  try {
-    const tx = await vinSocialContract.register(name, bio, avatar, website, {
-      value: ethers.utils.parseEther("0.05")
-    });
-    await tx.wait();
-    alert("✅ Registration successful!");
-    document.getElementById("registerForm").classList.add("hidden");
-    await checkRegistration();
   } catch (err) {
-    console.error("Registration failed", err);
-    alert("❌ Registration failed. Make sure you have 0.05 VIN and enough VIC for gas.");
+    console.error("❌ Error checking registration:", err);
   }
 }
 
-// 👉 Hiển thị hồ sơ người dùng
+// 👉 Hiển thị thông tin người dùng đã đăng ký
 function loadUserProfile(user) {
   const profile = `
     <p><strong>Name:</strong> ${user.name}</p>
@@ -189,22 +142,52 @@ function showSection(id) {
   document.getElementById(id).classList.remove("hidden");
 }
 
+// 👉 Đăng ký tài khoản (trả 0.05 VIN)
+async function registerAccount() {
+  const name = document.getElementById("nameInput").value.trim();
+  const bio = document.getElementById("bioInput").value.trim();
+  const avatar = document.getElementById("avatarInput").value.trim();
+  const website = document.getElementById("websiteInput").value.trim();
+
+  if (!name) {
+    alert("Please enter your name.");
+    return;
+  }
+
+  try {
+    const tx = await vinSocialContract.register(name, bio, avatar, website, {
+      value: ethers.utils.parseEther("0.05") // phí đăng ký
+    });
+    await tx.wait();
+    alert("✅ Registration successful!");
+    document.getElementById("registerForm").classList.add("hidden");
+    await checkRegistration();
+  } catch (err) {
+    console.error("❌ Registration failed", err);
+    alert("❌ Registration failed. Make sure you have 0.05 VIN and enough VIC to pay gas.");
+  }
+}
+
 // 👉 Tạo bài viết mới
 async function createPost() {
   const content = document.getElementById("postContent").value.trim();
-  if (!content) return alert("Content cannot be empty");
+  if (!content) {
+    alert("Content cannot be empty");
+    return;
+  }
 
   try {
     const tx = await vinSocialContract.createPost(content, {
       value: ethers.utils.parseEther("0.001") // phí viết bài
     });
     await tx.wait();
+
     document.getElementById("postContent").value = "";
     alert("✅ Post created!");
     loadAllPosts();
   } catch (err) {
-    console.error("Post failed", err);
-    alert("❌ Post failed. Make sure you have VIN and VIC for gas.");
+    console.error("❌ Post failed", err);
+    alert("❌ Failed to post. Make sure you have VIN and some VIC for gas.");
   }
 }
 
@@ -215,7 +198,7 @@ async function loadAllPosts() {
     const postList = document.getElementById("postList");
     postList.innerHTML = "";
 
-    posts.slice().reverse().forEach((post, index) => {
+    posts.slice().reverse().forEach((post) => {
       const el = document.createElement("div");
       el.className = "post";
       el.innerHTML = `
@@ -231,6 +214,37 @@ async function loadAllPosts() {
       postList.appendChild(el);
     });
   } catch (err) {
-    console.error("Failed to load posts", err);
+    console.error("❌ Failed to load posts", err);
   }
 }
+
+// 👉 Tải bài viết cá nhân
+async function loadMyPosts() {
+  try {
+    const posts = await vinSocialContract.getAllPosts();
+    const myPostList = document.getElementById("myPostList");
+    myPostList.innerHTML = "";
+
+    posts
+      .filter(post => post.author.toLowerCase() === userAddress.toLowerCase())
+      .slice().reverse()
+      .forEach((post) => {
+        const el = document.createElement("div");
+        el.className = "post";
+        el.innerHTML = `
+          <div class="post-header">You</div>
+          <div class="post-content">${post.content}</div>
+          <div class="post-actions">
+            <a href="https://translate.google.com/?sl=auto&tl=en&text=${encodeURIComponent(post.content)}" target="_blank">🌐 Translate</a>
+          </div>
+        `;
+        myPostList.appendChild(el);
+      });
+  } catch (err) {
+    console.error("❌ Failed to load your posts", err);
+  }
+}
+
+<span onclick="alert('🔒 Please register to like')">👍 Like</span>
+<span onclick="alert('🔒 Please register to comment')">💬 Comment</span>
+<span onclick="alert('🔒 Please register to share')">🔁 Share</span>

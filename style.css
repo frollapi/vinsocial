@@ -1,38 +1,31 @@
-/* ==== CƠ BẢN ==== */
+
 body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
   background-color: #f9f9f9;
   color: #333;
 }
-
 .container {
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
 }
-
-/* ==== HEADER ==== */
 .header {
   text-align: center;
   margin-bottom: 20px;
 }
-
 .logo {
   width: 80px;
   height: 80px;
 }
-
 .title {
   font-size: 2rem;
   margin: 10px 0;
 }
-
 .slogan {
   font-size: 1rem;
   color: #666;
 }
-
 .trade-link {
   display: inline-block;
   margin-top: 5px;
@@ -40,21 +33,16 @@ body {
   color: #0077ff;
   font-weight: bold;
 }
-
 .trade-link:hover {
   text-decoration: underline;
 }
-
-/* ==== GIỚI THIỆU ==== */
 .intro-text {
   margin-top: 20px;
   font-size: 1rem;
 }
-
 .intro-text ul {
   padding-left: 20px;
 }
-
 .intro-text pre {
   background: #f0f0f0;
   padding: 10px;
@@ -62,8 +50,6 @@ body {
   font-size: 0.9rem;
   overflow-x: auto;
 }
-
-/* ==== NÚT CHUNG ==== */
 .button {
   background-color: #0077ff;
   color: white;
@@ -74,17 +60,13 @@ body {
   cursor: pointer;
   margin-top: 10px;
 }
-
 .button:hover {
   background-color: #005fcc;
 }
-
 .button.small {
   padding: 6px 14px;
   font-size: 0.9rem;
 }
-
-/* ==== INPUT ==== */
 input[type="text"],
 textarea {
   width: 100%;
@@ -95,15 +77,12 @@ textarea {
   font-size: 1rem;
   box-sizing: border-box;
 }
-
-/* ==== MENU ==== */
 .nav-menu {
   display: flex;
   justify-content: space-around;
   margin: 20px 0;
   flex-wrap: wrap;
 }
-
 .nav-btn {
   background: #f0f0f0;
   border: 1px solid #ccc;
@@ -113,54 +92,35 @@ textarea {
   font-size: 0.95rem;
   margin: 4px;
 }
-
 .nav-btn:hover {
   background: #dceeff;
   border-color: #0077ff;
 }
-
-/* ==== SECTIONS ==== */
 .section {
   margin-bottom: 30px;
 }
-
 .hidden {
   display: none;
 }
-
-/* ==== DANH SÁCH BÀI VIẾT ==== */
 .post-list {
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
-
 .post {
   border: 1px solid #ddd;
   background: #fff;
   padding: 12px;
   border-radius: 8px;
 }
-
 .post-header {
   font-weight: bold;
   margin-bottom: 6px;
 }
-
-.post-header a {
-  color: #0077ff;
-  text-decoration: none;
-}
-
-.post-header a:hover {
-  text-decoration: underline;
-}
-
 .post-content {
   white-space: pre-wrap;
   margin-bottom: 8px;
 }
-
 .post-actions {
   display: flex;
   gap: 12px;
@@ -168,17 +128,12 @@ textarea {
   color: #0077ff;
   cursor: pointer;
 }
-
 .post-actions span:hover {
   text-decoration: underline;
 }
-
-/* ==== PROFILE ==== */
 #profileArea {
   margin-bottom: 20px;
 }
-
-/* ==== FOOTER ==== */
 .footer {
   text-align: center;
   font-size: 0.85rem;
@@ -187,33 +142,26 @@ textarea {
   padding-top: 20px;
   border-top: 1px solid #ddd;
 }
-
 .footer a {
   color: #0077ff;
   text-decoration: none;
   margin: 0 6px;
 }
-
 .footer a:hover {
   text-decoration: underline;
 }
-
-/* ==== RESPONSIVE ==== */
 @media (max-width: 600px) {
   .nav-menu {
     flex-direction: column;
     align-items: center;
   }
-
   .nav-btn {
     width: 90%;
     text-align: center;
   }
-
   .trade-link {
     margin: 10px 0;
   }
-
   .post-actions {
     flex-direction: column;
     gap: 6px;

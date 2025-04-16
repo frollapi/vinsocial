@@ -244,7 +244,3 @@ async function loadMyPosts() {
     console.error("❌ Failed to load your posts", err);
   }
 }
-
-<span onclick="alert('🔒 Please register to like')">👍 Like</span>
-<span onclick="alert('🔒 Please register to comment')">💬 Comment</span>
-<span onclick="alert('🔒 Please register to share')">🔁 Share</span>

@@ -1,12 +1,12 @@
 body {
   margin: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f4f4f4;
-  color: #333;
+  background-color: #f5f8fa;
+  color: #14171a;
 }
 
 .container {
-  max-width: 800px;
+  max-width: 850px;
   margin: 0 auto;
   padding: 20px;
 }
@@ -29,7 +29,7 @@ h1 {
 
 .slogan {
   font-size: 1.1rem;
-  color: #666;
+  color: #657786;
 }
 
 .auth-buttons {
@@ -38,26 +38,27 @@ h1 {
 }
 
 button {
-  background-color: #007BFF;
+  background-color: #1da1f2;
   color: white;
   border: none;
-  padding: 10px 20px;
+  padding: 10px 22px;
   font-size: 1rem;
   margin: 5px;
-  border-radius: 8px;
+  border-radius: 25px;
   cursor: pointer;
   transition: background-color 0.3s;
 }
 
 button:hover {
-  background-color: #0056b3;
+  background-color: #0d8ddb;
 }
 
 .status {
   text-align: center;
+  font-size: 0.95rem;
   margin-bottom: 10px;
+  color: #e0245e;
   font-weight: bold;
-  color: #d9534f;
 }
 
 .instructions {
@@ -78,11 +79,13 @@ button:hover {
   font-size: 0.9rem;
 }
 
-#registrationForm {
+#registrationForm,
+.post-form,
+.profile-card {
   background: #ffffff;
   padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   margin-bottom: 20px;
 }
 
@@ -93,53 +96,40 @@ button:hover {
 }
 
 #registrationForm input,
-#registrationForm textarea {
-  width: 100%;
-  padding: 10px;
-  margin-top: 5px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 1rem;
-  box-sizing: border-box;
-}
-
-#registrationForm button {
-  margin-top: 15px;
-  background-color: #28a745;
-}
-
-#registrationForm button:hover {
-  background-color: #1e7e34;
-}
-
-#mainApp {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
+#registrationForm textarea,
 .post-form input,
 .post-form textarea {
   width: 100%;
   padding: 10px;
-  margin-bottom: 12px;
-  border: 1px solid #ccc;
+  margin-top: 6px;
+  border: 1px solid #ccd6dd;
   border-radius: 6px;
   font-size: 1rem;
   box-sizing: border-box;
 }
 
+#registrationForm button,
 .post-form button {
-  background-color: #28a745;
+  margin-top: 15px;
+  background-color: #17bf63;
 }
 
+#registrationForm button:hover,
 .post-form button:hover {
-  background-color: #1e7e34;
+  background-color: #129c4d;
+}
+
+#mainApp,
+#profileView {
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  margin-bottom: 30px;
 }
 
 .post {
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #e6ecf0;
   padding: 15px 0;
 }
 
@@ -150,32 +140,50 @@ button:hover {
 
 .post p {
   margin: 5px 0;
+  white-space: pre-wrap;
 }
 
 .post small {
-  color: #999;
+  color: #657786;
   font-size: 0.85rem;
 }
 
 .actions {
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
 .actions button {
-  margin-right: 8px;
-  background-color: #6c757d;
+  background-color: #e1e8ed;
+  color: #14171a;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  margin-right: 6px;
 }
 
 .actions button:hover {
-  background-color: #495057;
+  background-color: #cfd9de;
 }
 
 .comment-section {
-  margin-top: 12px;
+  margin-top: 10px;
   padding-left: 12px;
-  border-left: 2px solid #ddd;
+  border-left: 2px solid #e1e8ed;
 }
 
 .comment {
-  margin-bottom: 8px;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+
+.profile-card {
+  text-align: center;
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 10px;
 }

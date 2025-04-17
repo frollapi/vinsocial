@@ -1,4 +1,4 @@
-// 👉 VinSocial App.js - Updated: Show Balance + Full Registration Form
+// 👉 VinSocial App.js - Fixed: Add approve() before register
 
 const vinSocialAddress = "0x2DB5a0Dcf2942d552EF02D683b4d5852A7431a87";
 const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";
@@ -22,6 +22,7 @@ const vinTokenAbi = [
   "function balanceOf(address) view returns (uint256)",
   "function allowance(address,address) view returns (uint256)",
   "function estimateFee(uint256) view returns (uint256)",
+  "function approve(address spender, uint256 amount) returns (bool)",
   "function transferFrom(address,address,uint256) returns (bool)"
 ];
 
@@ -92,13 +93,15 @@ async function handleFormSubmission(e) {
     const regFee = await vinSocialContract.REGISTRATION_FEE();
     const estFee = await vinTokenContract.estimateFee(regFee);
     const total = regFee.add(estFee);
+
     const allowance = await vinTokenContract.allowance(userAddress, vinSocialAddress);
     if (allowance.lt(total)) {
-      alert("Insufficient allowance. Please approve 0.05 VIN + fee to register.");
-      return;
+      const tx1 = await vinTokenContract.approve(vinSocialAddress, total);
+      await tx1.wait();
     }
-    const tx = await vinSocialContract.register(name, bio, avatar, website);
-    await tx.wait();
+
+    const tx2 = await vinSocialContract.register(name, bio, avatar, website);
+    await tx2.wait();
     alert("Registration successful! Reloading...");
     location.reload();
   } catch (err) {

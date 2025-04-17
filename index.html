@@ -15,27 +15,32 @@
       <p class="slogan">Decentralized. Uncensored. Free Speech.</p>
     </header>
 
+    <!-- Hướng dẫn kết nối -->
+    <div class="instructions">
+      <strong>📱 How to Connect:</strong><br/>
+      • On mobile: open this site inside your <b>Viction</b> or <b>MetaMask</b> wallet browser.<br/>
+      • On desktop: use MetaMask and connect to the VIC network.
+      <pre>
+Network: VIC  
+RPC: https://rpc.viction.xyz  
+Chain ID: 88  
+Currency: VIC  
+Explorer: https://vicscan.xyz  
+      </pre>
+    </div>
+
+    <!-- Nút điều hướng -->
     <div class="auth-buttons">
       <button id="registerBtn">Register</button>
       <button id="loginBtn">Login</button>
+      <button id="myProfileBtn" style="display:none;">My Profile</button>
+      <button id="homeBtn" style="display:none;">Home</button>
     </div>
 
     <div id="status" class="status"></div>
     <div id="balances" class="status"></div>
 
-    <div class="instructions">
-      <p><strong>📱 Mobile:</strong> Use the in-app browser in Viction or MetaMask.</p>
-      <p><strong>🧭 MetaMask Setup:</strong></p>
-      <pre>
-Network Name: VIC
-RPC URL: https://rpc.viction.xyz
-Chain ID: 88
-Currency: VIC
-Explorer: https://vicscan.xyz
-      </pre>
-    </div>
-
-    <!-- Registration Form -->
+    <!-- Form đăng ký -->
     <div id="registrationForm" style="display:none;">
       <h3>Register Your Account</h3>
       <form id="regForm">
@@ -43,7 +48,7 @@ Explorer: https://vicscan.xyz
         <input type="text" id="regName" maxlength="30" required>
 
         <label>Bio (max 160 chars)</label>
-        <textarea id="regBio" maxlength="160" rows="3"></textarea>
+        <textarea id="regBio" maxlength="160"></textarea>
 
         <label>Avatar URL (max 255 chars)</label>
         <input type="text" id="regAvatar" maxlength="255">
@@ -55,13 +60,27 @@ Explorer: https://vicscan.xyz
       </form>
     </div>
 
-    <!-- Main App Content -->
+    <!-- Profile hiển thị -->
+    <div id="profileView" style="display:none;">
+      <div class="profile-card">
+        <img id="profileAvatar" class="profile-avatar" src="" alt="avatar">
+        <h2 id="profileName"></h2>
+        <p id="profileBio"></p>
+        <a id="profileWebsite" href="#" target="_blank"></a>
+        <p><strong>Joined:</strong> <span id="profileJoined"></span></p>
+        <button id="followBtn" style="display:none;"></button>
+      </div>
+      <h3>User's Posts:</h3>
+      <div id="profilePosts"></div>
+    </div>
+
+    <!-- Giao diện chính -->
     <div id="mainApp" style="display:none;">
       <div class="post-form">
         <h2>Create New Post</h2>
-        <input type="text" id="postTitle" placeholder="Post title" maxlength="100" />
-        <textarea id="postContent" placeholder="Write your content..." rows="4"></textarea>
-        <input type="text" id="postMedia" placeholder="Media URL (optional)" maxlength="255" />
+        <input type="text" id="postTitle" placeholder="Post title" />
+        <textarea id="postContent" placeholder="Write your content..."></textarea>
+        <input type="text" id="postMedia" placeholder="Media URL (optional)" />
         <button onclick="createPost()">Post</button>
       </div>
 

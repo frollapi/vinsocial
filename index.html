@@ -21,7 +21,29 @@
     </div>
 
     <div id="status" class="status"></div>
+    <div id="balances" class="status"></div>
 
+    <!-- Registration Form -->
+    <div id="registrationForm" style="display:none;">
+      <h3>Register Your Account</h3>
+      <form id="regForm">
+        <label>Display Name* (3–30 chars)</label>
+        <input type="text" id="regName" maxlength="30" required>
+
+        <label>Bio (max 160 chars)</label>
+        <textarea id="regBio" maxlength="160"></textarea>
+
+        <label>Avatar URL (max 255 chars)</label>
+        <input type="text" id="regAvatar" maxlength="255">
+
+        <label>Website (max 100 chars)</label>
+        <input type="text" id="regWebsite" maxlength="100">
+
+        <button type="submit">Confirm & Register</button>
+      </form>
+    </div>
+
+    <!-- Main App Content -->
     <div id="mainApp" style="display:none;">
       <div class="post-form">
         <h2>Create New Post</h2>

@@ -474,3 +474,40 @@ async function checkRegistration() {
 
 // Gán sự kiện nút
 document.getElementById("loginBtn").addEventListener("click", connectWallet);
+
+// Đăng ký tài khoản mới
+async function registerAccount() {
+  if (!signer || !userAddress) {
+    alert("Please connect your wallet first.");
+    return;
+  }
+
+  const name = prompt("Enter your display name:");
+  const bio = prompt("Enter a short bio (optional):") || "";
+  const avatarUrl = prompt("Enter avatar image URL (optional):") || "";
+  const website = prompt("Enter your website (optional):") || "";
+
+  try {
+    const registrationFee = await vinSocialContract.REGISTRATION_FEE();
+    const estimatedFee = await vinTokenContract.estimateFee(registrationFee);
+    const totalFee = registrationFee.add(estimatedFee);
+
+    const allowance = await vinTokenContract.allowance(userAddress, vinSocialAddress);
+    if (allowance.lt(totalFee)) {
+      alert("Please approve enough VIN to register (0.05 VIN + fee).");
+      return;
+    }
+
+    const tx = await vinSocialContract.register(name, bio, avatarUrl, website);
+    await tx.wait();
+
+    alert("Registration successful! Reloading...");
+    location.reload();
+  } catch (err) {
+    console.error("Registration error:", err);
+    alert("Registration failed.");
+  }
+}
+
+// Gán sự kiện nút Register
+document.getElementById("registerBtn").addEventListener("click", registerAccount);

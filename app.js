@@ -449,6 +449,7 @@ async function connectWallet() {
     alert("Please install MetaMask.");
     return;
   }
+
   provider = new ethers.providers.Web3Provider(window.ethereum);
   await provider.send("eth_requestAccounts", []);
   signer = provider.getSigner();
@@ -458,11 +459,13 @@ async function connectWallet() {
   vinTokenContract = new ethers.Contract(vinTokenAddress, vinTokenAbi, signer);
 
   document.getElementById("status").innerText = "Connected: " + userAddress;
+
   const vin = await vinTokenContract.balanceOf(userAddress);
   const vic = await provider.getBalance(userAddress);
   document.getElementById("balances").innerText =
     `Balance: ${formatVin(vin)} VIN | ${formatVic(vic)} VIC`;
 
+  // ✅ Đây là phần quan trọng: nếu đã đăng ký thì hiển thị giao diện chính
   const isRegistered = await vinSocialContract.registered(userAddress);
   if (isRegistered) {
     showMainApp();
@@ -470,6 +473,7 @@ async function connectWallet() {
     showRegistrationForm();
   }
 }
+
 
 // Nút Register
 document.getElementById("registerBtn").addEventListener("click", async () => {

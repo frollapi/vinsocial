@@ -26,140 +26,175 @@ const vinTokenAbi = [
   "function transferFrom(address,address,uint256) returns (bool)"
 ];
 
-// Connect wallet
+// Format đơn vị
+function formatVin(value) {
+  return Number(ethers.utils.formatUnits(value, 18)).toFixed(3);
+}
+function formatVic(value) {
+  return Number(ethers.utils.formatUnits(value, 18)).toFixed(5);
+}
+
 async function connectWallet() {
   if (!window.ethereum) {
-    alert("Please install MetaMask to use VinSocial.");
+    alert("Please install MetaMask or use a Web3-enabled browser.");
     return;
   }
+
   provider = new ethers.providers.Web3Provider(window.ethereum);
   await provider.send("eth_requestAccounts", []);
   signer = provider.getSigner();
   userAddress = await signer.getAddress();
-  document.getElementById("status").innerText = "Connected: " + userAddress;
+
   vinSocialContract = new ethers.Contract(vinSocialAddress, vinSocialAbi, signer);
   vinTokenContract = new ethers.Contract(vinTokenAddress, vinTokenAbi, signer);
-  await checkRegistration();
-  await showBalances();
-}
 
-// Show VIN and VIC balance
-async function showBalances() {
-  try {
-    const vinBal = await vinTokenContract.balanceOf(userAddress);
-    const vicBal = await provider.getBalance(userAddress);
-    const vin = parseFloat(ethers.utils.formatUnits(vinBal, 18)).toFixed(3);
-    const vic = parseFloat(ethers.utils.formatEther(vicBal)).toFixed(5);
-    document.getElementById("balances").innerText = `Balance: ${vin} VIN | ${vic} VIC`;
-  } catch (err) {
-    console.error("Balance fetch failed:", err);
-    document.getElementById("balances").innerText = "Balance: --";
+  document.getElementById("status").innerText = "Connected: " + userAddress;
+
+  const vinBal = await vinTokenContract.balanceOf(userAddress);
+  const vicBal = await provider.getBalance(userAddress);
+  document.getElementById("balances").innerText =
+    `Balance: ${formatVin(vinBal)} VIN | ${formatVic(vicBal)} VIC`;
+
+  const isRegistered = await vinSocialContract.registered(userAddress);
+  if (isRegistered) {
+    document.getElementById("registrationForm").style.display = "none";
+    document.getElementById("mainApp").style.display = "block";
+    loadPosts();
+  } else {
+    document.getElementById("mainApp").style.display = "none";
+    document.getElementById("registrationForm").style.display = "block";
+    document.getElementById("status").innerText +=
+      "\nYou are not registered. Please complete the form below.";
   }
 }
 
-// Check registration and toggle UI
-async function checkRegistration() {
-  try {
-    const isRegistered = await vinSocialContract.registered(userAddress);
-    if (isRegistered) {
-      document.getElementById("mainApp").style.display = "block";
-      document.getElementById("registrationForm").style.display = "none";
-      loadPosts();
-    } else {
-      document.getElementById("mainApp").style.display = "none";
-      document.getElementById("registrationForm").style.display = "block";
-      document.getElementById("status").innerText += "\nYou are not registered. Please complete the form below.";
-    }
-  } catch (err) {
-    console.error("Registration check failed:", err);
-    document.getElementById("status").innerText = "Error connecting to contract.";
-  }
-}
+document.getElementById("loginBtn").addEventListener("click", connectWallet);
 
-// Submit registration from form
-async function handleFormSubmission(e) {
+document.getElementById("registerBtn").addEventListener("click", async () => {
+  if (!signer) await connectWallet();
+
+  const isRegistered = await vinSocialContract.registered(userAddress);
+  if (isRegistered) {
+    alert("You are already registered.");
+    document.getElementById("registrationForm").style.display = "none";
+    document.getElementById("mainApp").style.display = "block";
+    loadPosts();
+    return;
+  }
+
+  document.getElementById("registrationForm").style.display = "block";
+});
+
+document.getElementById("regForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const name = document.getElementById("regName").value.trim();
+  if (name.length < 3 || name.length > 30) {
+    alert("Display name must be 3–30 characters.");
+    return;
+  }
+
   const bio = document.getElementById("regBio").value.trim();
   const avatar = document.getElementById("regAvatar").value.trim();
   const website = document.getElementById("regWebsite").value.trim();
 
-  if (name.length < 3 || name.length > 30) {
-    alert("Display name must be between 3 and 30 characters.");
-    return;
+  const fee = await vinSocialContract.REGISTRATION_FEE();
+  const est = await vinTokenContract.estimateFee(fee);
+  const total = fee.add(est);
+  const allowance = await vinTokenContract.allowance(userAddress, vinSocialAddress);
+  if (allowance.lt(total)) {
+    const approveTx = await vinTokenContract.approve(vinSocialAddress, total);
+    await approveTx.wait();
   }
 
-  try {
-    const regFee = await vinSocialContract.REGISTRATION_FEE();
-    const estFee = await vinTokenContract.estimateFee(regFee);
-    const total = regFee.add(estFee);
+  const tx = await vinSocialContract.register(name, bio, avatar, website);
+  await tx.wait();
+  alert("Registration successful!");
+  location.reload();
+});
 
-    const allowance = await vinTokenContract.allowance(userAddress, vinSocialAddress);
-    if (allowance.lt(total)) {
-      const tx1 = await vinTokenContract.approve(vinSocialAddress, total);
-      await tx1.wait();
-    }
-
-    const tx2 = await vinSocialContract.register(name, bio, avatar, website);
-    await tx2.wait();
-    alert("Registration successful! Reloading...");
-    location.reload();
-  } catch (err) {
-    console.error("Registration error:", err);
-    alert("Registration failed.");
-  }
-}
-
-// Create post
+// Tạo bài viết mới
 async function createPost() {
-  const title = document.getElementById("postTitle").value;
-  const content = document.getElementById("postContent").value;
-  const media = document.getElementById("postMedia").value;
+  const title = document.getElementById("postTitle").value.trim();
+  const content = document.getElementById("postContent").value.trim();
+  const media = document.getElementById("postMedia").value.trim();
 
   if (!title || !content) {
     alert("Please enter both title and content.");
     return;
   }
 
-  try {
-    const tx = await vinSocialContract.createPost(title, content, media);
-    await tx.wait();
-    alert("Post created!");
-    loadPosts();
-  } catch (err) {
-    console.error("Post creation failed:", err);
-    alert("Failed to create post.");
-  }
+  const tx = await vinSocialContract.createPost(title, content, media);
+  await tx.wait();
+  alert("Post submitted!");
+  location.reload();
 }
 
-// Load user posts
+// Load bài viết
 async function loadPosts() {
-  const postFeed = document.getElementById("postFeed");
-  postFeed.innerHTML = "Loading...";
-  try {
-    const postIds = await vinSocialContract.getUserPosts(userAddress);
-    let html = "";
-    for (let id of postIds.reverse()) {
-      const post = await vinSocialContract.posts(id);
-      html += `<div class="post">
-        <h3>${post[1]}</h3>
-        <p>${post[2]}</p>
-        ${post[3] ? `<img src="${post[3]}" style="max-width:100%; margin-top:10px;" />` : ""}
-        <small>By ${post[0]}</small>
-      </div>`;
-    }
-    postFeed.innerHTML = html || "No posts yet.";
-  } catch (err) {
-    console.error("Load post error:", err);
-    postFeed.innerText = "Failed to load posts.";
+  const feed = document.getElementById("postFeed");
+  feed.innerHTML = "";
+
+  const postCount = await vinSocialContract.nextPostId();
+  for (let i = postCount - 1; i >= 1; i--) {
+    const post = await vinSocialContract.posts(i);
+    const user = post.author;
+    const title = post.title;
+    const content = post.content;
+    const media = post.media;
+
+    const liked = await vinSocialContract.hasLiked(i, userAddress);
+    const comments = await vinSocialContract.getComments(i);
+
+    const postDiv = document.createElement("div");
+    postDiv.className = "post";
+    postDiv.innerHTML = `
+      <h3>${title}</h3>
+      <p>${content}</p>
+      ${media ? `<img src="${media}" alt="media" style="max-width:100%;margin-top:10px;border-radius:6px;">` : ""}
+      <small>By ${user}</small>
+      <div class="actions">
+        <button onclick="likePost(${i})" ${liked ? "disabled" : ""}>👍 Like</button>
+        <button onclick="sharePost(${i})">🔁 Share</button>
+        <button onclick="showCommentBox(${i})">💬 Comment</button>
+      </div>
+      <div id="comments-${i}" class="comment-section">
+        ${comments.map(c => `<div class="comment"><b>${c.commenter}</b>: ${c.message}</div>`).join("")}
+        <div id="comment-box-${i}" style="display:none;margin-top:8px;">
+          <input type="text" id="comment-input-${i}" placeholder="Write a comment..." />
+          <button onclick="submitComment(${i})">Send</button>
+        </div>
+      </div>
+    `;
+    feed.appendChild(postDiv);
   }
 }
 
-document.getElementById("loginBtn").addEventListener("click", connectWallet);
-document.getElementById("registerBtn").addEventListener("click", async () => {
-  if (!signer || !userAddress) {
-    await connectWallet();
-  }
-  document.getElementById("registrationForm").scrollIntoView({ behavior: "smooth" });
-});
-document.getElementById("regForm").addEventListener("submit", handleFormSubmission);
+// Like
+async function likePost(id) {
+  const tx = await vinSocialContract.likePost(id);
+  await tx.wait();
+  alert("Liked!");
+  loadPosts();
+}
+
+// Share
+async function sharePost(id) {
+  const tx = await vinSocialContract.sharePost(id);
+  await tx.wait();
+  alert("Shared!");
+  loadPosts();
+}
+
+// Comment
+function showCommentBox(id) {
+  document.getElementById(`comment-box-${id}`).style.display = "block";
+}
+
+async function submitComment(id) {
+  const msg = document.getElementById(`comment-input-${id}`).value.trim();
+  if (!msg) return;
+  const tx = await vinSocialContract.commentOnPost(id, msg);
+  await tx.wait();
+  alert("Commented!");
+  loadPosts();
+}

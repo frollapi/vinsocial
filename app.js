@@ -1,4 +1,4 @@
-// 👉 VinSocial App.js - Full Logic
+// 👉 VinSocial App.js - Updated: Show Balance + Full Registration Form
 
 const vinSocialAddress = "0x2DB5a0Dcf2942d552EF02D683b4d5852A7431a87";
 const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";
@@ -38,46 +38,66 @@ async function connectWallet() {
   document.getElementById("status").innerText = "Connected: " + userAddress;
   vinSocialContract = new ethers.Contract(vinSocialAddress, vinSocialAbi, signer);
   vinTokenContract = new ethers.Contract(vinTokenAddress, vinTokenAbi, signer);
-  checkRegistration();
+  await checkRegistration();
+  await showBalances();
 }
 
-// Check registration
+// Show VIN and VIC balance
+async function showBalances() {
+  try {
+    const vinBal = await vinTokenContract.balanceOf(userAddress);
+    const vicBal = await provider.getBalance(userAddress);
+    const vin = parseFloat(ethers.utils.formatUnits(vinBal, 18)).toFixed(3);
+    const vic = parseFloat(ethers.utils.formatEther(vicBal)).toFixed(5);
+    document.getElementById("balances").innerText = `Balance: ${vin} VIN | ${vic} VIC`;
+  } catch (err) {
+    console.error("Balance fetch failed:", err);
+    document.getElementById("balances").innerText = "Balance: --";
+  }
+}
+
+// Check registration and toggle UI
 async function checkRegistration() {
   try {
     const isRegistered = await vinSocialContract.registered(userAddress);
     if (isRegistered) {
       document.getElementById("mainApp").style.display = "block";
+      document.getElementById("registrationForm").style.display = "none";
       loadPosts();
     } else {
       document.getElementById("mainApp").style.display = "none";
-      document.getElementById("status").innerText += "\nYou are not registered. Please register first.";
+      document.getElementById("registrationForm").style.display = "block";
+      document.getElementById("status").innerText += "\nYou are not registered. Please complete the form below.";
     }
   } catch (err) {
-    console.error("Error checking registration:", err);
+    console.error("Registration check failed:", err);
     document.getElementById("status").innerText = "Error connecting to contract.";
   }
 }
 
-// Register account
-async function registerAccount() {
-  if (!signer || !userAddress) {
-    await connectWallet();
+// Submit registration from form
+async function handleFormSubmission(e) {
+  e.preventDefault();
+  const name = document.getElementById("regName").value.trim();
+  const bio = document.getElementById("regBio").value.trim();
+  const avatar = document.getElementById("regAvatar").value.trim();
+  const website = document.getElementById("regWebsite").value.trim();
+
+  if (name.length < 3 || name.length > 30) {
+    alert("Display name must be between 3 and 30 characters.");
+    return;
   }
-  const name = prompt("Enter your display name:");
-  const bio = prompt("Enter a short bio (optional):") || "";
-  const avatarUrl = prompt("Enter avatar image URL (optional):") || "";
-  const website = prompt("Enter your website (optional):") || "";
 
   try {
-    const registrationFee = await vinSocialContract.REGISTRATION_FEE();
-    const estimatedFee = await vinTokenContract.estimateFee(registrationFee);
-    const totalFee = registrationFee.add(estimatedFee);
+    const regFee = await vinSocialContract.REGISTRATION_FEE();
+    const estFee = await vinTokenContract.estimateFee(regFee);
+    const total = regFee.add(estFee);
     const allowance = await vinTokenContract.allowance(userAddress, vinSocialAddress);
-    if (allowance.lt(totalFee)) {
-      alert("Please approve enough VIN to register (0.05 VIN + fee).");
+    if (allowance.lt(total)) {
+      alert("Insufficient allowance. Please approve 0.05 VIN + fee to register.");
       return;
     }
-    const tx = await vinSocialContract.register(name, bio, avatarUrl, website);
+    const tx = await vinSocialContract.register(name, bio, avatar, website);
     await tx.wait();
     alert("Registration successful! Reloading...");
     location.reload();
@@ -109,7 +129,7 @@ async function createPost() {
   }
 }
 
-// Load all posts from user
+// Load user posts
 async function loadPosts() {
   const postFeed = document.getElementById("postFeed");
   postFeed.innerHTML = "Loading...";
@@ -127,7 +147,7 @@ async function loadPosts() {
     }
     postFeed.innerHTML = html || "No posts yet.";
   } catch (err) {
-    console.error("Failed to load posts:", err);
+    console.error("Load post error:", err);
     postFeed.innerText = "Failed to load posts.";
   }
 }
@@ -137,5 +157,6 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   if (!signer || !userAddress) {
     await connectWallet();
   }
-  registerAccount();
+  document.getElementById("registrationForm").scrollIntoView({ behavior: "smooth" });
 });
+document.getElementById("regForm").addEventListener("submit", handleFormSubmission);

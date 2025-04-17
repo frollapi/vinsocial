@@ -2,117 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>VinSocial.vin</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="icon" href="logo.png" />
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="logo.png" />
 </head>
 <body>
   <div class="container">
+    <header>
+      <img src="logo.png" alt="VinSocial Logo" class="logo">
+      <h1>VinSocial.vin</h1>
+      <p class="slogan">Decentralized. Uncensored. Free Speech.</p>
+    </header>
 
-    <!-- 👋 INTRO -->
-    <section id="intro-section">
-      <header class="header">
-        <img src="logo.png" class="logo" alt="VinSocial Logo" />
-        <h1 class="title">VinSocial.vin</h1>
-        <p class="slogan">Decentralized. Uncensored. Free Speech.</p>
-        <p id="vinPrice">1 VIN ≈ $-- USD</p>
-        <a href="https://vinswap.vin" target="_blank" class="trade-link">🔁 Trade VIN/VIC</a>
-      </header>
-      <div class="intro-text">
-        <h3>🚀 A censorship-resistant social network</h3>
-        <ul>
-          <li>🔓 Fully on-chain. No middlemen.</li>
-          <li>🗽 Everyone can speak freely.</li>
-          <li>💰 To post, like, comment, register once with 0.05 VIN.</li>
-          <li>🤖 No bots. All actions cost gas – humans only.</li>
-        </ul>
-        <p>To begin, connect MetaMask to the VIC Network:</p>
-        <pre>
-Network Name: Viction
-RPC URL: https://rpc.viction.xyz
-Chain ID: 88
-Currency Symbol: VIC
-Explorer: https://vicscan.xyz
-        </pre>
-        <button id="connectWalletBtn" class="button">Connect Wallet</button>
-      </div>
-    </section>
+    <div class="auth-buttons">
+      <button id="registerBtn">Đăng ký</button>
+      <button id="loginBtn">Đăng nhập</button>
+    </div>
 
-    <!-- 👛 WALLET INFO -->
-    <section id="wallet-section" class="hidden">
-      <p id="walletAddress"></p>
-      <p><span id="vinBalance">VIN: --</span> | <span id="vicBalance">VIC: --</span></p>
-      <button id="disconnectBtn" class="button small">Disconnect</button>
-    </section>
+    <div id="status" class="status"></div>
 
-    <!-- 🧭 MENU -->
-    <nav id="main-menu" class="nav-menu hidden">
-      <button class="nav-btn" onclick="showSection('feed-section')">🏠 Home</button>
-      <button class="nav-btn" onclick="showSection('create-post-section')">✍️ Create Post</button>
-      <button class="nav-btn" onclick="showSection('myposts-section')">📄 My Posts</button>
-      <button class="nav-btn" onclick="showSection('profile-section')">👤 My Profile</button>
-    </nav>
-
-    <!-- ✍️ CREATE POST -->
-    <section id="create-post-section" class="section hidden">
-      <h2>Create a Post</h2>
-      <input type="text" id="postTitle" placeholder="Post Title" />
-      <textarea id="postContent" rows="4" placeholder="What's on your mind?"></textarea>
-      <input type="text" id="postMedia" placeholder="Media URL (optional)" />
-      <button id="submitPostBtn" class="button">Post</button>
-    </section>
-
-    <!-- 🌍 COMMUNITY FEED -->
-    <section id="feed-section" class="section hidden">
-      <h2>Community Feed</h2>
-      <div id="postList" class="post-list"></div>
-    </section>
-
-    <!-- 🧍‍♂️ MY POSTS -->
-    <section id="myposts-section" class="section hidden">
-      <h2>My Posts</h2>
-      <div id="myPostList" class="post-list"></div>
-    </section>
-
-    <!-- 👤 MY PROFILE -->
-    <section id="profile-section" class="section hidden">
-      <h2>My Profile</h2>
-      <div id="profileArea"></div>
-      <div id="registerForm" class="hidden">
-        <p>Register your account to post, like, comment & more</p>
-        <input type="text" id="nameInput" placeholder="Name" />
-        <input type="text" id="bioInput" placeholder="Short Bio" />
-        <input type="text" id="avatarInput" placeholder="Avatar URL (optional)" />
-        <input type="text" id="websiteInput" placeholder="Website (optional)" />
-        <button id="registerBtn" class="button">Register & Pay 0.05 VIN</button>
-      </div>
-    </section>
-
-    <!-- ⚙️ FOOTER -->
-    <footer class="footer">
-      <p>&copy; 2025 VinSocial.vin – Built on VIC Blockchain</p>
-      <a href="https://t.me/vinplayvin" target="_blank">Telegram</a> |
-      <a href="https://x.com/vinplayvin" target="_blank">X (Twitter)</a> |
-      <a href="https://drive.google.com/your-vin-guide-link" target="_blank">User Guide</a>
-    </footer>
+    <div id="mainApp" style="display:none;">
+      <!-- nội dung mạng xã hội sẽ ở đây -->
+    </div>
   </div>
 
-  <!-- 📦 LIBRARY + PRICE -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script src="app.js"></script>
-  <script>
-    async function showVinPriceDirectly() {
-      try {
-        const res = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=VICUSDT");
-        const data = await res.json();
-        const vinPrice = parseFloat(data.price) * 100;
-        document.getElementById("vinPrice").innerText = `1 VIN ≈ $${vinPrice.toFixed(2)} USD`;
-      } catch (err) {
-        console.error("Unable to fetch VIN price", err);
-      }
-    }
-    window.addEventListener("load", showVinPriceDirectly);
-  </script>
 </body>
 </html>

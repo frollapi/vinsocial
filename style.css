@@ -1,8 +1,7 @@
-/* ==== CƠ BẢN ==== */
 body {
   margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #f9f9f9;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f4f4;
   color: #333;
 }
 
@@ -12,208 +11,114 @@ body {
   padding: 20px;
 }
 
-/* ==== HEADER ==== */
-.header {
+header {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 }
 
 .logo {
   width: 80px;
   height: 80px;
+  border-radius: 50%;
 }
 
-.title {
+h1 {
   font-size: 2rem;
-  margin: 10px 0;
+  margin: 10px 0 5px;
 }
 
 .slogan {
-  font-size: 1rem;
+  font-size: 1.1rem;
   color: #666;
 }
 
-.trade-link {
-  display: inline-block;
-  margin-top: 5px;
-  text-decoration: none;
-  color: #0077ff;
-  font-weight: bold;
-}
-
-.trade-link:hover {
-  text-decoration: underline;
-}
-
-/* ==== GIỚI THIỆU ==== */
-.intro-text {
-  margin-top: 20px;
-  font-size: 1rem;
-}
-
-.intro-text ul {
-  padding-left: 20px;
-}
-
-.intro-text pre {
-  background: #f0f0f0;
-  padding: 10px;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  overflow-x: auto;
-}
-
-/* ==== NÚT CHUNG ==== */
-.button {
-  background-color: #0077ff;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  cursor: pointer;
-  margin-top: 10px;
-}
-
-.button:hover {
-  background-color: #005fcc;
-}
-
-.button.small {
-  padding: 6px 14px;
-  font-size: 0.9rem;
-}
-
-/* ==== INPUT ==== */
-input[type="text"],
-textarea {
-  width: 100%;
-  padding: 10px;
-  margin-top: 8px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 1rem;
-  box-sizing: border-box;
-}
-
-/* ==== MENU ==== */
-.nav-menu {
-  display: flex;
-  justify-content: space-around;
-  margin: 20px 0;
-  flex-wrap: wrap;
-}
-
-.nav-btn {
-  background: #f0f0f0;
-  border: 1px solid #ccc;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.95rem;
-  margin: 4px;
-}
-
-.nav-btn:hover {
-  background: #dceeff;
-  border-color: #0077ff;
-}
-
-/* ==== SECTIONS ==== */
-.section {
+.auth-buttons {
+  text-align: center;
   margin-bottom: 30px;
 }
 
-.hidden {
-  display: none;
+button {
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-size: 1rem;
+  margin: 0 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
-/* ==== DANH SÁCH BÀI VIẾT ==== */
-.post-list {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+button:hover {
+  background-color: #0056b3;
+}
+
+.status {
+  text-align: center;
+  margin-bottom: 20px;
+  font-weight: bold;
+  color: #d9534f;
+}
+
+#mainApp {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.post-form input,
+.post-form textarea {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.post-form button {
+  background-color: #28a745;
+}
+
+.post-form button:hover {
+  background-color: #1e7e34;
 }
 
 .post {
-  border: 1px solid #ddd;
-  background: #fff;
-  padding: 12px;
-  border-radius: 8px;
+  border-bottom: 1px solid #ddd;
+  padding: 15px 0;
 }
 
-.post-header {
-  font-weight: bold;
-  margin-bottom: 6px;
+.post h3 {
+  margin: 0 0 8px;
+  font-size: 1.2rem;
 }
 
-.post-content {
-  white-space: pre-wrap;
-  margin-bottom: 8px;
+.post p {
+  margin: 5px 0;
 }
 
-.post img {
-  max-width: 100%;
-  border-radius: 8px;
-  margin-top: 8px;
-}
-
-.post-actions {
-  display: flex;
-  gap: 12px;
-  font-size: 0.9rem;
-  color: #0077ff;
-  cursor: pointer;
-}
-
-.post-actions span:hover,
-.post-actions a:hover {
-  text-decoration: underline;
-}
-
-/* ==== PROFILE ==== */
-#profileArea {
-  margin-bottom: 20px;
-}
-
-/* ==== FOOTER ==== */
-.footer {
-  text-align: center;
+.post small {
+  color: #999;
   font-size: 0.85rem;
-  color: #777;
-  margin-top: 40px;
-  padding-top: 20px;
-  border-top: 1px solid #ddd;
 }
 
-.footer a {
-  color: #0077ff;
-  text-decoration: none;
-  margin: 0 6px;
+.actions button {
+  margin-right: 8px;
+  background-color: #6c757d;
 }
 
-.footer a:hover {
-  text-decoration: underline;
+.actions button:hover {
+  background-color: #495057;
 }
 
-/* ==== RESPONSIVE ==== */
-@media (max-width: 600px) {
-  .nav-menu {
-    flex-direction: column;
-    align-items: center;
-  }
+.comment-section {
+  margin-top: 12px;
+  padding-left: 12px;
+  border-left: 2px solid #ddd;
+}
 
-  .nav-btn {
-    width: 90%;
-    text-align: center;
-  }
-
-  .trade-link {
-    margin: 10px 0;
-  }
-
-  .post-actions {
-    flex-direction: column;
-    gap: 6px;
-  }
+.comment {
+  margin-bottom: 8px;
 }

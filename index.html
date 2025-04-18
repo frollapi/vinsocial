@@ -4,19 +4,22 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>VinSocial.vin</title>
+  <link rel="icon" href="logo.png" type="image/png" />
   <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script defer src="app.js"></script>
 </head>
 <body>
   <header>
+    <img src="logo.png" alt="VinSocial Logo" class="logo" />
     <h1>VinSocial.vin</h1>
     <p>Decentralized. Uncensored. Free Speech.</p>
-    <button id="connectBtn">Connect Wallet</button>
     <div id="walletDetails" style="display:none">
       <p id="walletAddress"></p>
-      <p><span id="vinBalance"></span> | <span id="vicBalance"></span></p>
+      <p><span id="vinBalance">--</span> VIN | <span id="vicBalance">--</span> VIC</p>
       <button id="disconnectBtn">Disconnect</button>
     </div>
+    <button id="connectBtn">Connect Wallet</button>
   </header>
 
   <nav>
@@ -26,35 +29,37 @@
     <button id="postBtn" style="display:none">✍️ New Post</button>
   </nav>
 
-  <section id="registrationForm" class="hidden">
-    <h2>Register Account</h2>
-    <form id="regForm">
-      <input id="name" type="text" placeholder="Name*" required />
-      <input id="bio" type="text" placeholder="Bio" />
-      <input id="avatarUrl" type="text" placeholder="Avatar URL" />
-      <input id="website" type="text" placeholder="Website" />
-      <button type="submit">Register (0.05 VIN)</button>
-    </form>
-  </section>
+  <main>
+    <div id="registrationForm" class="hidden">
+      <h2>Register Account</h2>
+      <form id="regForm">
+        <input type="text" id="name" placeholder="Name*" required maxlength="32" />
+        <input type="text" id="bio" placeholder="Bio" maxlength="160" />
+        <input type="url" id="avatarUrl" placeholder="Avatar URL" />
+        <input type="url" id="website" placeholder="Website" />
+        <button type="submit">Register (0.05 VIN)</button>
+      </form>
+    </div>
 
-  <section id="newPostForm" class="hidden">
-    <h2>New Post</h2>
-    <form id="postForm">
-      <input id="postTitle" type="text" placeholder="Title" required />
-      <textarea id="postContent" placeholder="What's on your mind?" required></textarea>
-      <input id="postMedia" type="text" placeholder="Image URL (optional)" />
-      <button type="submit">Post</button>
-    </form>
-  </section>
+    <div id="newPostForm" class="hidden">
+      <h2>New Post</h2>
+      <form id="postForm">
+        <input type="text" id="postTitle" placeholder="Title" maxlength="100" />
+        <textarea id="postContent" placeholder="What's on your mind?" rows="4"></textarea>
+        <input type="url" id="postMedia" placeholder="Image URL (optional)" />
+        <button type="submit">Post</button>
+      </form>
+    </div>
 
-  <main id="feed"></main>
+    <div id="feed" class="feed-area">
+      <p>Loading feed...</p>
+    </div>
+  </main>
 
   <footer>
-    <p>Tip: Use VIC chain in MetaMask. On mobile, open in the wallet's browser (e.g. Viction, MetaMask).</p>
-    <a href="https://vinswap.vin" target="_blank">Trade VIN/VIC</a>
-    <p>Made with ❤️ on the VIC blockchain | Trade VIN/VIC</p>
+    <p class="tip">Tip: Use VIC chain in MetaMask. On mobile, open in the wallet's browser (e.g. Viction, MetaMask).</p>
+    <a class="trade-link" href="https://VinSwap.vin" target="_blank">Trade VIN/VIC</a>
+    <p class="footer-note">Made with ❤️ on the VIC blockchain | <a href="https://VinSwap.vin" target="_blank">Trade VIN/VIC</a></p>
   </footer>
-
-  <script src="app.js"></script>
 </body>
 </html>

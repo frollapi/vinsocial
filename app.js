@@ -6,428 +6,7 @@ let vinSocialContract, vinTokenContract;
 let currentView = "home";
 let viewingAddress = null;
 
-const vinSocialAbi = [
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_vinToken",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      }
-    ],
-    "name": "Registered",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "postId",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "author",
-        "type": "address"
-      }
-    ],
-    "name": "PostCreated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "postId",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      }
-    ],
-    "name": "Liked",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "postId",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "message",
-        "type": "string"
-      }
-    ],
-    "name": "Commented",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "postId",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      }
-    ],
-    "name": "Shared",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "from",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
-      }
-    ],
-    "name": "Followed",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "from",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
-      }
-    ],
-    "name": "Unfollowed",
-    "type": "event"
-  },
-  {
-    "inputs": [],
-    "name": "owner",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "vinToken",
-    "outputs": [
-      {
-        "internalType": "contract IVIN",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "nextPostId",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "REGISTRATION_FEE",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "name",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "bio",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "avatarUrl",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "website",
-        "type": "string"
-      }
-    ],
-    "name": "register",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "string",
-        "name": "title",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "content",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "media",
-        "type": "string"
-      }
-    ],
-    "name": "createPost",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "postId",
-        "type": "uint256"
-      }
-    ],
-    "name": "likePost",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "postId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "string",
-        "name": "message",
-        "type": "string"
-      }
-    ],
-    "name": "commentOnPost",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "postId",
-        "type": "uint256"
-      }
-    ],
-    "name": "sharePost",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      }
-    ],
-    "name": "follow",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      }
-    ],
-    "name": "unfollow",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "from",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "to",
-        "type": "address"
-      }
-    ],
-    "name": "isFollowing",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "postId",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      }
-    ],
-    "name": "hasLiked",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "user",
-        "type": "address"
-      }
-    ],
-    "name": "getUserPosts",
-    "outputs": [
-      {
-        "internalType": "uint256[]",
-        "name": "",
-        "type": "uint256[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "postId",
-        "type": "uint256"
-      }
-    ],
-    "name": "getComments",
-    "outputs": [
-      {
-        "components": [
-          {
-            "internalType": "address",
-            "name": "commenter",
-            "type": "address"
-          },
-          {
-            "internalType": "string",
-            "name": "message",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestamp",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct VinSocial.Comment[]",
-        "name": "",
-        "type": "tuple[]"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  }
-];
+const vinSocialAbi = [/* Dán đầy đủ ABI của hợp đồng VinSocial tại đây */];
 const vinTokenAbi = [
   "function balanceOf(address) view returns (uint256)",
   "function allowance(address owner, address spender) view returns (uint256)",
@@ -435,7 +14,7 @@ const vinTokenAbi = [
   "function approve(address spender, uint256 amount) returns (bool)"
 ];
 
-// Format đơn vị
+// Format số VIN & VIC
 function formatVin(v) {
   return Number(ethers.utils.formatUnits(v, 18)).toFixed(3);
 }
@@ -459,13 +38,11 @@ async function connectWallet() {
   vinTokenContract = new ethers.Contract(vinTokenAddress, vinTokenAbi, signer);
 
   document.getElementById("status").innerText = "Connected: " + userAddress;
-
   const vin = await vinTokenContract.balanceOf(userAddress);
   const vic = await provider.getBalance(userAddress);
   document.getElementById("balances").innerText =
     `Balance: ${formatVin(vin)} VIN | ${formatVic(vic)} VIC`;
 
-  // ✅ Đây là phần quan trọng: nếu đã đăng ký thì hiển thị giao diện chính
   const isRegistered = await vinSocialContract.registered(userAddress);
   if (isRegistered) {
     showMainApp();
@@ -473,7 +50,6 @@ async function connectWallet() {
     showRegistrationForm();
   }
 }
-
 
 // Nút Register
 document.getElementById("registerBtn").addEventListener("click", async () => {
@@ -491,46 +67,16 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   await connectWallet();
 });
 
-// Nút Home / My Profile
+// Nút chuyển Home / Profile
 document.getElementById("homeBtn").addEventListener("click", () => {
   currentView = "home";
   showMainApp();
 });
-
 document.getElementById("myProfileBtn").addEventListener("click", () => {
   viewProfile(userAddress);
 });
 
-// Đăng ký
-document.getElementById("regForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const name = document.getElementById("regName").value.trim();
-  const bio = document.getElementById("regBio").value.trim();
-  const avatar = document.getElementById("regAvatar").value.trim();
-  const website = document.getElementById("regWebsite").value.trim();
-
-  if (name.length < 3 || name.length > 30) {
-    alert("Display name must be 3–30 characters.");
-    return;
-  }
-
-  const fee = await vinSocialContract.REGISTRATION_FEE();
-  const est = await vinTokenContract.estimateFee(fee);
-  const total = fee.add(est);
-
-  const allowance = await vinTokenContract.allowance(userAddress, vinSocialAddress);
-  if (allowance.lt(total)) {
-    const approveTx = await vinTokenContract.approve(vinSocialAddress, total);
-    await approveTx.wait();
-  }
-
-  const tx = await vinSocialContract.register(name, bio, avatar, website);
-  await tx.wait();
-  alert("Registration successful!");
-  location.reload();
-});
-
-// Chuyển giao diện
+// Giao diện
 function showMainApp() {
   currentView = "home";
   viewingAddress = null;
@@ -547,6 +93,35 @@ function showRegistrationForm() {
   document.getElementById("mainApp").style.display = "none";
   document.getElementById("profileView").style.display = "none";
 }
+
+// Xử lý đăng ký tài khoản
+document.getElementById("regForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const name = document.getElementById("regName").value.trim();
+  const bio = document.getElementById("regBio").value.trim();
+  const avatar = document.getElementById("regAvatar").value.trim();
+  const website = document.getElementById("regWebsite").value.trim();
+
+  if (name.length < 3 || name.length > 30) {
+    alert("Display name must be 3–30 characters.");
+    return;
+  }
+
+  const fee = await vinSocialContract.REGISTRATION_FEE();
+  const est = await vinTokenContract.estimateFee(fee);
+  const total = fee.add(est);
+  const allowance = await vinTokenContract.allowance(userAddress, vinSocialAddress);
+
+  if (allowance.lt(total)) {
+    const approveTx = await vinTokenContract.approve(vinSocialAddress, total);
+    await approveTx.wait();
+  }
+
+  const tx = await vinSocialContract.register(name, bio, avatar, website);
+  await tx.wait();
+  alert("Registration successful!");
+  location.reload();
+});
 
 // Đăng bài mới
 async function createPost() {
@@ -578,6 +153,7 @@ async function loadPosts() {
 
     const postDiv = document.createElement("div");
     postDiv.className = "post";
+
     postDiv.innerHTML = `
       <h3>${post.title}</h3>
       <p>${post.content}</p>
@@ -587,6 +163,7 @@ async function loadPosts() {
         <button onclick="likePost(${i})" ${liked ? "disabled" : ""}>👍 Like</button>
         <button onclick="sharePost(${i})">🔁 Share</button>
         <button onclick="showCommentBox(${i})">💬 Comment</button>
+        <button onclick="translatePost('${post.content.replace(/'/g, "\\'")}')">🌐 Translate</button>
       </div>
       <div id="comments-${i}" class="comment-section">
         ${comments.map(c => `<div class="comment"><b>${c.commenter}</b>: ${c.message}</div>`).join("")}
@@ -596,8 +173,15 @@ async function loadPosts() {
         </div>
       </div>
     `;
+
     feed.appendChild(postDiv);
   }
+}
+
+// Dịch bài viết (Google Translate popup)
+function translatePost(content) {
+  const url = `https://translate.google.com/?sl=auto&tl=vi&text=${encodeURIComponent(content)}&op=translate`;
+  window.open(url, '_blank');
 }
 
 // Like bài viết
@@ -624,12 +208,12 @@ async function sharePost(postId) {
   }
 }
 
-// Hiện ô nhập bình luận
+// Hiện ô nhập comment
 function showCommentBox(postId) {
   document.getElementById(`comment-box-${postId}`).style.display = "block";
 }
 
-// Gửi bình luận
+// Gửi comment
 async function submitComment(postId) {
   const input = document.getElementById(`comment-input-${postId}`);
   const message = input.value.trim();
@@ -644,7 +228,7 @@ async function submitComment(postId) {
   }
 }
 
-// Xem profile người dùng
+// Xem hồ sơ người dùng (dùng cho cả mình và người khác)
 async function viewProfile(address) {
   if (!vinSocialContract) return;
   viewingAddress = address;
@@ -679,7 +263,7 @@ async function viewProfile(address) {
     profilePosts.appendChild(postDiv);
   }
 
-  // Xử lý nút Follow / Unfollow
+  // Follow / Unfollow
   const followBtn = document.getElementById("followBtn");
   if (userAddress.toLowerCase() === address.toLowerCase()) {
     followBtn.style.display = "none";
@@ -694,7 +278,7 @@ async function viewProfile(address) {
           : await vinSocialContract.follow(address);
         await tx.wait();
         alert(isFollowing ? "Unfollowed" : "Followed");
-        viewProfile(address); // Refresh view
+        viewProfile(address); // refresh
       } catch (err) {
         alert("Error: " + err.message);
       }

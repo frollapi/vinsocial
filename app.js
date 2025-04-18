@@ -132,7 +132,7 @@ window.addEventListener("load", async () => {
   document.getElementById("postBtn").onclick = showPostForm;
   document.getElementById("postForm").onsubmit = handleCreatePost;
   document.getElementById("homeBtn").onclick = loadFeed;
-  document.getElementById("profileBtn").onclick = showMyProfile;
+  document.getElementById("myProfileBtn").onclick = showMyProfile;
 
   await checkIfConnected();
 });

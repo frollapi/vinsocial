@@ -3,68 +3,68 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>VinSocial.vin - Decentralized Social Network</title>
-  <link rel="stylesheet" href="style.css"/>
-  <link rel="icon" href="logo.png" type="image/png"/>
+  <title>VinSocial.vin</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" type="image/png" href="logo.png" />
 </head>
 <body>
   <header>
     <div class="logo">
-      <img src="logo.png" alt="VinSocial Logo"/>
+      <img src="logo.png" alt="VinSocial Logo" />
       <h1>VinSocial.vin</h1>
-      <p>Decentralized. Uncensored. Free Speech.</p>
     </div>
-    <div class="wallet-info">
-      <button id="connectBtn">Connect Wallet</button>
-      <div id="walletDetails" style="display: none;">
-        <span id="walletAddress"></span>
-        <span id="vinBalance"></span>
-        <span id="vicBalance"></span>
-        <button id="disconnectBtn">Disconnect</button>
-      </div>
+    <p class="slogan">Decentralized. Uncensored. Free Speech.</p>
+    <div id="walletDetails" style="display: none;">
+      <p id="walletAddress">Wallet: ...</p>
+      <p><span id="vinBalance">-- VIN</span> | <span id="vicBalance">-- VIC</span></p>
+      <button id="disconnectBtn">Disconnect</button>
     </div>
+    <button id="connectBtn">Connect Wallet</button>
   </header>
 
+  <nav>
+    <button id="homeBtn">🏠 Home</button>
+    <button id="myProfileBtn">👤 My Profile</button>
+    <button id="registerBtn">📝 Register</button>
+    <button id="postBtn" style="display: none;">✍️ New Post</button>
+  </nav>
+
+  <div class="notice">
+    <p><strong>Tip:</strong> Use VIC chain in MetaMask. On mobile, open in the wallet's browser (e.g. Viction, MetaMask).</p>
+    <p>Need VIN? <a href="https://vinswap.vin" target="_blank">Trade VIN/VIC</a></p>
+  </div>
+
   <main>
-    <nav>
-      <ul>
-        <li><button id="homeBtn">🏠 Home</button></li>
-        <li><button id="myProfileBtn">👤 My Profile</button></li>
-        <li><button id="registerBtn">📝 Register</button></li>
-        <li><button id="postBtn">✍️ New Post</button></li>
-      </ul>
-    </nav>
+    <section id="feed"></section>
 
-    <section id="contentArea">
-      <div id="registrationForm" style="display: none;">
-        <h2>Register Your Account</h2>
-        <form id="regForm">
-          <label>Name* <input type="text" id="name" maxlength="32" required></label>
-          <label>Bio <input type="text" id="bio" maxlength="160"></label>
-          <label>Avatar URL <input type="url" id="avatarUrl"></label>
-          <label>Website <input type="url" id="website"></label>
-          <button type="submit">Confirm Registration (0.05 VIN)</button>
-        </form>
-      </div>
+    <section id="registrationForm" class="hidden">
+      <h2>Register Account</h2>
+      <form id="regForm">
+        <label>Name* <input type="text" id="name" maxlength="32" required /></label>
+        <label>Bio <textarea id="bio" maxlength="160"></textarea></label>
+        <label>Avatar URL <input type="url" id="avatarUrl" /></label>
+        <label>Website <input type="url" id="website" /></label>
+        <button type="submit">Register (0.05 VIN)</button>
+      </form>
+    </section>
+    <section id="newPostForm" class="hidden">
+      <h2>New Post</h2>
+      <form id="postForm">
+        <label>Title* <input type="text" id="postTitle" maxlength="80" required /></label>
+        <label>Content* <textarea id="postContent" maxlength="500" required></textarea></label>
+        <label>Image URL <input type="url" id="postMedia" /></label>
+        <button type="submit">Publish</button>
+      </form>
+    </section>
 
-      <div id="newPostForm" style="display: none;">
-        <h2>New Post</h2>
-        <form id="postForm">
-          <label>Title* <input type="text" id="postTitle" maxlength="100" required></label>
-          <label>Content* <textarea id="postContent" maxlength="1000" required></textarea></label>
-          <label>Media URL (optional) <input type="url" id="postMedia"></label>
-          <button type="submit">Publish</button>
-        </form>
-      </div>
-
-      <div id="feed">
-        <!-- All posts will be loaded here -->
-      </div>
+    <section id="profileView" class="hidden">
+      <div id="profileInfo"></div>
+      <div id="profilePosts"></div>
     </section>
   </main>
 
   <footer>
-    <p>Made with ❤️ on the VIC blockchain | <a href="https://VinSwap.vin" target="_blank">Trade VIN/VIC</a></p>
+    <p>Made with ❤️ on the VIC blockchain | <a href="https://vinswap.vin" target="_blank">Trade VIN/VIC</a></p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>

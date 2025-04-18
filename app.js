@@ -1,117 +1,6 @@
-// 👉 Địa chỉ hợp đồng
-const vinSocialAddress = "0x2DB5a0Dcf2942d552EF02D683b4d5852A7431a87";
+const vinSocialAddress = "0xdEDe433305ed14E3791CF5C47F66060F84a68F10";
 const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";
 
-// 👉 ABI đầy đủ cho VinSocial (gồm các hàm về hồ sơ cá nhân, like, follow, posts...)
-const vinSocialAbi = [
-  {
-    "inputs": [{"internalType": "address","name": "_vinToken","type": "address"}],
-    "stateMutability": "nonpayable","type": "constructor"
-  },
-  {
-    "inputs": [{"internalType": "address","name": "","type": "address"}],
-    "name": "registered","outputs": [{"internalType": "bool","name": "","type": "bool"}],
-    "stateMutability": "view","type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "nextPostId",
-    "outputs": [{"internalType": "uint256","name": "","type": "uint256"}],
-    "stateMutability": "view","type": "function"
-  },
-  {
-    "inputs": [
-      {"internalType": "string","name": "name","type": "string"},
-      {"internalType": "string","name": "bio","type": "string"},
-      {"internalType": "string","name": "avatarUrl","type": "string"},
-      {"internalType": "string","name": "website","type": "string"}
-    ],
-    "name": "register","outputs": [],"stateMutability": "nonpayable","type": "function"
-  },
-  {
-    "inputs": [{"internalType": "address","name": "","type": "address"}],
-    "name": "users",
-    "outputs": [
-      {"internalType": "string","name": "name","type": "string"},
-      {"internalType": "string","name": "bio","type": "string"},
-      {"internalType": "string","name": "avatarUrl","type": "string"},
-      {"internalType": "string","name": "website","type": "string"}
-    ],
-    "stateMutability": "view","type": "function"
-  },
-  {
-    "inputs": [
-      {"internalType": "string","name": "title","type": "string"},
-      {"internalType": "string","name": "content","type": "string"},
-      {"internalType": "string","name": "media","type": "string"}
-    ],
-    "name": "createPost","outputs": [],"stateMutability": "nonpayable","type": "function"
-  },
-  {
-    "inputs": [{"internalType": "uint256","name": "","type": "uint256"}],
-    "name": "posts",
-    "outputs": [
-      {"internalType": "address","name": "author","type": "address"},
-      {"internalType": "string","name": "title","type": "string"},
-      {"internalType": "string","name": "content","type": "string"},
-      {"internalType": "string","name": "media","type": "string"},
-      {"internalType": "uint256","name": "timestamp","type": "uint256"}
-    ],
-    "stateMutability": "view","type": "function"
-  },
-  {
-    "inputs": [{"internalType": "address","name": "user","type": "address"}],
-    "name": "getUserPosts",
-    "outputs": [{"internalType": "uint256[]","name": "","type": "uint256[]"}],
-    "stateMutability": "view","type": "function"
-  },
-  {
-    "inputs": [{"internalType": "uint256","name": "postId","type": "uint256"}],
-    "name": "likePost","outputs": [],"stateMutability": "nonpayable","type": "function"
-  },
-  {
-    "inputs": [{"internalType": "uint256","name": "postId","type": "uint256"}],
-    "name": "sharePost","outputs": [],"stateMutability": "nonpayable","type": "function"
-  },
-  {
-    "inputs": [
-      {"internalType": "uint256","name": "postId","type": "uint256"},
-      {"internalType": "string","name": "message","type": "string"}
-    ],
-    "name": "commentOnPost","outputs": [],"stateMutability": "nonpayable","type": "function"
-  },
-  {
-    "inputs": [{"internalType": "uint256","name": "postId","type": "uint256"}],
-    "name": "getComments",
-    "outputs": [{
-      "components": [
-        {"internalType": "address","name": "commenter","type": "address"},
-        {"internalType": "string","name": "message","type": "string"},
-        {"internalType": "uint256","name": "timestamp","type": "uint256"}
-      ],
-      "internalType": "struct VinSocial.Comment[]","name": "","type": "tuple[]"
-    }],
-    "stateMutability": "view","type": "function"
-  },
-  {
-    "inputs": [{"internalType": "address","name": "user","type": "address"}],
-    "name": "follow","outputs": [],"stateMutability": "nonpayable","type": "function"
-  },
-  {
-    "inputs": [{"internalType": "address","name": "user","type": "address"}],
-    "name": "unfollow","outputs": [],"stateMutability": "nonpayable","type": "function"
-  },
-  {
-    "inputs": [
-      {"internalType": "address","name": "from","type": "address"},
-      {"internalType": "address","name": "to","type": "address"}
-    ],
-    "name": "isFollowing","outputs": [{"internalType": "bool","name": "","type": "bool"}],
-    "stateMutability": "view","type": "function"
-  }
-];
-
-// 👉 ABI rút gọn của token VIN
 const vinAbi = [
   "function balanceOf(address) view returns (uint256)",
   "function allowance(address owner, address spender) view returns (uint256)",
@@ -119,22 +8,27 @@ const vinAbi = [
   "function estimateFee(uint256 amount) view returns (uint256)"
 ];
 
-// 👉 Biến toàn cục
+const vinSocialAbi = [ /* ← Sẽ được chèn đầy đủ ở phần sau */ ];
+
 let provider, signer, userAddress;
-let vinSocialContract, vinTokenContract;
+let vinToken, vinSocial;
 let registered = false;
+
 window.addEventListener("load", async () => {
   document.getElementById("connectBtn").onclick = connectWallet;
-  document.getElementById("disconnectBtn").onclick = disconnectWallet;
-  document.getElementById("registerBtn").onclick = showRegistrationForm;
-  document.getElementById("regForm").onsubmit = handleRegister;
-  document.getElementById("postBtn").onclick = showPostForm;
-  document.getElementById("postForm").onsubmit = handleCreatePost;
+  document.getElementById("disconnectBtn").onclick = () => location.reload();
   document.getElementById("homeBtn").onclick = loadFeed;
-  document.getElementById("profileBtn").onclick = showMyProfile;
+  document.getElementById("registerBtn").onclick = showRegistrationForm;
+  document.getElementById("postBtn").onclick = showPostForm;
 
   await checkIfConnected();
 });
+
+async function checkIfConnected() {
+  if (window.ethereum && window.ethereum.selectedAddress) {
+    await connectWallet();
+  }
+}
 
 async function connectWallet() {
   if (!window.ethereum) {
@@ -147,8 +41,8 @@ async function connectWallet() {
   signer = provider.getSigner();
   userAddress = await signer.getAddress();
 
-  vinSocialContract = new ethers.Contract(vinSocialAddress, vinSocialAbi, signer);
-  vinTokenContract = new ethers.Contract(vinTokenAddress, vinAbi, signer);
+  vinToken = new ethers.Contract(vinTokenAddress, vinAbi, signer);
+  vinSocial = new ethers.Contract(vinSocialAddress, vinSocialAbi, signer);
 
   document.getElementById("walletAddress").innerText = `Wallet: ${userAddress}`;
   document.getElementById("walletDetails").style.display = "block";
@@ -159,186 +53,165 @@ async function connectWallet() {
   await loadFeed();
 }
 
-function disconnectWallet() {
-  location.reload();
-}
-
 async function updateBalances() {
-  const vinBal = await vinTokenContract.balanceOf(userAddress);
+  const vinBal = await vinToken.balanceOf(userAddress);
   const vicBal = await provider.getBalance(userAddress);
 
-  const vin = ethers.utils.formatUnits(vinBal, 18);
-  const vic = ethers.utils.formatUnits(vicBal, 18);
-
-  document.getElementById("vinBalance").innerText = `${Number(vin).toFixed(2)} VIN`;
-  document.getElementById("vicBalance").innerText = `${Number(vic).toFixed(4)} VIC`;
+  document.getElementById("vinBalance").innerText = `${ethers.utils.formatUnits(vinBal, 18)} VIN`;
+  document.getElementById("vicBalance").innerText = `${ethers.utils.formatUnits(vicBal, 18)} VIC`;
 }
-
-async function checkIfConnected() {
-  if (window.ethereum && window.ethereum.selectedAddress) {
-    await connectWallet();
-  }
-}
-
 async function checkRegistration() {
   try {
-    registered = await vinSocialContract.registered(userAddress);
+    registered = await vinSocial.registered(userAddress);
     document.getElementById("postBtn").style.display = registered ? "inline-block" : "none";
     document.getElementById("registerBtn").style.display = registered ? "none" : "inline-block";
   } catch (err) {
-    console.log("checkRegistration error:", err);
+    console.error("❌ checkRegistration error:", err);
   }
 }
 
 function showRegistrationForm() {
   if (!registered) {
-    document.getElementById("registrationForm").style.display = "block";
-    document.getElementById("newPostForm").style.display = "none";
-    document.getElementById("profileSection").style.display = "none";
+    document.getElementById("registrationForm").classList.remove("hidden");
+    document.getElementById("newPostForm").classList.add("hidden");
   } else {
-    alert("You are already registered!");
+    alert("You are already registered.");
   }
 }
 
 async function handleRegister(e) {
   e.preventDefault();
 
-  const name = document.getElementById("name").value;
-  const bio = document.getElementById("bio").value;
-  const avatarUrl = document.getElementById("avatarUrl").value;
-  const website = document.getElementById("website").value;
+  const name = document.getElementById("name").value.trim();
+  const bio = document.getElementById("bio").value.trim();
+  const avatarUrl = document.getElementById("avatarUrl").value.trim();
+  const website = document.getElementById("website").value.trim();
+
+  if (!name || name.length > 32) return alert("Please enter a name (max 32 chars).");
 
   try {
     const fee = ethers.utils.parseUnits("0.05", 18);
-    const extraFee = await vinTokenContract.estimateFee(fee);
-    const total = fee.add(extraFee);
+    const extra = await vinToken.estimateFee(fee);
+    const total = fee.add(extra);
 
-    const allowance = await vinTokenContract.allowance(userAddress, vinSocialAddress);
+    const allowance = await vinToken.allowance(userAddress, vinSocialAddress);
     if (allowance.lt(total)) {
-      const approveTx = await vinTokenContract.approve(vinSocialAddress, total);
+      const approveTx = await vinToken.approve(vinSocialAddress, total);
       await approveTx.wait();
     }
 
-    const tx = await vinSocialContract.register(name, bio, avatarUrl, website);
+    const tx = await vinSocial.register(name, bio, avatarUrl, website);
     await tx.wait();
-    alert("Registration successful!");
+
+    alert("🎉 Registered successfully!");
     registered = true;
-    document.getElementById("registrationForm").style.display = "none";
+    document.getElementById("registrationForm").classList.add("hidden");
     document.getElementById("postBtn").style.display = "inline-block";
     document.getElementById("registerBtn").style.display = "none";
   } catch (err) {
-    console.error("Registration error:", err);
-    alert("Registration failed");
+    console.error("❌ Registration failed:", err);
+    alert("Registration failed. Please check your balance and gas.");
   }
 }
 function showPostForm() {
   if (!registered) {
-    alert("You must register first.");
+    alert("You must register to post.");
     return;
   }
-  document.getElementById("newPostForm").style.display = "block";
-  document.getElementById("registrationForm").style.display = "none";
-  document.getElementById("profileSection").style.display = "none";
+
+  document.getElementById("newPostForm").classList.remove("hidden");
+  document.getElementById("registrationForm").classList.add("hidden");
 }
 
 async function handleCreatePost(e) {
   e.preventDefault();
-  const title = document.getElementById("postTitle").value;
-  const content = document.getElementById("postContent").value;
-  const media = document.getElementById("postMedia").value;
+
+  const title = document.getElementById("postTitle").value.trim();
+  const content = document.getElementById("postContent").value.trim();
+  const media = document.getElementById("postMedia").value.trim();
+
+  if (!title || !content) {
+    alert("Title and content are required.");
+    return;
+  }
 
   try {
-    const tx = await vinSocialContract.createPost(title, content, media);
+    const tx = await vinSocial.createPost(title, content, media);
     await tx.wait();
-    alert("Post created!");
+
+    alert("✅ Post published!");
     document.getElementById("postForm").reset();
-    document.getElementById("newPostForm").style.display = "none";
+    document.getElementById("newPostForm").classList.add("hidden");
     loadFeed();
   } catch (err) {
-    console.error("Create post error:", err);
-    alert("Failed to post.");
+    console.error("❌ Post failed:", err);
+    alert("Failed to publish post.");
   }
 }
 
 async function loadFeed() {
   const feed = document.getElementById("feed");
   feed.innerHTML = "<p>Loading posts...</p>";
-  let html = "";
 
   try {
-    const postCount = await vinSocialContract.nextPostId();
+    const postCount = await vinSocial.nextPostId();
+    let html = "";
+
     for (let i = postCount - 1; i >= 1; i--) {
-      const post = await vinSocialContract.posts(i);
-      const user = await vinSocialContract.users(post.author);
+      const post = await vinSocial.posts(i);
+      const user = await vinSocial.users(post.author);
 
       html += `
         <div class="post">
-          <h3>${post.title}</h3>
-          <p>${post.content}</p>
-          ${post.media ? `<img src="${post.media}" style="max-width:100%; border-radius:8px; margin-top:10px"/>` : ""}
-          <p><small>👤 ${user.name || post.author.slice(0, 6)} | ${new Date(post.timestamp * 1000).toLocaleString()}</small></p>
+          <h3>${sanitize(post.title)}</h3>
+          <p>${sanitize(post.content)}</p>
+          ${post.media ? `<img src="${sanitize(post.media)}" class="media" />` : ""}
+          <p class="meta">👤 ${user.name || post.author.slice(0, 6)} | ${new Date(post.timestamp * 1000).toLocaleString()}</p>
           <div class="actions">
             ${registered ? `
               <button onclick="likePost(${i})">👍 Like</button>
-              <button onclick="sharePost(${i})">🔁 Share</button>
               <button onclick="commentPrompt(${i})">💬 Comment</button>
+              <button onclick="sharePost(${i})">🔁 Share</button>
               <button onclick="followUser('${post.author}')">👤 Follow</button>
-            ` : `<small>Connect and register to interact</small>`}
-            <button onclick="translatePost('${post.content.replace(/'/g, "\\'")}')">🌐 Translate</button>
+            ` : `<small>Connect & register to interact</small>`}
+            <button onclick="translatePost(\`${sanitize(post.content)}\`)">🌐 Translate</button>
           </div>
-          <div class="comment-section" id="comments-${i}">
+          <div id="comments-${i}" class="comment-section">
             ${await renderComments(i)}
           </div>
-        </div>
-      `;
+        </div>`;
     }
 
     feed.innerHTML = html || "<p>No posts yet.</p>";
   } catch (err) {
-    console.error("Load feed error:", err);
+    console.error("❌ Load feed error:", err);
     feed.innerHTML = "<p>Failed to load posts.</p>";
   }
 }
 
+function sanitize(str) {
+  return str.replace(/[&<>"']/g, function (m) {
+    return ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[m];
+  });
+}
 async function renderComments(postId) {
   try {
-    const comments = await vinSocialContract.getComments(postId);
+    const comments = await vinSocial.getComments(postId);
     let html = "";
+
     for (let c of comments) {
       html += `<div class="comment">
-        <p>${c.message}</p>
+        <p>${sanitize(c.message)}</p>
         <small>👤 ${c.commenter.slice(0, 6)} | ${new Date(c.timestamp * 1000).toLocaleString()}</small>
       </div>`;
     }
+
     return html;
   } catch (err) {
+    console.error("❌ Load comments error:", err);
     return "<p>Failed to load comments</p>";
-  }
-}
-
-function translatePost(content) {
-  const url = `https://translate.google.com/?sl=auto&tl=en&text=${encodeURIComponent(content)}&op=translate`;
-  window.open(url, "_blank");
-}
-async function likePost(postId) {
-  try {
-    const tx = await vinSocialContract.likePost(postId);
-    await tx.wait();
-    alert("Liked!");
-  } catch (err) {
-    alert("Failed to like.");
-    console.error(err);
-  }
-}
-
-async function sharePost(postId) {
-  try {
-    const tx = await vinSocialContract.sharePost(postId);
-    await tx.wait();
-    alert("Post shared!");
-  } catch (err) {
-    alert("Failed to share.");
-    console.error(err);
   }
 }
 
@@ -350,87 +223,119 @@ function commentPrompt(postId) {
 
 async function commentOnPost(postId, message) {
   try {
-    const tx = await vinSocialContract.commentOnPost(postId, message);
+    const tx = await vinSocial.commentOnPost(postId, message);
     await tx.wait();
-    alert("Commented!");
+    alert("Comment posted!");
     loadFeed();
   } catch (err) {
+    console.error("❌ Comment error:", err);
     alert("Failed to comment.");
-    console.error(err);
   }
 }
 
-async function followUser(userAddr) {
-  if (userAddr.toLowerCase() === userAddress.toLowerCase()) {
+async function likePost(postId) {
+  try {
+    const tx = await vinSocial.likePost(postId);
+    await tx.wait();
+    alert("You liked this post.");
+  } catch (err) {
+    console.error("❌ Like error:", err);
+    alert("Failed to like post.");
+  }
+}
+
+async function sharePost(postId) {
+  try {
+    const tx = await vinSocial.sharePost(postId);
+    await tx.wait();
+    alert("Post shared.");
+  } catch (err) {
+    console.error("❌ Share error:", err);
+    alert("Failed to share post.");
+  }
+}
+
+async function followUser(targetAddr) {
+  if (targetAddr.toLowerCase() === userAddress.toLowerCase()) {
     alert("You can't follow yourself.");
     return;
   }
 
   try {
-    const isFollowing = await vinSocialContract.isFollowing(userAddress, userAddr);
-    const tx = isFollowing
-      ? await vinSocialContract.unfollow(userAddr)
-      : await vinSocialContract.follow(userAddr);
+    const isNowFollowing = await vinSocial.isUserFollowing(userAddress, targetAddr);
+    const tx = isNowFollowing
+      ? await vinSocial.unfollow(targetAddr)
+      : await vinSocial.follow(targetAddr);
     await tx.wait();
-    alert(isFollowing ? "Unfollowed" : "Followed");
+    alert(isNowFollowing ? "Unfollowed." : "Now following!");
   } catch (err) {
+    console.error("❌ Follow error:", err);
     alert("Failed to follow/unfollow.");
-    console.error(err);
   }
 }
+
+function translatePost(content) {
+  const url = `https://translate.google.com/?sl=auto&tl=en&text=${encodeURIComponent(content)}&op=translate`;
+  window.open(url, "_blank");
+}
+document.getElementById("myProfileBtn").onclick = showMyProfile;
+
 async function showMyProfile() {
   if (!registered) {
-    alert("You must register first.");
+    alert("Please register first.");
     return;
   }
 
-  document.getElementById("registrationForm").style.display = "none";
-  document.getElementById("newPostForm").style.display = "none";
-  document.getElementById("feed").innerHTML = "";
-  const section = document.getElementById("profileSection");
-  section.style.display = "block";
+  const feed = document.getElementById("feed");
+  feed.innerHTML = "<p>Loading your profile...</p>";
 
   try {
-    const user = await vinSocialContract.users(userAddress);
-    section.innerHTML = `
-      <div class="profile-card">
-        ${user.avatarUrl ? `<img src="${user.avatarUrl}" alt="avatar" class="avatar">` : ""}
-        <h2>${user.name || userAddress.slice(0, 6)}</h2>
-        <p>${user.bio || ""}</p>
-        ${user.website ? `<p><a href="${user.website}" target="_blank">${user.website}</a></p>` : ""}
-      </div>
-      <div id="myPosts"><h3>Your Posts</h3><p>Loading...</p></div>
+    const posts = await vinSocial.getUserPosts(userAddress);
+    const user = await vinSocial.users(userAddress);
+    const followers = await vinSocial.getFollowers(userAddress);
+    const following = await vinSocial.getFollowing(userAddress);
+
+    let html = `
+      <div class="profile">
+        <h2>${user.name}</h2>
+        ${user.avatarUrl ? `<img src="${sanitize(user.avatarUrl)}" class="avatar" />` : ""}
+        <p><strong>Bio:</strong> ${sanitize(user.bio)}</p>
+        <p><strong>Website:</strong> <a href="${sanitize(user.website)}" target="_blank">${sanitize(user.website)}</a></p>
+        <p><strong>Followers:</strong> ${followers.length} | <strong>Following:</strong> ${following.length}</p>
+        <hr/>
+        <h3>Your Posts</h3>
     `;
 
-    const container = section.querySelector("#myPosts");
-    const postIds = await vinSocialContract.getUserPosts(userAddress);
-    let html = "";
+    if (posts.length === 0) {
+      html += `<p>No posts yet.</p>`;
+    } else {
+      for (let i = posts.length - 1; i >= 0; i--) {
+        const postId = posts[i];
+        const post = await vinSocial.posts(postId);
 
-    for (let i = postIds.length - 1; i >= 0; i--) {
-      const post = await vinSocialContract.posts(postIds[i]);
-      html += `
-        <div class="post">
-          <h3>${post.title}</h3>
-          <p>${post.content}</p>
-          ${post.media ? `<img src="${post.media}" style="max-width:100%; border-radius:8px; margin-top:10px"/>` : ""}
-          <p><small>⏰ ${new Date(post.timestamp * 1000).toLocaleString()}</small></p>
-          <div class="actions">
-            <button onclick="likePost(${postIds[i]})">👍 Like</button>
-            <button onclick="sharePost(${postIds[i]})">🔁 Share</button>
-            <button onclick="commentPrompt(${postIds[i]})">💬 Comment</button>
-            <button onclick="translatePost('${post.content.replace(/'/g, "\\'")}')">🌐 Translate</button>
-          </div>
-          <div class="comment-section" id="comments-my-${postIds[i]}">
-            ${await renderComments(postIds[i])}
-          </div>
-        </div>
-      `;
+        html += `
+          <div class="post">
+            <h3>${sanitize(post.title)}</h3>
+            <p>${sanitize(post.content)}</p>
+            ${post.media ? `<img src="${sanitize(post.media)}" class="media" />` : ""}
+            <p class="meta">🕒 ${new Date(post.timestamp * 1000).toLocaleString()}</p>
+            <div class="actions">
+              <button onclick="likePost(${postId})">👍 Like</button>
+              <button onclick="commentPrompt(${postId})">💬 Comment</button>
+              <button onclick="sharePost(${postId})">🔁 Share</button>
+              <button onclick="translatePost(\`${sanitize(post.content)}\`)">🌐 Translate</button>
+            </div>
+            <div id="comments-${postId}" class="comment-section">
+              ${await renderComments(postId)}
+            </div>
+          </div>`;
+      }
     }
 
-    container.innerHTML = html || "<p>You haven't posted anything yet.</p>";
+    html += `</div>`;
+    feed.innerHTML = html;
   } catch (err) {
-    console.error("Load profile error:", err);
-    section.innerHTML = "<p>Failed to load profile.</p>";
+    console.error("❌ Show profile error:", err);
+    feed.innerHTML = "<p>Failed to load profile.</p>";
   }
 }
-

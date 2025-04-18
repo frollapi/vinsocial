@@ -3,92 +3,70 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>VinSocial.vin</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="icon" type="image/png" href="logo.png" />
+  <title>VinSocial.vin - Decentralized Social Network</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="icon" href="logo.png" type="image/png"/>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <img src="logo.png" alt="VinSocial Logo" class="logo">
+  <header>
+    <div class="logo">
+      <img src="logo.png" alt="VinSocial Logo"/>
       <h1>VinSocial.vin</h1>
-      <p class="slogan">Decentralized. Uncensored. Free Speech.</p>
-    </header>
-
-    <!-- Hướng dẫn kết nối -->
-    <div class="instructions">
-      <strong>📱 How to Connect:</strong><br/>
-      • On mobile: open this site inside your <b>Viction</b> or <b>MetaMask</b> wallet browser.<br/>
-      • On desktop: use MetaMask and connect to the VIC network.
-      <pre>
-Network: VIC  
-RPC: https://rpc.viction.xyz  
-Chain ID: 88  
-Currency: VIC  
-Explorer: https://vicscan.xyz  
-      </pre>
+      <p>Decentralized. Uncensored. Free Speech.</p>
     </div>
-
-    <!-- Nút điều hướng -->
-    <div class="auth-buttons">
-      <button id="registerBtn">Register</button>
-      <button id="loginBtn">Login</button>
-      <button id="myProfileBtn" style="display:none;">My Profile</button>
-      <button id="homeBtn" style="display:none;">Home</button>
-    </div>
-
-    <div id="status" class="status"></div>
-    <div id="balances" class="status"></div>
-
-    <!-- Form đăng ký -->
-    <div id="registrationForm" style="display:none;">
-      <h3>Register Your Account</h3>
-      <form id="regForm">
-        <label>Display Name* (3–30 chars)</label>
-        <input type="text" id="regName" maxlength="30" required>
-
-        <label>Bio (max 160 chars)</label>
-        <textarea id="regBio" maxlength="160"></textarea>
-
-        <label>Avatar URL (max 255 chars)</label>
-        <input type="text" id="regAvatar" maxlength="255">
-
-        <label>Website (max 100 chars)</label>
-        <input type="text" id="regWebsite" maxlength="100">
-
-        <button type="submit">Confirm & Register</button>
-      </form>
-    </div>
-
-    <!-- Giao diện profile -->
-    <div id="profileView" style="display:none;">
-      <div class="profile-card">
-        <img id="profileAvatar" class="profile-avatar" src="" alt="avatar">
-        <h2 id="profileName"></h2>
-        <p id="profileBio"></p>
-        <a id="profileWebsite" href="#" target="_blank"></a>
-        <p><strong>Joined:</strong> <span id="profileJoined"></span></p>
-        <button id="followBtn" style="display:none;"></button>
+    <div class="wallet-info">
+      <button id="connectBtn">Connect Wallet</button>
+      <div id="walletDetails" style="display: none;">
+        <span id="walletAddress"></span>
+        <span id="vinBalance"></span>
+        <span id="vicBalance"></span>
+        <button id="disconnectBtn">Disconnect</button>
       </div>
-      <h3>User's Posts:</h3>
-      <div id="profilePosts"></div>
     </div>
+  </header>
 
-    <!-- Giao diện chính -->
-    <div id="mainApp" style="display:none;">
-      <div class="post-form">
-        <h2>Create New Post</h2>
-        <input type="text" id="postTitle" placeholder="Post title" />
-        <textarea id="postContent" placeholder="Write your content..."></textarea>
-        <input type="text" id="postMedia" placeholder="Media URL (optional)" />
-        <button onclick="createPost()">Post</button>
+  <main>
+    <nav>
+      <ul>
+        <li><button id="homeBtn">🏠 Home</button></li>
+        <li><button id="myProfileBtn">👤 My Profile</button></li>
+        <li><button id="registerBtn">📝 Register</button></li>
+        <li><button id="postBtn">✍️ New Post</button></li>
+      </ul>
+    </nav>
+
+    <section id="contentArea">
+      <div id="registrationForm" style="display: none;">
+        <h2>Register Your Account</h2>
+        <form id="regForm">
+          <label>Name* <input type="text" id="name" maxlength="32" required></label>
+          <label>Bio <input type="text" id="bio" maxlength="160"></label>
+          <label>Avatar URL <input type="url" id="avatarUrl"></label>
+          <label>Website <input type="url" id="website"></label>
+          <button type="submit">Confirm Registration (0.05 VIN)</button>
+        </form>
       </div>
 
-      <div id="postFeed"></div>
-    </div>
-  </div>
+      <div id="newPostForm" style="display: none;">
+        <h2>New Post</h2>
+        <form id="postForm">
+          <label>Title* <input type="text" id="postTitle" maxlength="100" required></label>
+          <label>Content* <textarea id="postContent" maxlength="1000" required></textarea></label>
+          <label>Media URL (optional) <input type="url" id="postMedia"></label>
+          <button type="submit">Publish</button>
+        </form>
+      </div>
 
-  <!-- Script -->
+      <div id="feed">
+        <!-- All posts will be loaded here -->
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Made with ❤️ on the VIC blockchain | <a href="https://VinSwap.vin" target="_blank">Trade VIN/VIC</a></p>
+  </footer>
+
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script src="app.js"></script>
 </body>

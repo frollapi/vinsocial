@@ -164,10 +164,15 @@ async function loadFeed() {
 
   try {
     let html = "";
-    const nextId = await vinSocial.nextPostId ? await vinSocial.nextPostId() : 1000;
+    const nextId = await vinSocial.nextPostId();
+
     for (let i = nextId - 1; i >= 1; i--) {
       try {
         const post = await vinSocial.posts(i);
+
+        // ✅ Bỏ qua bài viết chưa tồn tại (post.author là address(0))
+        if (post.author === "0x0000000000000000000000000000000000000000") continue;
+
         const user = await vinSocial.users(post.author);
 
         html += `
@@ -189,8 +194,11 @@ async function loadFeed() {
             ${await renderComments(i)}
           </div>
         </div>`;
-      } catch {}
+      } catch (err) {
+        console.warn("⛔ Skipping post ID", i, err);
+      }
     }
+
     feed.innerHTML = html || "<p>No posts yet.</p>";
   } catch (err) {
     console.error("❌ Load feed error:", err);

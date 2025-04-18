@@ -11,55 +11,55 @@
 </head>
 <body>
   <header>
-    <img src="logo.png" alt="VinSocial Logo" class="logo" />
-    <h1>VinSocial.vin</h1>
-    <p>Decentralized. Uncensored. Free Speech.</p>
-    <div id="walletDetails" style="display:none">
-      <p id="walletAddress"></p>
-      <p><span id="vinBalance">--</span> VIN | <span id="vicBalance">--</span> VIC</p>
-      <button id="disconnectBtn">Disconnect</button>
+    <div class="header-left">
+      <img src="logo.png" alt="VinSocial Logo" class="logo" />
+      <h1>VinSocial.vin</h1>
     </div>
-    <button id="connectBtn">Connect Wallet</button>
+    <div class="header-right">
+      <span id="walletAddress"></span>
+      <span id="vinBalance"></span>
+      <span id="vicBalance"></span>
+      <button id="connectBtn">Connect Wallet</button>
+      <button id="disconnectBtn" class="hidden">Disconnect</button>
+    </div>
   </header>
 
   <nav>
     <button id="homeBtn">🏠 Home</button>
-    <button id="myProfileBtn">👤 My Profile</button>
-    <button id="registerBtn">📝 Register</button>
-    <button id="postBtn" style="display:none">✍️ New Post</button>
+    <button id="myProfileBtn" class="hidden">👤 My Profile</button>
+    <button id="registerBtn" class="hidden">📝 Register</button>
+    <button id="postBtn" class="hidden">✍️ New Post</button>
   </nav>
 
   <main>
-    <div id="registrationForm" class="hidden">
+    <section id="registrationForm" class="hidden">
       <h2>Register Account</h2>
       <form id="regForm">
-        <input type="text" id="name" placeholder="Name*" required maxlength="32" />
-        <input type="text" id="bio" placeholder="Bio" maxlength="160" />
-        <input type="url" id="avatarUrl" placeholder="Avatar URL" />
-        <input type="url" id="website" placeholder="Website" />
+        <label>Name*<input type="text" id="name" maxlength="32" required /></label>
+        <label>Bio<input type="text" id="bio" maxlength="160" /></label>
+        <label>Avatar URL<input type="text" id="avatarUrl" /></label>
+        <label>Website<input type="text" id="website" /></label>
         <button type="submit">Register (0.05 VIN)</button>
       </form>
-    </div>
+    </section>
 
-    <div id="newPostForm" class="hidden">
+    <section id="newPostForm" class="hidden">
       <h2>New Post</h2>
       <form id="postForm">
-        <input type="text" id="postTitle" placeholder="Title" maxlength="100" />
-        <textarea id="postContent" placeholder="What's on your mind?" rows="4"></textarea>
-        <input type="url" id="postMedia" placeholder="Image URL (optional)" />
+        <label>Title<input type="text" id="postTitle" maxlength="100" required /></label>
+        <label>What's on your mind?<textarea id="postContent" maxlength="500" required></textarea></label>
+        <label>Image URL (optional)<input type="text" id="postMedia" /></label>
         <button type="submit">Post</button>
       </form>
-    </div>
+    </section>
 
-    <div id="feed" class="feed-area">
-      <p>Loading feed...</p>
-    </div>
+    <div id="feed" class="feed"></div>
   </main>
 
   <footer>
-    <p class="tip">Tip: Use VIC chain in MetaMask. On mobile, open in the wallet's browser (e.g. Viction, MetaMask).</p>
-    <a class="trade-link" href="https://VinSwap.vin" target="_blank">Trade VIN/VIC</a>
-    <p class="footer-note">Made with ❤️ on the VIC blockchain | <a href="https://VinSwap.vin" target="_blank">Trade VIN/VIC</a></p>
+    <p>Tip: Use VIC chain in MetaMask. On mobile, open in the wallet's browser (e.g. Viction, MetaMask).</p>
+    <a href="https://vinswap.vin" target="_blank">Trade VIN/VIC</a>
+    <p>Made with ❤️ on the VIC blockchain | Trade VIN/VIC</p>
   </footer>
 </body>
 </html>

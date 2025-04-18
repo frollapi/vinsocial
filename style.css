@@ -1,189 +1,238 @@
-body {
+/* Reset và font */
+* {
   margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f5f8fa;
-  color: #14171a;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', sans-serif;
 }
 
-.container {
-  max-width: 850px;
-  margin: 0 auto;
-  padding: 20px;
+body {
+  background: #f2f3f5;
+  color: #333;
+  line-height: 1.6;
 }
 
+/* Header */
 header {
-  text-align: center;
-  margin-bottom: 20px;
+  background: #ffffff;
+  border-bottom: 1px solid #ccc;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .logo {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
-h1 {
-  font-size: 2rem;
-  margin: 10px 0 5px;
+.logo img {
+  height: 40px;
 }
 
-.slogan {
-  font-size: 1.1rem;
-  color: #657786;
+.logo h1 {
+  font-size: 24px;
+  margin-top: 5px;
 }
 
-.auth-buttons {
-  text-align: center;
+.logo p {
+  font-size: 14px;
+  color: #555;
+}
+
+/* Wallet info */
+.wallet-info {
+  text-align: right;
+}
+
+.wallet-info button {
+  padding: 8px 16px;
+  background: #2266ee;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.wallet-info button:hover {
+  background: #1144cc;
+}
+
+#walletDetails span {
+  display: block;
+  font-size: 14px;
+  margin-top: 6px;
+}
+
+/* Navigation */
+nav {
+  background: #fff;
+  border-bottom: 1px solid #ccc;
+  padding: 10px 20px;
+}
+
+nav ul {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  list-style: none;
+}
+
+nav button {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #2266ee;
+}
+
+nav button:hover {
+  text-decoration: underline;
+}
+
+/* Main content */
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+#contentArea {
+  width: 100%;
+  max-width: 700px;
+}
+
+form {
+  background: #fff;
+  border: 1px solid #ccc;
+  padding: 15px;
+  border-radius: 10px;
   margin-bottom: 20px;
 }
 
-button {
-  background-color: #1da1f2;
+form label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+form input,
+form textarea {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+form button {
+  margin-top: 10px;
+  padding: 10px 16px;
+  background: #28a745;
   color: white;
   border: none;
-  padding: 10px 22px;
-  font-size: 1rem;
-  margin: 5px;
-  border-radius: 25px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background-color 0.3s;
 }
 
-button:hover {
-  background-color: #0d8ddb;
+form button:hover {
+  background: #218838;
 }
 
-.status {
-  text-align: center;
-  font-size: 0.95rem;
-  margin-bottom: 10px;
-  color: #e0245e;
-  font-weight: bold;
-}
-
-.instructions {
-  background: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffeeba;
-  padding: 15px;
-  border-radius: 6px;
-  margin-bottom: 20px;
-  font-size: 0.95rem;
-}
-
-.instructions pre {
-  background: #fdf8e4;
-  padding: 10px;
-  border-radius: 6px;
-  overflow-x: auto;
-  font-size: 0.9rem;
-}
-
-#registrationForm,
-.post-form,
-.profile-card {
-  background: #ffffff;
-  padding: 20px;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  margin-bottom: 20px;
-}
-
-#registrationForm label {
-  display: block;
-  margin-top: 10px;
-  font-weight: bold;
-}
-
-#registrationForm input,
-#registrationForm textarea,
-.post-form input,
-.post-form textarea {
-  width: 100%;
-  padding: 10px;
-  margin-top: 6px;
-  border: 1px solid #ccd6dd;
-  border-radius: 6px;
-  font-size: 1rem;
-  box-sizing: border-box;
-}
-
-#registrationForm button,
-.post-form button {
-  margin-top: 15px;
-  background-color: #17bf63;
-}
-
-#registrationForm button:hover,
-.post-form button:hover {
-  background-color: #129c4d;
-}
-
-#mainApp,
-#profileView {
-  background: white;
-  padding: 20px;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  margin-bottom: 30px;
+/* Feed & posts */
+#feed {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .post {
-  border-bottom: 1px solid #e6ecf0;
-  padding: 15px 0;
+  background: #ffffff;
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
 }
 
 .post h3 {
-  margin: 0 0 8px;
-  font-size: 1.2rem;
+  font-size: 18px;
+  margin-bottom: 10px;
 }
 
 .post p {
   margin: 5px 0;
-  white-space: pre-wrap;
 }
 
-.post small {
-  color: #657786;
-  font-size: 0.85rem;
-}
-
-.actions {
+.post .actions {
+  display: flex;
+  justify-content: space-between;
   margin-top: 10px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
-.actions button {
-  background-color: #e1e8ed;
-  color: #14171a;
-  border-radius: 20px;
-  padding: 6px 14px;
-  font-size: 0.85rem;
-  margin-right: 6px;
+.post .actions button {
+  background: none;
+  border: none;
+  color: #007bff;
+  cursor: pointer;
+  font-size: 14px;
 }
 
-.actions button:hover {
-  background-color: #cfd9de;
+.post .actions button:hover {
+  text-decoration: underline;
 }
 
+/* Comments */
 .comment-section {
   margin-top: 10px;
-  padding-left: 12px;
-  border-left: 2px solid #e1e8ed;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
 }
 
 .comment {
-  margin-bottom: 6px;
-  font-size: 0.9rem;
+  background: #f7f7f7;
+  padding: 8px;
+  border-radius: 6px;
+  margin-bottom: 5px;
 }
 
-.profile-card {
+.comment small {
+  display: block;
+  color: #666;
+  font-size: 12px;
+}
+
+/* Footer */
+footer {
   text-align: center;
+  margin-top: 50px;
+  padding: 20px;
+  color: #777;
+  font-size: 14px;
 }
 
-.profile-avatar {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-bottom: 10px;
+/* Responsive */
+@media (max-width: 600px) {
+  .logo h1 {
+    font-size: 20px;
+  }
+
+  nav ul {
+    gap: 10px;
+    font-size: 14px;
+  }
+
+  form input,
+  form textarea {
+    font-size: 13px;
+  }
+
+  .post h3 {
+    font-size: 16px;
+  }
 }

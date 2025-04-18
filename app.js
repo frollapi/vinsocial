@@ -1,4 +1,4 @@
-const vinSocialAddress = "0xdEDe433305ed14E3791CF5C47F66060F84a68F10";
+const vinSocialAddress = "0x1a68799bC78a312bE434F28C5F04814E14CF49a7";
 const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";
 
 const vinAbi = [

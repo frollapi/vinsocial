@@ -1,6 +1,17 @@
 const vinSocialAddress = "0x2DB5a0Dcf2942d552EF02D683b4d5852A7431a87";
 const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";
 
+// 👉 Dán đầy đủ ABI của VinSocial vào đây:
+const vinSocialAbi = [ /* từ file VinSocial_ABI.json */ ];
+
+// 👉 Dùng bản rút gọn của token VIN là đủ:
+const vinAbi = [
+  "function balanceOf(address) view returns (uint256)",
+  "function allowance(address owner, address spender) view returns (uint256)",
+  "function approve(address spender, uint256 amount) returns (bool)",
+  "function estimateFee(uint256 amount) view returns (uint256)"
+];
+
 let provider, signer, userAddress, vinSocialContract, vinTokenContract;
 let registered = false;
 

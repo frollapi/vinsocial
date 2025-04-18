@@ -1,238 +1,175 @@
-/* Reset và font */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Segoe UI', sans-serif;
-}
-
 body {
-  background: #f2f3f5;
-  color: #333;
-  line-height: 1.6;
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #f9f9f9;
+  color: #111;
 }
 
-/* Header */
 header {
-  background: #ffffff;
-  border-bottom: 1px solid #ccc;
-  padding: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
+  text-align: center;
+  padding: 1rem;
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
 }
 
 .logo {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .logo img {
+  width: 40px;
   height: 40px;
+  border-radius: 12px;
 }
 
-.logo h1 {
-  font-size: 24px;
-  margin-top: 5px;
-}
-
-.logo p {
-  font-size: 14px;
+.slogan {
+  font-size: 0.95rem;
   color: #555;
+  margin-top: 0.25rem;
 }
 
-/* Wallet info */
-.wallet-info {
-  text-align: right;
+#walletDetails {
+  margin-top: 0.5rem;
 }
 
-.wallet-info button {
-  padding: 8px 16px;
-  background: #2266ee;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.wallet-info button:hover {
-  background: #1144cc;
-}
-
-#walletDetails span {
-  display: block;
-  font-size: 14px;
-  margin-top: 6px;
-}
-
-/* Navigation */
-nav {
-  background: #fff;
-  border-bottom: 1px solid #ccc;
-  padding: 10px 20px;
-}
-
-nav ul {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-  list-style: none;
-}
-
-nav button {
-  background: transparent;
-  border: none;
-  font-size: 16px;
-  cursor: pointer;
-  color: #2266ee;
-}
-
-nav button:hover {
-  text-decoration: underline;
-}
-
-/* Main content */
-main {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-}
-
-#contentArea {
-  width: 100%;
-  max-width: 700px;
-}
-
-form {
-  background: #fff;
-  border: 1px solid #ccc;
-  padding: 15px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-}
-
-form label {
-  display: block;
-  margin-bottom: 10px;
-  font-size: 14px;
-}
-
-form input,
-form textarea {
-  width: 100%;
-  padding: 8px;
-  font-size: 14px;
-  margin-top: 5px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-form button {
-  margin-top: 10px;
-  padding: 10px 16px;
-  background: #28a745;
+button {
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+  background-color: #0077cc;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  margin: 0.25rem;
 }
 
-form button:hover {
-  background: #218838;
+button:hover {
+  background-color: #005fa3;
 }
 
-/* Feed & posts */
-#feed {
+nav {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background-color: #f1f1f1;
+  border-bottom: 1px solid #ddd;
+}
+
+.notice {
+  background-color: #fffbe6;
+  border-left: 5px solid #ffd700;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  margin: 1rem;
+  border-radius: 6px;
+}
+
+main {
+  max-width: 700px;
+  margin: auto;
+  padding: 1rem;
+}
+section {
+  margin-bottom: 2rem;
+}
+
+.hidden {
+  display: none;
+}
+
+form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+form input,
+form textarea {
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 100%;
+}
+
+form button {
+  width: fit-content;
+  align-self: flex-start;
 }
 
 .post {
-  background: #ffffff;
-  padding: 15px;
+  background: #fff;
+  border: 1px solid #ddd;
   border-radius: 10px;
-  border: 1px solid #ccc;
+  padding: 1rem;
+  margin-bottom: 1.25rem;
 }
 
 .post h3 {
-  font-size: 18px;
-  margin-bottom: 10px;
+  margin-top: 0;
+  font-size: 1.1rem;
 }
 
-.post p {
-  margin: 5px 0;
+.post small {
+  color: #777;
 }
 
-.post .actions {
+.actions {
+  margin-top: 0.5rem;
   display: flex;
-  justify-content: space-between;
-  margin-top: 10px;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 0.5rem;
 }
 
-.post .actions button {
-  background: none;
-  border: none;
-  color: #007bff;
-  cursor: pointer;
-  font-size: 14px;
+.actions button {
+  background-color: #e1ecf4;
+  color: #0077cc;
+  font-weight: bold;
 }
 
-.post .actions button:hover {
-  text-decoration: underline;
+.actions button:hover {
+  background-color: #c9e6ff;
 }
 
-/* Comments */
 .comment-section {
-  margin-top: 10px;
-  padding-top: 10px;
+  margin-top: 1rem;
+  padding-top: 0.5rem;
   border-top: 1px solid #eee;
 }
 
 .comment {
-  background: #f7f7f7;
-  padding: 8px;
+  background-color: #f6f8fa;
   border-radius: 6px;
-  margin-bottom: 5px;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
-.comment small {
-  display: block;
-  color: #666;
-  font-size: 12px;
+#profileInfo {
+  background: #fff;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 1rem;
 }
 
-/* Footer */
 footer {
   text-align: center;
-  margin-top: 50px;
-  padding: 20px;
-  color: #777;
-  font-size: 14px;
+  padding: 1rem;
+  font-size: 0.9rem;
+  background-color: #f0f0f0;
+  border-top: 1px solid #ccc;
 }
 
-/* Responsive */
-@media (max-width: 600px) {
-  .logo h1 {
-    font-size: 20px;
-  }
-
-  nav ul {
-    gap: 10px;
-    font-size: 14px;
-  }
-
-  form input,
-  form textarea {
-    font-size: 13px;
-  }
-
-  .post h3 {
-    font-size: 16px;
-  }
+footer a {
+  color: #0077cc;
+  font-weight: bold;
 }

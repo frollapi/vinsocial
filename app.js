@@ -46,6 +46,7 @@ window.addEventListener("load", async () => {
   document.getElementById("homeBtn").onclick = loadFeed;
   document.getElementById("registerBtn").onclick = showRegistrationForm;
   document.getElementById("postBtn").onclick = showPostForm;
+  document.getElementById("regForm").onsubmit = handleRegister;
 
   await checkIfConnected();
 });

@@ -1,175 +1,138 @@
 body {
+  font-family: Arial, sans-serif;
   margin: 0;
-  font-family: system-ui, sans-serif;
-  background: #f9f9f9;
-  color: #111;
+  padding: 0;
+  background-color: #f5f8fa;
+  color: #14171a;
 }
 
 header {
-  text-align: center;
-  padding: 1rem;
-  background-color: #fff;
-  border-bottom: 1px solid #ddd;
-}
-
-.logo {
+  background-color: #1da1f2;
+  color: white;
+  padding: 10px 20px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+  justify-content: space-between;
 }
 
-.logo img {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
+header h1 {
+  margin: 0;
+  font-size: 24px;
 }
 
-.slogan {
-  font-size: 0.95rem;
-  color: #555;
-  margin-top: 0.25rem;
-}
-
-#walletDetails {
-  margin-top: 0.5rem;
-}
-
-button {
-  padding: 0.5rem 1rem;
-  font-size: 0.95rem;
-  background-color: #0077cc;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  margin: 0.25rem;
-}
-
-button:hover {
-  background-color: #005fa3;
-}
-
-nav {
+nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: flex;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem;
-  background-color: #f1f1f1;
-  border-bottom: 1px solid #ddd;
+  gap: 10px;
 }
 
-.notice {
-  background-color: #fffbe6;
-  border-left: 5px solid #ffd700;
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
-  margin: 1rem;
-  border-radius: 6px;
+nav ul li button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
 }
 
 main {
-  max-width: 700px;
+  padding: 20px;
+  max-width: 600px;
   margin: auto;
-  padding: 1rem;
-}
-section {
-  margin-bottom: 2rem;
 }
 
-.hidden {
+#walletDetails {
   display: none;
+  padding: 10px;
+  background-color: #e1f5fe;
+  margin-bottom: 20px;
+  border-radius: 5px;
 }
 
 form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-top: 1rem;
-  background: #fff;
-  padding: 1rem;
-  border-radius: 8px;
-  border: 1px solid #ddd;
+  background-color: white;
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-form input,
-form textarea {
-  padding: 0.5rem;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+form input, form textarea {
   width: 100%;
+  padding: 8px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  border-radius: 4px;
+  border: 1px solid #ccc;
 }
 
 form button {
-  width: fit-content;
-  align-self: flex-start;
+  padding: 10px 20px;
+  background-color: #1da1f2;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  margin-top: 10px;
 }
 
 .post {
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  padding: 1rem;
-  margin-bottom: 1.25rem;
+  background-color: white;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-.post h3 {
-  margin-top: 0;
-  font-size: 1.1rem;
-}
-
-.post small {
-  color: #777;
-}
-
-.actions {
-  margin-top: 0.5rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+.post .meta {
+  font-size: 13px;
+  color: #657786;
 }
 
 .actions button {
-  background-color: #e1ecf4;
-  color: #0077cc;
-  font-weight: bold;
+  margin-right: 10px;
+  padding: 5px 10px;
+  font-size: 14px;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  background-color: #e8f5fe;
+  color: #1da1f2;
 }
 
 .actions button:hover {
-  background-color: #c9e6ff;
+  background-color: #d0e8fc;
+}
+
+.media {
+  width: 100%;
+  border-radius: 8px;
+  margin-top: 10px;
 }
 
 .comment-section {
-  margin-top: 1rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid #eee;
+  margin-top: 10px;
+  padding-left: 10px;
+  border-left: 2px solid #eee;
 }
 
 .comment {
-  background-color: #f6f8fa;
-  border-radius: 6px;
-  padding: 0.5rem;
-  margin-bottom: 0.5rem;
+  font-size: 14px;
+  margin-bottom: 10px;
 }
 
-#profileInfo {
-  background: #fff;
-  padding: 1rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  margin-bottom: 1rem;
+.profile img.avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 10px;
 }
 
 footer {
   text-align: center;
-  padding: 1rem;
-  font-size: 0.9rem;
-  background-color: #f0f0f0;
-  border-top: 1px solid #ccc;
-}
-
-footer a {
-  color: #0077cc;
-  font-weight: bold;
+  padding: 20px;
+  font-size: 14px;
+  color: #657786;
 }

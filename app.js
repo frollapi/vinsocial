@@ -126,6 +126,8 @@ async function handleRegister(e) {
     await tx.wait();
 
     alert("🎉 Registered successfully!");
+    document.getElementById("registerBtn").style.display = "none";
+    document.getElementById("postBtn").style.display = "inline-block";
     document.getElementById("registrationForm").classList.add("hidden");
     await checkRegistration();
     await loadFeed();

@@ -1,71 +1,80 @@
-/* === VinSocial.vin CSS === */
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background-color: #f5f8fa;
-  color: #14171a;
+  font-family: system-ui, sans-serif;
+  background: #f9f9f9;
+  color: #111;
 }
 
 header {
-  background: #ffffff;
-  padding: 12px 24px;
-  border-bottom: 1px solid #e1e8ed;
+  text-align: center;
+  padding: 1rem;
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
+}
+
+.logo {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-}
-
-header h1 {
-  font-size: 24px;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-header img.logo {
-  height: 28px;
-}
-
-nav ul {
-  list-style: none;
-  display: flex;
-  gap: 16px;
-  padding: 0;
-  margin: 16px 0;
   justify-content: center;
+  gap: 0.5rem;
 }
 
-nav ul li button {
-  padding: 6px 14px;
-  border-radius: 20px;
-  background-color: #1da1f2;
-  color: white;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
+.logo img {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
 }
 
-#connectBtn, #disconnectBtn {
-  background-color: #1da1f2;
-  color: white;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 20px;
-  cursor: pointer;
-  font-weight: bold;
+.slogan {
+  font-size: 0.95rem;
+  color: #555;
+  margin-top: 0.25rem;
 }
 
 #walletDetails {
-  text-align: center;
-  margin-top: 10px;
-  display: none;
+  margin-top: 0.5rem;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  font-size: 0.95rem;
+  background-color: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin: 0.25rem;
+}
+
+button:hover {
+  background-color: #005fa3;
+}
+
+nav {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background-color: #f1f1f1;
+  border-bottom: 1px solid #ddd;
+}
+
+.notice {
+  background-color: #fffbe6;
+  border-left: 5px solid #ffd700;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  margin: 1rem;
+  border-radius: 6px;
 }
 
 main {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 16px;
+  max-width: 700px;
+  margin: auto;
+  padding: 1rem;
+}
+section {
+  margin-bottom: 2rem;
 }
 
 .hidden {
@@ -73,74 +82,94 @@ main {
 }
 
 form {
-  background: white;
-  padding: 16px;
-  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  background: #fff;
+  padding: 1rem;
   border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  border: 1px solid #ddd;
 }
 
-form input, form textarea {
-  width: 100%;
-  padding: 10px;
-  margin: 6px 0 12px;
+form input,
+form textarea {
+  padding: 0.5rem;
+  font-size: 1rem;
   border: 1px solid #ccc;
   border-radius: 6px;
-  font-size: 14px;
+  width: 100%;
 }
 
 form button {
-  background-color: #1da1f2;
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 20px;
-  cursor: pointer;
-  font-weight: bold;
+  width: fit-content;
+  align-self: flex-start;
 }
 
-.post, .profile {
-  background: white;
-  padding: 16px;
-  margin-bottom: 16px;
-  border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+.post {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 1rem;
+  margin-bottom: 1.25rem;
 }
 
-.media {
-  max-width: 100%;
-  border-radius: 8px;
-  margin-top: 10px;
+.post h3 {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+.post small {
+  color: #777;
+}
+
+.actions {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .actions button {
-  margin-right: 10px;
-  padding: 4px 10px;
-  background-color: #e1e8ed;
-  border: none;
-  border-radius: 16px;
-  font-size: 14px;
-  cursor: pointer;
+  background-color: #e1ecf4;
+  color: #0077cc;
+  font-weight: bold;
+}
+
+.actions button:hover {
+  background-color: #c9e6ff;
+}
+
+.comment-section {
+  margin-top: 1rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #eee;
 }
 
 .comment {
-  padding: 6px 12px;
-  background-color: #f0f8ff;
+  background-color: #f6f8fa;
   border-radius: 6px;
-  margin-top: 6px;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
-.avatar {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin: 10px 0;
+#profileInfo {
+  background: #fff;
+  padding: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 1rem;
 }
 
 footer {
   text-align: center;
-  font-size: 13px;
-  color: #657786;
-  margin: 32px 0;
+  padding: 1rem;
+  font-size: 0.9rem;
+  background-color: #f0f0f0;
+  border-top: 1px solid #ccc;
+}
+
+footer a {
+  color: #0077cc;
+  font-weight: bold;
 }

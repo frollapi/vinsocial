@@ -2,19 +2,21 @@
 const vinSocialAddress = "0x2DB5a0Dcf2942d552EF02D683b4d5852A7431a87";
 const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";
 
-// 👉 ABI đầy đủ của VinSocial (rút gọn logic cần dùng)
+// 👉 ABI đầy đủ cho VinSocial (gồm các hàm về hồ sơ cá nhân, like, follow, posts...)
 const vinSocialAbi = [
   {
     "inputs": [{"internalType": "address","name": "_vinToken","type": "address"}],
     "stateMutability": "nonpayable","type": "constructor"
   },
   {
-    "anonymous": false,"inputs": [{"indexed": true,"internalType": "address","name": "user","type": "address"}],
-    "name": "Registered","type": "event"
-  },
-  {
     "inputs": [{"internalType": "address","name": "","type": "address"}],
     "name": "registered","outputs": [{"internalType": "bool","name": "","type": "bool"}],
+    "stateMutability": "view","type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "nextPostId",
+    "outputs": [{"internalType": "uint256","name": "","type": "uint256"}],
     "stateMutability": "view","type": "function"
   },
   {
@@ -25,6 +27,17 @@ const vinSocialAbi = [
       {"internalType": "string","name": "website","type": "string"}
     ],
     "name": "register","outputs": [],"stateMutability": "nonpayable","type": "function"
+  },
+  {
+    "inputs": [{"internalType": "address","name": "","type": "address"}],
+    "name": "users",
+    "outputs": [
+      {"internalType": "string","name": "name","type": "string"},
+      {"internalType": "string","name": "bio","type": "string"},
+      {"internalType": "string","name": "avatarUrl","type": "string"},
+      {"internalType": "string","name": "website","type": "string"}
+    ],
+    "stateMutability": "view","type": "function"
   },
   {
     "inputs": [
@@ -47,19 +60,9 @@ const vinSocialAbi = [
     "stateMutability": "view","type": "function"
   },
   {
-    "inputs": [{"internalType": "address","name": "","type": "address"}],
-    "name": "users",
-    "outputs": [
-      {"internalType": "string","name": "name","type": "string"},
-      {"internalType": "string","name": "bio","type": "string"},
-      {"internalType": "string","name": "avatarUrl","type": "string"},
-      {"internalType": "string","name": "website","type": "string"}
-    ],
-    "stateMutability": "view","type": "function"
-  },
-  {
-    "inputs": [],"name": "nextPostId",
-    "outputs": [{"internalType": "uint256","name": "","type": "uint256"}],
+    "inputs": [{"internalType": "address","name": "user","type": "address"}],
+    "name": "getUserPosts",
+    "outputs": [{"internalType": "uint256[]","name": "","type": "uint256[]"}],
     "stateMutability": "view","type": "function"
   },
   {
@@ -108,7 +111,7 @@ const vinSocialAbi = [
   }
 ];
 
-// 👉 ABI rút gọn của VIN token
+// 👉 ABI rút gọn của token VIN
 const vinAbi = [
   "function balanceOf(address) view returns (uint256)",
   "function allowance(address owner, address spender) view returns (uint256)",
@@ -117,10 +120,10 @@ const vinAbi = [
 ];
 
 // 👉 Biến toàn cục
-let provider, signer, userAddress, vinSocialContract, vinTokenContract;
+let provider, signer, userAddress;
+let vinSocialContract, vinTokenContract;
 let registered = false;
 
-// 👉 Khi tải trang: gắn sự kiện các nút
 window.addEventListener("load", async () => {
   document.getElementById("connectBtn").onclick = connectWallet;
   document.getElementById("disconnectBtn").onclick = disconnectWallet;
@@ -129,6 +132,7 @@ window.addEventListener("load", async () => {
   document.getElementById("postBtn").onclick = showPostForm;
   document.getElementById("postForm").onsubmit = handleCreatePost;
   document.getElementById("homeBtn").onclick = loadFeed;
+  document.getElementById("profileBtn").onclick = showMyProfile;
 
   await checkIfConnected();
 });
@@ -153,7 +157,7 @@ async function connectWallet() {
 
   await updateBalances();
   await checkRegistration();
-  loadFeed();
+  await loadFeed();
 }
 
 function disconnectWallet() {
@@ -181,6 +185,7 @@ async function checkRegistration() {
   try {
     registered = await vinSocialContract.registered(userAddress);
     document.getElementById("postBtn").style.display = registered ? "inline-block" : "none";
+    document.getElementById("registerBtn").style.display = registered ? "none" : "inline-block";
   } catch (err) {
     console.log("checkRegistration error:", err);
   }
@@ -190,6 +195,7 @@ function showRegistrationForm() {
   if (!registered) {
     document.getElementById("registrationForm").style.display = "block";
     document.getElementById("newPostForm").style.display = "none";
+    document.getElementById("profileSection").style.display = "none";
   } else {
     alert("You are already registered!");
   }
@@ -220,6 +226,7 @@ async function handleRegister(e) {
     registered = true;
     document.getElementById("registrationForm").style.display = "none";
     document.getElementById("postBtn").style.display = "inline-block";
+    document.getElementById("registerBtn").style.display = "none";
   } catch (err) {
     console.error("Registration error:", err);
     alert("Registration failed");
@@ -233,6 +240,7 @@ function showPostForm() {
   }
   document.getElementById("newPostForm").style.display = "block";
   document.getElementById("registrationForm").style.display = "none";
+  document.getElementById("profileSection").style.display = "none";
 }
 
 async function handleCreatePost(e) {
@@ -371,5 +379,61 @@ async function followUser(userAddr) {
   } catch (err) {
     alert("Failed to follow/unfollow.");
     console.error(err);
+  }
+}
+
+async function showMyProfile() {
+  if (!registered) {
+    alert("You must register first.");
+    return;
+  }
+
+  document.getElementById("registrationForm").style.display = "none";
+  document.getElementById("newPostForm").style.display = "none";
+  document.getElementById("feed").innerHTML = "";
+  const section = document.getElementById("profileSection");
+  section.style.display = "block";
+
+  try {
+    const user = await vinSocialContract.users(userAddress);
+    section.innerHTML = `
+      <div class="profile-card">
+        ${user.avatarUrl ? `<img src="${user.avatarUrl}" alt="avatar" class="avatar">` : ""}
+        <h2>${user.name || userAddress.slice(0, 6)}</h2>
+        <p>${user.bio || ""}</p>
+        ${user.website ? `<p><a href="${user.website}" target="_blank">${user.website}</a></p>` : ""}
+      </div>
+      <div id="myPosts"><h3>Your Posts</h3><p>Loading...</p></div>
+    `;
+
+    const container = section.querySelector("#myPosts");
+    const postIds = await vinSocialContract.getUserPosts(userAddress);
+    let html = "";
+
+    for (let i = postIds.length - 1; i >= 0; i--) {
+      const post = await vinSocialContract.posts(postIds[i]);
+      html += `
+        <div class="post">
+          <h3>${post.title}</h3>
+          <p>${post.content}</p>
+          ${post.media ? `<img src="${post.media}" style="max-width:100%; border-radius:8px; margin-top:10px"/>` : ""}
+          <p><small>⏰ ${new Date(post.timestamp * 1000).toLocaleString()}</small></p>
+          <div class="actions">
+            <button onclick="likePost(${postIds[i]})">👍 Like</button>
+            <button onclick="sharePost(${postIds[i]})">🔁 Share</button>
+            <button onclick="commentPrompt(${postIds[i]})">💬 Comment</button>
+            <button onclick="translatePost('${post.content.replace(/'/g, "\\'")}')">🌐 Translate</button>
+          </div>
+          <div class="comment-section" id="comments-my-${postIds[i]}">
+            ${await renderComments(postIds[i])}
+          </div>
+        </div>
+      `;
+    }
+
+    container.innerHTML = html || "<p>You haven't posted anything yet.</p>";
+  } catch (err) {
+    console.error("Load profile error:", err);
+    section.innerHTML = "<p>Failed to load profile.</p>";
   }
 }

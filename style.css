@@ -116,3 +116,9 @@ footer {
 #connectBtn:hover, #disconnectBtn:hover {
   background: #5a6268;
 }
+
+.post {
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid #eee;
+}

@@ -9,13 +9,13 @@
 </head>
 <body>
   <header>
-    <img src="logo.png" alt="VinSocial Logo" />
+    <img src="logo.png" alt="VinSocial Logo" id="logo" />
     <h1>VinSocial.vin</h1>
     <p>Decentralized. Uncensored. Free Speech.</p>
-    <div id="walletDetails" style="display: none;">
+    <div id="walletDetails" class="hidden">
       <span id="walletAddress"></span><br />
-      <span id="vinBalance">-- VIN</span> | <span id="vicBalance">-- VIC</span>
-      <br /><button id="disconnectBtn">Disconnect</button>
+      <span id="vinBalance">-- VIN</span> | <span id="vicBalance">-- VIC</span><br />
+      <button id="disconnectBtn">Disconnect</button>
     </div>
     <button id="connectBtn">Connect Wallet</button>
   </header>
@@ -24,7 +24,7 @@
     <button id="homeBtn">🏠 Home</button>
     <button id="myProfileBtn">👤 My Profile</button>
     <button id="registerBtn">📝 Register</button>
-    <button id="postBtn" style="display: none;">✍️ New Post</button>
+    <button id="postBtn" class="hidden">✍️ New Post</button>
   </nav>
 
   <section id="registrationForm" class="hidden">
@@ -63,7 +63,7 @@
   <footer>
     <p>Tip: Use VIC chain in MetaMask. On mobile, open in the wallet's browser (e.g. Viction, MetaMask).</p>
     <p>Need VIN? <a href="https://vinswap.vin" target="_blank">Trade VIN/VIC</a></p>
-    <p>Made with ❤️ on the VIC blockchain | <a href="https://vinswap.vin" target="_blank">Trade VIN/VIC</a></p>
+    <p>Made with ❤️ on the VIC blockchain</p>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>

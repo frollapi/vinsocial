@@ -1,193 +1,147 @@
-/* ✅ style.css hoàn chỉnh cho VinSocial.vin */
-
 body {
-  margin: 0;
-  font-family: system-ui, sans-serif;
+  font-family: Arial, sans-serif;
   background: #f9f9f9;
-  color: #111;
+  margin: 0;
+  padding: 0;
+  color: #333;
 }
 
 header {
-  text-align: center;
+  background: #222;
+  color: #fff;
   padding: 1rem;
-  background-color: #fff;
-  border-bottom: 1px solid #ddd;
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.logo img {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-}
-
-.slogan {
-  font-size: 0.95rem;
-  color: #555;
-  margin-top: 0.25rem;
-}
-
-#walletDetails {
-  margin-top: 0.5rem;
-}
-
-button {
-  padding: 0.5rem 1rem;
-  font-size: 0.95rem;
-  background-color: #0077cc;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  margin: 0.25rem;
-}
-
-button:hover {
-  background-color: #005fa3;
+  text-align: center;
 }
 
 nav {
   display: flex;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 0.5rem;
-  background-color: #f1f1f1;
-  border-bottom: 1px solid #ddd;
-}
-
-.notice {
-  background-color: #fffbe6;
-  border-left: 5px solid #ffd700;
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
-  margin: 1rem;
-  border-radius: 6px;
-}
-
-main {
-  max-width: 700px;
-  margin: auto;
+  gap: 1rem;
   padding: 1rem;
-}
-
-section {
-  margin-bottom: 2rem;
-}
-
-.hidden {
-  display: none;
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-top: 1rem;
-  background: #fff;
-  padding: 1rem;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-}
-
-form input,
-form textarea {
-  padding: 0.5rem;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  width: 100%;
-}
-
-form button {
-  width: fit-content;
-  align-self: flex-start;
-}
-
-.post {
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  padding: 1rem;
-  margin-bottom: 1.25rem;
-}
-
-.post h3 {
-  margin-top: 0;
-  font-size: 1.1rem;
-}
-
-.post small {
-  color: #777;
-}
-
-.actions {
-  margin-top: 0.5rem;
-  display: flex;
+  background: #f1f1f1;
   flex-wrap: wrap;
-  gap: 0.5rem;
 }
 
-.actions button {
-  background-color: #e1ecf4;
-  color: #0077cc;
-  font-weight: bold;
+nav button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+  border: none;
+  background: #0077cc;
+  color: white;
+  border-radius: 5px;
 }
 
-.actions button:hover {
-  background-color: #c9e6ff;
-}
-
-.comment-section {
-  margin-top: 1rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid #eee;
-}
-
-.comment {
-  background-color: #f6f8fa;
-  border-radius: 6px;
-  padding: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-#profileInfo {
-  background: #fff;
+main, section {
+  max-width: 800px;
+  margin: 1rem auto;
   padding: 1rem;
-  border: 1px solid #ddd;
+  background: #fff;
   border-radius: 8px;
-  margin-bottom: 1rem;
+  box-shadow: 0 0 8px rgba(0,0,0,0.05);
 }
 
 footer {
   text-align: center;
   padding: 1rem;
   font-size: 0.9rem;
-  background-color: #f0f0f0;
-  border-top: 1px solid #ccc;
+  color: #666;
+  background: #f1f1f1;
 }
 
-footer a {
-  color: #0077cc;
-  font-weight: bold;
+form input, form textarea {
+  width: 100%;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+form button {
+  padding: 0.5rem 1.5rem;
+  background: #28a745;
+  color: white;
+  border: none;
+  font-size: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}
+
+.post {
+  border-bottom: 1px solid #ddd;
+  padding: 1rem 0;
+}
+
+.post img.media {
+  max-width: 100%;
+  margin-top: 0.5rem;
+  border-radius: 6px;
+}
+
+.post .meta {
+  font-size: 0.9rem;
+  color: #777;
+}
+
+.actions button {
+  margin-right: 0.5rem;
+  margin-top: 0.5rem;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.9rem;
+  background: #eee;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.actions button:hover {
+  background: #ddd;
+}
+
+.comment-section {
+  margin-top: 0.5rem;
+  padding-left: 1rem;
+  border-left: 2px solid #eee;
+}
+
+.comment {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
 }
 
 .avatar {
-  width: 60px;
-  height: 60px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
-  object-fit: cover;
-  margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
 }
 
-.media {
-  max-width: 100%;
-  max-height: 300px;
-  margin-top: 0.5rem;
-  border-radius: 10px;
+.clickable {
+  color: #0077cc;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#userProfileView, #profileView {
+  background: #ffffff;
+}
+
+@media (max-width: 600px) {
+  nav {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  nav button {
+    width: 100%;
+  }
+
+  header h1 {
+    font-size: 1.5rem;
+  }
 }

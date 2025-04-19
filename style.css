@@ -1,71 +1,73 @@
 body {
-  font-family: Arial, sans-serif;
-  background: #f4f6f8;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f2f4f8;
   margin: 0;
   padding: 0;
-  color: #333;
+  color: #222;
+  line-height: 1.6;
 }
 
 header {
   background: #ffffff;
-  border-bottom: 1px solid #ddd;
-  padding: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 1.5rem;
   text-align: center;
 }
 
 header h1 {
+  font-size: 2rem;
   display: inline-block;
-  font-size: 1.8rem;
-  margin: 0;
   vertical-align: middle;
+  margin: 0;
 }
 
 header img {
-  height: 48px;
+  height: 50px;
   vertical-align: middle;
-  margin-right: 10px;
+  margin-right: 12px;
 }
 
 header p {
-  margin: 0.5rem 0 0;
-  font-size: 0.95rem;
+  font-size: 1rem;
   color: #666;
+  margin-top: 0.5rem;
 }
 
 #walletDetails {
-  margin-top: 0.5rem;
+  margin-top: 1rem;
   font-size: 0.95rem;
 }
 
 #disconnectBtn {
   margin-top: 0.5rem;
-  background: #dc3545;
-  color: white;
+  background: #ff4d4f;
+  color: #fff;
   border: none;
-  padding: 0.4rem 1rem;
-  border-radius: 5px;
+  padding: 0.5rem 1.2rem;
+  border-radius: 50px;
+  font-size: 0.9rem;
   cursor: pointer;
-  font-size: 0.95rem;
 }
 
 nav {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
   background: #ffffff;
-  border-bottom: 1px solid #ddd;
   padding: 1rem;
+  border-bottom: 1px solid #eaeaea;
 }
 
 nav button {
-  padding: 0.5rem 1.2rem;
+  padding: 0.6rem 1.4rem;
   font-size: 1rem;
   background: #007bff;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 50px;
   cursor: pointer;
+  transition: background 0.3s ease;
 }
 
 nav button:hover {
@@ -74,21 +76,21 @@ nav button:hover {
 
 main, section {
   max-width: 700px;
-  margin: 1rem auto;
-  background: #fff;
+  margin: 1.5rem auto;
+  background: #ffffff;
   padding: 1.5rem;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 form input, form textarea {
   width: 100%;
-  padding: 0.75rem;
-  margin-top: 0.5rem;
-  margin-bottom: 1rem;
+  padding: 0.9rem;
+  margin: 0.5rem 0 1rem;
   border: 1px solid #ccc;
-  border-radius: 5px;
+  border-radius: 8px;
   font-size: 1rem;
+  box-sizing: border-box;
 }
 
 form button {
@@ -96,9 +98,14 @@ form button {
   color: white;
   border: none;
   padding: 0.6rem 1.2rem;
-  border-radius: 5px;
+  border-radius: 8px;
   font-size: 1rem;
   cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+form button:hover {
+  background: #218838;
 }
 
 .hidden {
@@ -106,46 +113,47 @@ form button {
 }
 
 .post {
-  border-bottom: 1px solid #eee;
-  padding: 1rem 0;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 1.2rem 0;
 }
 
 .post img.media {
   max-width: 100%;
+  border-radius: 10px;
   margin-top: 0.5rem;
-  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
 .meta {
   font-size: 0.9rem;
-  color: #666;
+  color: #555;
   margin-top: 0.5rem;
 }
 
 .actions button {
-  margin-top: 0.4rem;
-  margin-right: 0.5rem;
-  background: #f1f1f1;
+  background: #f8f9fa;
   border: 1px solid #ccc;
-  padding: 0.3rem 0.6rem;
-  border-radius: 4px;
-  cursor: pointer;
+  padding: 0.4rem 0.9rem;
+  border-radius: 50px;
   font-size: 0.9rem;
+  margin: 0.3rem 0.4rem 0 0;
+  cursor: pointer;
 }
 
 .actions button:hover {
-  background: #e2e2e2;
+  background: #e2e6ea;
 }
 
 .comment-section {
-  margin-top: 0.5rem;
-  padding-left: 1rem;
-  border-left: 2px solid #eee;
-  font-size: 0.9rem;
+  margin-top: 0.75rem;
+  padding-left: 1.2rem;
+  border-left: 3px solid #e0e0e0;
+  font-size: 0.95rem;
+  color: #444;
 }
 
 .comment {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .avatar {
@@ -153,32 +161,50 @@ form button {
   height: 60px;
   border-radius: 50%;
   margin-top: 0.5rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
 .clickable {
   color: #007bff;
-  font-weight: bold;
+  font-weight: 600;
   cursor: pointer;
 }
 
 footer {
   text-align: center;
-  padding: 1rem;
-  font-size: 0.9rem;
-  background: #fafafa;
-  border-top: 1px solid #ddd;
-  color: #666;
-  margin-top: 2rem;
+  padding: 1.5rem 1rem;
+  font-size: 0.95rem;
+  background: #ffffff;
+  border-top: 1px solid #eaeaea;
+  color: #777;
+  margin-top: 3rem;
+}
+
+footer a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+footer a:hover {
+  text-decoration: underline;
 }
 
 @media (max-width: 600px) {
   nav {
     flex-direction: column;
+    gap: 8px;
   }
+
   nav button {
     width: 100%;
   }
+
   header h1 {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
+  }
+
+  main, section {
+    margin: 1rem;
+    padding: 1rem;
   }
 }

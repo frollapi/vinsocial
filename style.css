@@ -1,229 +1,118 @@
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f9fafb;
   margin: 0;
-  padding: 0;
+  font-family: Arial, sans-serif;
+  background: #f8f9fa;
   color: #222;
-  line-height: 1.6;
 }
 
 header {
-  background: transparent;
-  padding: 1.5rem;
   text-align: center;
+  padding: 1rem;
+  background: white;
+  border-bottom: 1px solid #ddd;
 }
 
-header h1 {
-  font-size: 2rem;
-  display: inline-block;
-  vertical-align: middle;
-  margin: 0;
-}
-
-header img {
-  height: 50px;
-  vertical-align: middle;
-  margin-right: 12px;
+#logo {
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 0.5rem;
 }
 
-header p {
-  font-size: 1rem;
-  color: #666;
-  margin-top: 0.5rem;
+h1 {
+  margin: 0.2rem 0;
+  font-size: 1.8rem;
 }
 
-#walletDetails {
-  margin-top: 1rem;
+p {
+  margin: 0.2rem 0;
   font-size: 0.95rem;
-}
-
-#disconnectBtn {
-  margin-top: 0.5rem;
-  background: #ff4d4f;
-  color: #fff;
-  border: none;
-  padding: 0.5rem 1.2rem;
-  border-radius: 50px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-#connectBtn {
-  background: #007bff;
-  color: white;
-  border: none;
-  padding: 0.6rem 1.4rem;
-  font-size: 1rem;
-  border-radius: 50px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-  margin-top: 1rem;
-}
-
-#connectBtn:hover {
-  background: #0056b3;
+  color: #555;
 }
 
 nav {
   display: flex;
   justify-content: center;
+  gap: 1rem;
+  padding: 0.8rem;
+  background: white;
+  border-bottom: 1px solid #eee;
   flex-wrap: wrap;
-  gap: 12px;
-  background: transparent;
-  padding: 1rem;
 }
 
 nav button {
-  padding: 0.6rem 1.4rem;
-  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  border: none;
   background: #007bff;
   color: white;
-  border: none;
-  border-radius: 50px;
+  border-radius: 20px;
   cursor: pointer;
-  transition: background 0.3s ease;
+  font-weight: bold;
 }
 
 nav button:hover {
   background: #0056b3;
 }
 
-main, section {
-  max-width: 700px;
-  margin: 1.5rem auto;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 1.5rem;
-  border-radius: 16px;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
-  backdrop-filter: blur(4px);
+section, main {
+  max-width: 600px;
+  margin: 1rem auto;
+  background: white;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.05);
 }
 
-form input, form textarea {
+input, textarea {
   width: 100%;
-  padding: 0.9rem;
-  margin: 0.5rem 0 1rem;
-  border: 1px solid #ccc;
+  margin-bottom: 1rem;
+  padding: 0.6rem;
   border-radius: 8px;
+  border: 1px solid #ccc;
   font-size: 1rem;
-  box-sizing: border-box;
-  background: #ffffff;
 }
 
-form button {
+button[type="submit"] {
+  padding: 0.6rem 1.2rem;
   background: #28a745;
   color: white;
   border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 50px;
-  font-size: 1rem;
+  border-radius: 20px;
   cursor: pointer;
-  transition: background 0.3s ease;
+  font-weight: bold;
 }
 
-form button:hover {
+button[type="submit"]:hover {
   background: #218838;
+}
+
+footer {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.85rem;
+  color: #777;
 }
 
 .hidden {
   display: none;
 }
 
-.post {
-  border-bottom: 1px solid #f0f0f0;
-  padding: 1.2rem 0;
-}
-
-.post img.media {
-  max-width: 100%;
-  border-radius: 10px;
+#walletDetails {
   margin-top: 0.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-
-.meta {
   font-size: 0.9rem;
-  color: #555;
+}
+
+#connectBtn, #disconnectBtn {
   margin-top: 0.5rem;
-}
-
-.actions button {
-  background: #f8f9fa;
-  border: 1px solid #ccc;
-  padding: 0.4rem 0.9rem;
-  border-radius: 50px;
-  font-size: 0.9rem;
-  margin: 0.3rem 0.4rem 0 0;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.actions button:hover {
-  background: #e2e6ea;
-}
-
-.comment-section {
-  margin-top: 0.75rem;
-  padding-left: 1.2rem;
-  border-left: 3px solid #e0e0e0;
-  font-size: 0.95rem;
-  color: #444;
-}
-
-.comment {
-  margin-bottom: 0.75rem;
-}
-
-.avatar {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  margin-top: 0.5rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
-.clickable {
-  color: #007bff;
-  font-weight: 600;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 20px;
+  background: #6c757d;
+  color: white;
   cursor: pointer;
 }
 
-footer {
-  text-align: center;
-  padding: 1.5rem 1rem;
-  font-size: 0.95rem;
-  background: transparent;
-  color: #777;
-  margin-top: 3rem;
-}
-
-footer a {
-  color: #007bff;
-  text-decoration: none;
-}
-
-footer a:hover {
-  text-decoration: underline;
-}
-
-@media (max-width: 600px) {
-  nav {
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  nav button {
-    width: 100%;
-  }
-
-  header h1 {
-    font-size: 1.6rem;
-  }
-
-  main, section {
-    margin: 1rem;
-    padding: 1rem;
-  }
+#connectBtn:hover, #disconnectBtn:hover {
+  background: #5a6268;
 }

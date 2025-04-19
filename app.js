@@ -1,4 +1,4 @@
-// ✅ app.js hoàn chỉnh nhất – hỗ trợ xem bài viết ngay cả khi chưa đăng ký
+// ✅ app.js hoàn chỉnh cho VinSocial.vin – giống X (Twitter), không tin nhắn
 
 const vinSocialAddress = "0xeff6a28C1858D6faa95c0813946E9F0020ebf41D";
 const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";
@@ -43,37 +43,30 @@ window.addEventListener("load", async () => {
   document.getElementById("regForm").addEventListener("submit", handleRegister);
   document.getElementById("postForm").addEventListener("submit", handleCreatePost);
   document.getElementById("myProfileBtn").onclick = showMyProfile;
-
   await checkIfConnected();
 });
 
 async function checkIfConnected() {
   provider = new ethers.providers.Web3Provider(window.ethereum || window);
   vinSocial = new ethers.Contract(vinSocialAddress, vinSocialAbi, provider);
-
   if (window.ethereum && window.ethereum.selectedAddress) {
     await connectWallet();
   } else {
-    // ✅ Không cần kết nối ví vẫn hiển thị được bài viết công khai
     await loadFeed();
   }
 }
 
 async function connectWallet() {
   if (!window.ethereum) return alert("Please install MetaMask!");
-
   provider = new ethers.providers.Web3Provider(window.ethereum);
   await provider.send("eth_requestAccounts", []);
   signer = provider.getSigner();
   userAddress = await signer.getAddress();
-
   vinToken = new ethers.Contract(vinTokenAddress, vinAbi, signer);
   vinSocial = new ethers.Contract(vinSocialAddress, vinSocialAbi, signer);
-
   document.getElementById("walletAddress").innerText = `Wallet: ${userAddress}`;
   document.getElementById("walletDetails").style.display = "block";
   document.getElementById("connectBtn").style.display = "none";
-
   await updateBalances();
   await checkRegistration();
   await loadFeed();
@@ -86,17 +79,9 @@ async function updateBalances() {
   document.getElementById("vicBalance").innerText = `${ethers.utils.formatUnits(vicBal, 18).slice(0, 8)} VIC`;
 }
 
-function showRegistrationForm() {
-  document.getElementById("registrationForm").classList.remove("hidden");
-  document.getElementById("newPostForm").classList.add("hidden");
+function sanitize(str) {
+  return str.replace(/[&<>\"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', "'": '&#39;' }[m]));
 }
-
-function showPostForm() {
-  if (!registered) return alert("You must register first.");
-  document.getElementById("newPostForm").classList.remove("hidden");
-  document.getElementById("registrationForm").classList.add("hidden");
-}
-// ✅ Phần 2: Đăng ký, đăng bài, xem bài viết (dù chưa đăng ký)
 
 async function checkRegistration() {
   try {
@@ -108,29 +93,35 @@ async function checkRegistration() {
   }
 }
 
+function showRegistrationForm() {
+  document.getElementById("registrationForm").classList.remove("hidden");
+  document.getElementById("newPostForm").classList.add("hidden");
+}
+
+function showPostForm() {
+  if (!registered) return alert("You must register first.");
+  document.getElementById("newPostForm").classList.remove("hidden");
+  document.getElementById("registrationForm").classList.add("hidden");
+}
+
 async function handleRegister(e) {
   e.preventDefault();
   const name = document.getElementById("name").value.trim();
   const bio = document.getElementById("bio").value.trim();
   const avatarUrl = document.getElementById("avatarUrl").value.trim();
   const website = document.getElementById("website").value.trim();
-
-  if (!name || name.length > 32) return alert("Please enter a name (max 32 chars).);");
-
+  if (!name || name.length > 32) return alert("Please enter a name (max 32 chars).");
   try {
     const fee = ethers.utils.parseUnits("0.05", 18);
     const extra = await vinToken.estimateFee(fee);
     const total = fee.add(extra);
-
     const allowance = await vinToken.allowance(userAddress, vinSocialAddress);
     if (allowance.lt(total)) {
       const approveTx = await vinToken.approve(vinSocialAddress, total);
       await approveTx.wait();
     }
-
     const tx = await vinSocial.register(name, bio, avatarUrl, website);
     await tx.wait();
-
     alert("🎉 Registered successfully!");
     document.getElementById("registerBtn").style.display = "none";
     document.getElementById("postBtn").style.display = "inline-block";
@@ -148,9 +139,7 @@ async function handleCreatePost(e) {
   const title = document.getElementById("postTitle").value.trim();
   const content = document.getElementById("postContent").value.trim();
   const media = document.getElementById("postMedia").value.trim();
-
   if (!title || !content) return alert("Title and content required.");
-
   try {
     const tx = await vinSocial.createPost(title, content, media);
     await tx.wait();
@@ -164,14 +153,39 @@ async function handleCreatePost(e) {
   }
 }
 
-function sanitize(str) {
-  return str.replace(/[&<>"]'/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+async function getLikers(postId) {
+  try {
+    const followers = await vinSocial.getFollowers(vinSocialAddress);
+    let likers = [];
+    for (const addr of followers) {
+      try {
+        const liked = await vinSocial.hasLiked(postId, addr);
+        if (liked) likers.push(addr);
+      } catch {}
+    }
+    return likers;
+  } catch {
+    return [];
+  }
+}
+
+async function renderComments(postId) {
+  try {
+    const comments = await vinSocial.getComments(postId);
+    return comments.map(c => `
+      <div class="comment">
+        <p>${sanitize(c.message)}</p>
+        <small>👤 ${c.commenter.slice(0, 6)} | ${new Date(c.timestamp * 1000).toLocaleString()}</small>
+      </div>
+    `).join("");
+  } catch {
+    return "<p>Failed to load comments</p>";
+  }
 }
 
 async function loadFeed() {
   const feed = document.getElementById("feed");
   feed.innerHTML = "<p>Loading posts...</p>";
-
   try {
     let html = "";
     const nextId = await vinSocial.nextPostId();
@@ -180,13 +194,15 @@ async function loadFeed() {
         const post = await vinSocial.posts(i);
         if (post.author === "0x0000000000000000000000000000000000000000") continue;
         const user = await vinSocial.users(post.author);
-
+        const likers = await getLikers(i);
+        const likerDisplay = likers.length > 0 ? `❤️ Liked by: ${likers.map(a => a.slice(0, 6)).join(", ")}` : "";
         html += `
         <div class="post">
           <h3>${sanitize(post.title)}</h3>
           <p>${sanitize(post.content)}</p>
           ${post.media ? `<img src="${sanitize(post.media)}" class="media" />` : ""}
           <p class="meta">👤 ${user.name || post.author.slice(0, 8)} | 🕒 ${new Date(post.timestamp * 1000).toLocaleString()}</p>
+          ${likerDisplay ? `<p class="likes">${likerDisplay}</p>` : ""}
           <div class="actions">
             ${registered ? `
               <button onclick="likePost(${i})">👍 Like</button>
@@ -206,21 +222,6 @@ async function loadFeed() {
   } catch (err) {
     console.error("❌ Load feed error:", err);
     feed.innerHTML = "<p>Failed to load posts.</p>";
-  }
-}
-// ✅ Phần 3: Tương tác, bình luận, hồ sơ cá nhân, follow/share
-
-async function renderComments(postId) {
-  try {
-    const comments = await vinSocial.getComments(postId);
-    return comments.map(c => `
-      <div class="comment">
-        <p>${sanitize(c.message)}</p>
-        <small>👤 ${c.commenter.slice(0, 6)} | ${new Date(c.timestamp * 1000).toLocaleString()}</small>
-      </div>
-    `).join("");
-  } catch {
-    return "<p>Failed to load comments</p>";
   }
 }
 
@@ -279,51 +280,6 @@ function translatePost(text) {
   const url = `https://translate.google.com/?sl=auto&tl=en&text=${encodeURIComponent(text)}`;
   window.open(url, "_blank");
 }
-
-async function showMyProfile() {
-  if (!registered) return alert("You must register first.");
-  document.getElementById("profileView").classList.remove("hidden");
-  document.getElementById("feed").innerHTML = "";
-  document.getElementById("registrationForm").classList.add("hidden");
-  document.getElementById("newPostForm").classList.add("hidden");
-
-  const info = await vinSocial.users(userAddress);
-  const posts = await vinSocial.getUserPosts(userAddress);
-
-  let htmlInfo = `
-    <h2>👤 ${sanitize(info.name)}</h2>
-    ${info.avatarUrl ? `<img src="${info.avatarUrl}" class="avatar" />` : ""}
-    <p>${sanitize(info.bio)}</p>
-    ${info.website ? `<p>🔗 <a href='${info.website}' target='_blank'>${info.website}</a></p>` : ""}
-  `;
-
-  let htmlPosts = "<h3>📝 Your Posts</h3>";
-  for (let i = posts.length - 1; i >= 0; i--) {
-    try {
-      const post = await vinSocial.posts(posts[i]);
-      htmlPosts += `
-        <div class="post">
-          <h3>${sanitize(post.title)}</h3>
-          <p>${sanitize(post.content)}</p>
-          ${post.media ? `<img src="${sanitize(post.media)}" class="media" />` : ""}
-          <p class="meta">🕒 ${new Date(post.timestamp * 1000).toLocaleString()}</p>
-          <div class="actions">
-            <button onclick="likePost(${posts[i]})">👍 Like</button>
-            <button onclick="commentPrompt(${posts[i]})">💬 Comment</button>
-            <button onclick="sharePost(${posts[i]})">🔁 Share</button>
-            <button onclick="translatePost(\`${sanitize(post.content)}\`)">🌐 Translate</button>
-          </div>
-        </div>`;
-    } catch {}
-  }
-
-  document.getElementById("profileInfo").innerHTML = htmlInfo;
-  document.getElementById("profilePosts").innerHTML = htmlPosts;
-}
-
-console.log("✅ VinSocial frontend loaded.");
-
-// ✅ Bổ sung trong My Profile: hiển thị follower & following
 
 async function showMyProfile() {
   if (!registered) return alert("You must register first.");

@@ -2,69 +2,65 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>VinSocial.vin</title>
   <link rel="stylesheet" href="style.css" />
-  <link rel="icon" type="image/png" href="logo.png" />
 </head>
 <body>
   <header>
-    <div class="logo">
-      <img src="logo.png" alt="VinSocial Logo" />
-      <h1>VinSocial.vin</h1>
-    </div>
-    <p class="slogan">Decentralized. Uncensored. Free Speech.</p>
+    <h1>VinSocial.vin</h1>
+    <p>Decentralized. Uncensored. Free Speech.</p>
     <div id="walletDetails" style="display: none;">
-      <p id="walletAddress">Wallet: ...</p>
-      <p><span id="vinBalance">-- VIN</span> | <span id="vicBalance">-- VIC</span></p>
-      <button id="disconnectBtn">Disconnect</button>
+      <span id="walletAddress"></span><br />
+      <span id="vinBalance">-- VIN</span> | <span id="vicBalance">-- VIC</span>
     </div>
     <button id="connectBtn">Connect Wallet</button>
+    <button id="disconnectBtn">Disconnect</button>
   </header>
 
   <nav>
     <button id="homeBtn">🏠 Home</button>
     <button id="myProfileBtn">👤 My Profile</button>
-    <button id="registerBtn" style="display: none;">📝 Register</button>
+    <button id="registerBtn">📝 Register</button>
     <button id="postBtn" style="display: none;">✍️ New Post</button>
   </nav>
 
-  <div class="notice">
-    <p><strong>Tip:</strong> Use VIC chain in MetaMask. On mobile, open in the wallet's browser (e.g. Viction, MetaMask).</p>
-    <p>Need VIN? <a href="https://vinswap.vin" target="_blank">Trade VIN/VIC</a></p>
-  </div>
+  <section id="registrationForm" class="hidden">
+    <h2>Register Account</h2>
+    <form id="regForm">
+      <label>Name*<br /><input type="text" id="name" maxlength="32" required /></label><br />
+      <label>Bio<br /><textarea id="bio" maxlength="160"></textarea></label><br />
+      <label>Avatar URL<br /><input type="url" id="avatarUrl" /></label><br />
+      <label>Website<br /><input type="url" id="website" /></label><br />
+      <button type="submit">Register (0.05 VIN)</button>
+    </form>
+  </section>
 
-  <main>
-    <section id="feed"></section>
+  <section id="newPostForm" class="hidden">
+    <h2>New Post</h2>
+    <form id="postForm">
+      <input type="text" id="postTitle" placeholder="Title" maxlength="100" required /><br />
+      <textarea id="postContent" placeholder="What's on your mind?" maxlength="500" required></textarea><br />
+      <input type="url" id="postMedia" placeholder="Image URL (optional)" /><br />
+      <button type="submit">Post</button>
+    </form>
+  </section>
 
-    <section id="registrationForm" class="hidden">
-      <h2>Register Account</h2>
-      <form id="regForm">
-        <label>Name* <input type="text" id="name" maxlength="32" required /></label>
-        <label>Bio <textarea id="bio" maxlength="160"></textarea></label>
-        <label>Avatar URL <input type="url" id="avatarUrl" /></label>
-        <label>Website <input type="url" id="website" /></label>
-        <button type="submit">Register (0.05 VIN)</button>
-      </form>
-    </section>
+  <main id="feed"></main>
 
-    <section id="newPostForm" class="hidden">
-      <h2>New Post</h2>
-      <form id="postForm">
-        <label>Title* <input type="text" id="postTitle" maxlength="80" required /></label>
-        <label>Content* <textarea id="postContent" maxlength="500" required></textarea></label>
-        <label>Image URL <input type="url" id="postMedia" /></label>
-        <button type="submit">Publish</button>
-      </form>
-    </section>
+  <section id="profileView" class="hidden">
+    <div id="profileInfo"></div>
+    <div id="profilePosts"></div>
+  </section>
 
-    <section id="profileView" class="hidden">
-      <div id="profileInfo"></div>
-      <div id="profilePosts"></div>
-    </section>
-  </main>
+  <section id="userProfileView" class="hidden">
+    <div id="userProfileInfo"></div>
+    <div id="userProfilePosts"></div>
+  </section>
 
   <footer>
+    <p>Tip: Use VIC chain in MetaMask. On mobile, open in the wallet's browser (e.g. Viction, MetaMask).</p>
+    <p>Need VIN? <a href="https://vinswap.vin" target="_blank">Trade VIN/VIC</a></p>
     <p>Made with ❤️ on the VIC blockchain | <a href="https://vinswap.vin" target="_blank">Trade VIN/VIC</a></p>
   </footer>
 

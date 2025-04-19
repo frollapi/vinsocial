@@ -4,18 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>VinSocial.vin</title>
+  <link rel="icon" href="logo.png" type="image/png">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
-    <h1>VinSocial.vin</h1>
+    <img src="logo.png" alt="VinSocial Logo" style="height:48px; vertical-align:middle;" />
+    <h1 style="display:inline-block; margin-left:10px;">VinSocial.vin</h1>
     <p>Decentralized. Uncensored. Free Speech.</p>
     <div id="walletDetails" style="display: none;">
       <span id="walletAddress"></span><br />
       <span id="vinBalance">-- VIN</span> | <span id="vicBalance">-- VIC</span>
+      <br /><button id="disconnectBtn">Disconnect</button>
     </div>
     <button id="connectBtn">Connect Wallet</button>
-    <button id="disconnectBtn">Disconnect</button>
   </header>
 
   <nav>

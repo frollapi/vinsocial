@@ -15,7 +15,8 @@ const vinSocialAbi = [
   "function sharePost(uint256) external",
   "function follow(address) external",
   "function unfollow(address) external",
-  "function isUserFollowing(address,address) view returns (bool)"
+  "function isUserFollowing(address,address) view returns (bool)",
+  "function getTotalPosts() view returns (uint256)"
 ];
 
 // 👉 ABI rút gọn của token VIN (chỉ cần balanceOf)
@@ -43,6 +44,7 @@ async function connectWallet() {
 
     await updateBalances();
     checkRegistration();
+    loadFeed(); // Tải feed sau khi kết nối
   } else {
     alert("Please install MetaMask and connect to the VIC network.");
   }
@@ -56,8 +58,8 @@ async function updateBalances() {
     const vinRaw = await vinTokenContract.balanceOf(userAddress);
     const vin = Number(ethers.utils.formatUnits(vinRaw, 18)).toFixed(2);
 
-    document.getElementById("vicBalance").innerText = vin + " VIN";
-    document.getElementById("vinBalance").innerText = vic + " VIC";
+    document.getElementById("vinBalance").innerText = vin + " VIN";
+    document.getElementById("vicBalance").innerText = vic + " VIC";
   } catch (err) {
     console.error("Error loading balances:", err);
   }
@@ -138,23 +140,28 @@ document.getElementById("postForm").addEventListener("submit", async (e) => {
   }
 });
 
-// 👉 Hiển thị feed (bài viết của chính mình)
+// 👉 Hiển thị tất cả bài viết từ mọi người (công khai)
 async function loadFeed() {
   const feedContainer = document.getElementById("feed");
   feedContainer.innerHTML = "<p>Loading posts...</p>";
 
   try {
-    const posts = await vinSocialContract.getUserPosts(userAddress);
-    if (posts.length === 0) {
+    const tempProvider = window.ethereum
+      ? new ethers.providers.Web3Provider(window.ethereum)
+      : new ethers.providers.JsonRpcProvider("https://rpc.viction.xyz"); // fallback nếu chưa kết nối ví
+
+    const contract = new ethers.Contract(vinSocialAddress, vinSocialAbi, tempProvider);
+    const total = await contract.getTotalPosts();
+
+    if (total === 0) {
       feedContainer.innerHTML = "<p>No posts yet.</p>";
       return;
     }
 
     feedContainer.innerHTML = "";
 
-    for (let i = posts.length - 1; i >= 0; i--) {
-      const postId = posts[i];
-      const post = await vinSocialContract.posts(postId);
+    for (let i = total - 1; i >= 0; i--) {
+      const post = await contract.posts(i);
 
       const postEl = document.createElement("div");
       postEl.className = "post";
@@ -163,15 +170,17 @@ async function loadFeed() {
         <p>${post.content}</p>
         ${post.media ? `<img src="${post.media}" style="max-width:100%;border-radius:8px;" />` : ""}
         <p><small>By: ${post.author}</small></p>
-        <button onclick="likePost(${postId})">👍 Like</button>
-        <button onclick="toggleComment(${postId})">💬 Comment</button>
-        <button onclick="sharePost(${postId})">🔁 Share</button>
-        <div id="commentBox-${postId}" class="hidden">
-          <form onsubmit="submitComment(event, ${postId})">
-            <input type="text" id="commentInput-${postId}" placeholder="Your comment" required />
-            <button type="submit">Send</button>
-          </form>
-        </div>
+        ${userAddress ? `
+          <button onclick="likePost(${i})">👍 Like</button>
+          <button onclick="toggleComment(${i})">💬 Comment</button>
+          <button onclick="sharePost(${i})">🔁 Share</button>
+          <div id="commentBox-${i}" class="hidden">
+            <form onsubmit="submitComment(event, ${i})">
+              <input type="text" id="commentInput-${i}" placeholder="Your comment" required />
+              <button type="submit">Send</button>
+            </form>
+          </div>
+        ` : ""}
       `;
       feedContainer.appendChild(postEl);
     }
@@ -232,9 +241,18 @@ async function sharePost(postId) {
   }
 }
 
+// 👉 Hiện lại feed khi bấm nút Home
+document.getElementById("homeBtn").addEventListener("click", () => {
+  document.getElementById("feed").style.display = "block";
+  document.getElementById("profileView").classList.add("hidden");
+  document.getElementById("userProfileView").classList.add("hidden");
+  loadFeed();
+});
+
 // 👉 Xem hồ sơ cá nhân
 document.getElementById("myProfileBtn").addEventListener("click", async () => {
   document.getElementById("feed").style.display = "none";
+  document.getElementById("userProfileView").classList.add("hidden");
   document.getElementById("profileView").classList.remove("hidden");
 
   try {
@@ -266,6 +284,7 @@ document.getElementById("myProfileBtn").addEventListener("click", async () => {
 // 👉 Xem hồ sơ người khác (có nút follow/unfollow)
 async function viewUserProfile(address) {
   document.getElementById("feed").style.display = "none";
+  document.getElementById("profileView").classList.add("hidden");
   document.getElementById("userProfileView").classList.remove("hidden");
 
   const infoBox = document.getElementById("userProfileInfo");

@@ -322,3 +322,52 @@ async function showMyProfile() {
 }
 
 console.log("✅ VinSocial frontend loaded.");
+
+// ✅ Bổ sung trong My Profile: hiển thị follower & following
+
+async function showMyProfile() {
+  if (!registered) return alert("You must register first.");
+  document.getElementById("profileView").classList.remove("hidden");
+  document.getElementById("feed").innerHTML = "";
+  document.getElementById("registrationForm").classList.add("hidden");
+  document.getElementById("newPostForm").classList.add("hidden");
+
+  const info = await vinSocial.users(userAddress);
+  const posts = await vinSocial.getUserPosts(userAddress);
+  const followers = await vinSocial.getFollowers(userAddress);
+  const following = await vinSocial.getFollowing(userAddress);
+
+  let htmlInfo = `
+    <h2>👤 ${sanitize(info.name)}</h2>
+    ${info.avatarUrl ? `<img src="${info.avatarUrl}" class="avatar" />` : ""}
+    <p>${sanitize(info.bio)}</p>
+    ${info.website ? `<p>🔗 <a href='${info.website}' target='_blank'>${info.website}</a></p>` : ""}
+    <p>👥 Followers: ${followers.length}</p>
+    <p>➡️ Following: ${following.length}</p>
+  `;
+
+  let htmlPosts = "<h3>📝 Your Posts</h3>";
+  for (let i = posts.length - 1; i >= 0; i--) {
+    try {
+      const post = await vinSocial.posts(posts[i]);
+      htmlPosts += `
+        <div class="post">
+          <h3>${sanitize(post.title)}</h3>
+          <p>${sanitize(post.content)}</p>
+          ${post.media ? `<img src="${sanitize(post.media)}" class="media" />` : ""}
+          <p class="meta">🕒 ${new Date(post.timestamp * 1000).toLocaleString()}</p>
+          <div class="actions">
+            <button onclick="likePost(${posts[i]})">👍 Like</button>
+            <button onclick="commentPrompt(${posts[i]})">💬 Comment</button>
+            <button onclick="sharePost(${posts[i]})">🔁 Share</button>
+            <button onclick="translatePost(\`${sanitize(post.content)}\`)">🌐 Translate</button>
+          </div>
+        </div>`;
+    } catch {}
+  }
+
+  document.getElementById("profileInfo").innerHTML = htmlInfo;
+  document.getElementById("profilePosts").innerHTML = htmlPosts;
+}
+
+console.log("✅ VinSocial frontend loaded.");

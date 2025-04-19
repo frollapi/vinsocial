@@ -1,4 +1,4 @@
-// ✅ app.js hoàn chỉnh cho VinSocial.vin – giống X (Twitter), không tin nhắn
+// ✅ app.js hoàn chỉnh cho VinSocial.vin – giống X (Twitter), có xem hồ sơ người khác
 
 const vinSocialAddress = "0xeff6a28C1858D6faa95c0813946E9F0020ebf41D";
 const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";
@@ -37,7 +37,11 @@ let registered = false;
 window.addEventListener("load", async () => {
   document.getElementById("connectBtn").onclick = connectWallet;
   document.getElementById("disconnectBtn").onclick = () => location.reload();
-  document.getElementById("homeBtn").onclick = loadFeed;
+  document.getElementById("homeBtn").onclick = () => {
+    document.getElementById("feed").style.display = "block";
+    document.getElementById("userProfileView").classList.add("hidden");
+    loadFeed();
+  };
   document.getElementById("registerBtn").onclick = showRegistrationForm;
   document.getElementById("postBtn").onclick = showPostForm;
   document.getElementById("regForm").addEventListener("submit", handleRegister);
@@ -80,8 +84,15 @@ async function updateBalances() {
 }
 
 function sanitize(str) {
-  return str.replace(/[&<>\"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', "'": '&#39;' }[m]));
+  return str.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
 }
+
+// 👉 tiếp tục viết phần còn lại nếu bạn đồng ý
+// ✅ app.js hoàn chỉnh cho VinSocial.vin – giống X (Twitter), có xem hồ sơ người khác
+
+// (Phần đầu đã khai báo các biến và contract)
+
+// ...phần trước giữ nguyên...
 
 async function checkRegistration() {
   try {
@@ -96,12 +107,14 @@ async function checkRegistration() {
 function showRegistrationForm() {
   document.getElementById("registrationForm").classList.remove("hidden");
   document.getElementById("newPostForm").classList.add("hidden");
+  document.getElementById("userProfileView").classList.add("hidden");
 }
 
 function showPostForm() {
   if (!registered) return alert("You must register first.");
   document.getElementById("newPostForm").classList.remove("hidden");
   document.getElementById("registrationForm").classList.add("hidden");
+  document.getElementById("userProfileView").classList.add("hidden");
 }
 
 async function handleRegister(e) {
@@ -153,39 +166,12 @@ async function handleCreatePost(e) {
   }
 }
 
-async function getLikers(postId) {
-  try {
-    const followers = await vinSocial.getFollowers(vinSocialAddress);
-    let likers = [];
-    for (const addr of followers) {
-      try {
-        const liked = await vinSocial.hasLiked(postId, addr);
-        if (liked) likers.push(addr);
-      } catch {}
-    }
-    return likers;
-  } catch {
-    return [];
-  }
-}
-
-async function renderComments(postId) {
-  try {
-    const comments = await vinSocial.getComments(postId);
-    return comments.map(c => `
-      <div class="comment">
-        <p>${sanitize(c.message)}</p>
-        <small>👤 ${c.commenter.slice(0, 6)} | ${new Date(c.timestamp * 1000).toLocaleString()}</small>
-      </div>
-    `).join("");
-  } catch {
-    return "<p>Failed to load comments</p>";
-  }
-}
+// ✅ Tiếp tục phần 3 – Hiển thị bài viết và xem hồ sơ người khác
 
 async function loadFeed() {
   const feed = document.getElementById("feed");
   feed.innerHTML = "<p>Loading posts...</p>";
+  document.getElementById("userProfileView").classList.add("hidden");
   try {
     let html = "";
     const nextId = await vinSocial.nextPostId();
@@ -194,15 +180,12 @@ async function loadFeed() {
         const post = await vinSocial.posts(i);
         if (post.author === "0x0000000000000000000000000000000000000000") continue;
         const user = await vinSocial.users(post.author);
-        const likers = await getLikers(i);
-        const likerDisplay = likers.length > 0 ? `❤️ Liked by: ${likers.map(a => a.slice(0, 6)).join(", ")}` : "";
         html += `
         <div class="post">
           <h3>${sanitize(post.title)}</h3>
           <p>${sanitize(post.content)}</p>
           ${post.media ? `<img src="${sanitize(post.media)}" class="media" />` : ""}
-          <p class="meta">👤 ${user.name || post.author.slice(0, 8)} | 🕒 ${new Date(post.timestamp * 1000).toLocaleString()}</p>
-          ${likerDisplay ? `<p class="likes">${likerDisplay}</p>` : ""}
+          <p class="meta">👤 <span class="clickable" onclick="showUserProfile('${post.author}')">${user.name || post.author.slice(0, 8)}</span> | 🕒 ${new Date(post.timestamp * 1000).toLocaleString()}</p>
           <div class="actions">
             ${registered ? `
               <button onclick="likePost(${i})">👍 Like</button>
@@ -225,76 +208,20 @@ async function loadFeed() {
   }
 }
 
-function commentPrompt(postId) {
-  const msg = prompt("Enter your comment:");
-  if (msg) commentOnPost(postId, msg);
-}
-
-async function commentOnPost(postId, message) {
-  try {
-    const tx = await vinSocial.commentOnPost(postId, message);
-    await tx.wait();
-    alert("Comment posted!");
-    await loadFeed();
-  } catch (err) {
-    console.error("❌ Comment error:", err);
-    alert("Failed to comment.");
-  }
-}
-
-async function likePost(postId) {
-  try {
-    const tx = await vinSocial.likePost(postId);
-    await tx.wait();
-    alert("You liked this post.");
-  } catch (err) {
-    console.error("❌ Like error:", err);
-    alert("Failed to like post.");
-  }
-}
-
-async function sharePost(postId) {
-  try {
-    const tx = await vinSocial.sharePost(postId);
-    await tx.wait();
-    alert("Shared!");
-  } catch (err) {
-    console.error("❌ Share error:", err);
-    alert("Failed to share post.");
-  }
-}
-
-async function followUser(addr) {
-  try {
-    const isFollowing = await vinSocial.isUserFollowing(userAddress, addr);
-    const tx = isFollowing ? await vinSocial.unfollow(addr) : await vinSocial.follow(addr);
-    await tx.wait();
-    alert(isFollowing ? "Unfollowed!" : "Followed!");
-  } catch (err) {
-    console.error("❌ Follow error:", err);
-    alert("Follow action failed.");
-  }
-}
-
-function translatePost(text) {
-  const url = `https://translate.google.com/?sl=auto&tl=en&text=${encodeURIComponent(text)}`;
-  window.open(url, "_blank");
-}
-
-async function showMyProfile() {
-  if (!registered) return alert("You must register first.");
-  document.getElementById("profileView").classList.remove("hidden");
+async function showUserProfile(addr) {
+  document.getElementById("userProfileView").classList.remove("hidden");
   document.getElementById("feed").innerHTML = "";
   document.getElementById("registrationForm").classList.add("hidden");
   document.getElementById("newPostForm").classList.add("hidden");
+  document.getElementById("profileView").classList.add("hidden");
 
-  const info = await vinSocial.users(userAddress);
-  const posts = await vinSocial.getUserPosts(userAddress);
-  const followers = await vinSocial.getFollowers(userAddress);
-  const following = await vinSocial.getFollowing(userAddress);
+  const info = await vinSocial.users(addr);
+  const posts = await vinSocial.getUserPosts(addr);
+  const followers = await vinSocial.getFollowers(addr);
+  const following = await vinSocial.getFollowing(addr);
 
   let htmlInfo = `
-    <h2>👤 ${sanitize(info.name)}</h2>
+    <h2>👤 ${sanitize(info.name || addr.slice(0, 8))}</h2>
     ${info.avatarUrl ? `<img src="${info.avatarUrl}" class="avatar" />` : ""}
     <p>${sanitize(info.bio)}</p>
     ${info.website ? `<p>🔗 <a href='${info.website}' target='_blank'>${info.website}</a></p>` : ""}
@@ -302,7 +229,7 @@ async function showMyProfile() {
     <p>➡️ Following: ${following.length}</p>
   `;
 
-  let htmlPosts = "<h3>📝 Your Posts</h3>";
+  let htmlPosts = "<h3>📝 Posts</h3>";
   for (let i = posts.length - 1; i >= 0; i--) {
     try {
       const post = await vinSocial.posts(posts[i]);
@@ -322,8 +249,6 @@ async function showMyProfile() {
     } catch {}
   }
 
-  document.getElementById("profileInfo").innerHTML = htmlInfo;
-  document.getElementById("profilePosts").innerHTML = htmlPosts;
+  document.getElementById("userProfileInfo").innerHTML = htmlInfo;
+  document.getElementById("userProfilePosts").innerHTML = htmlPosts;
 }
-
-console.log("✅ VinSocial frontend loaded.");

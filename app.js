@@ -1,4 +1,4 @@
-// 👉 VinSocial v2 - app.js hoàn chỉnh (không đếm view tự động, tối ưu gas)
+// 👉 VinSocial v2 (không gọi viewPost tự động) – Phần 1/5
 
 const vinSocialAddress = "0xA86598807da8C76c5273A06d01C521252D5CDd17";
 const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";
@@ -21,6 +21,7 @@ const vinSocialAbi = [
   "function likePost(uint256) external",
   "function commentOnPost(uint256,string) external",
   "function sharePost(uint256) external",
+  "function viewPost(uint256) external", // vẫn giữ trong ABI nếu sau này muốn dùng
   "function follow(address) external",
   "function unfollow(address) external",
   "function getUserPosts(address) view returns (uint256[])",
@@ -64,7 +65,7 @@ function disconnectWallet() {
   document.getElementById("connectBtn").style.display = "inline-block";
   document.getElementById("disconnectBtn").style.display = "none";
   document.getElementById("mainNav").style.display = "none";
-  document.getElementById("mainContent").innerHTML = `<p class='tip'>Tip: Use VIC chain in MetaMask. On mobile, open in the wallet's browser (e.g. Viction, MetaMask).</p>`;
+  document.getElementById("mainContent").innerHTML = `<p class="tip">Tip: Use VIC chain in MetaMask. On mobile, open in the wallet's browser (e.g. Viction, MetaMask).</p>`;
 }
 
 async function setupContracts() {
@@ -119,7 +120,7 @@ function updateMenu() {
 document.getElementById("connectBtn").onclick = connectWallet;
 document.getElementById("disconnectBtn").onclick = disconnectWallet;
 
-// 👉 Hiển thị bài viết mới nhất (❤️/🔁/👁️ – không gọi viewPost)
+// 👉 Hiển thị bài viết mới nhất (có ❤️ likes, 🔁 shares, 👁️ views – không gọi viewPost)
 async function showHome(reset = false) {
   if (reset) {
     lastPostId = 0;
@@ -195,7 +196,9 @@ async function showHome(reset = false) {
         </div>
       `;
       loaded++;
-    } catch {}
+    } catch (err) {
+      console.warn("Failed loading post", i, err);
+    }
     i--;
   }
 
@@ -211,25 +214,32 @@ async function showHome(reset = false) {
   }
 }
 
+// 👉 Dịch bài viết
 function translatePost(text) {
   const url = `https://translate.google.com/?sl=auto&tl=en&text=${encodeURIComponent(text)}&op=translate`;
   window.open(url, "_blank");
 }
 
+// 👉 Hiển thị form đăng ký tài khoản
 function showRegister() {
   if (isRegistered) return alert("You are already registered.");
   document.getElementById("mainContent").innerHTML = `
     <h2>Register Account</h2>
     <form onsubmit="registerUser(); return false;">
-      <label>Name*</label><input type="text" id="regName" maxlength="32" required/>
-      <label>Bio</label><input type="text" id="regBio" maxlength="160"/>
-      <label>Avatar URL</label><input type="text" id="regAvatar"/>
-      <label>Website</label><input type="text" id="regWebsite"/>
+      <label>Name*</label>
+      <input type="text" id="regName" maxlength="32" required/>
+      <label>Bio</label>
+      <input type="text" id="regBio" maxlength="160"/>
+      <label>Avatar URL</label>
+      <input type="text" id="regAvatar"/>
+      <label>Website</label>
+      <input type="text" id="regWebsite"/>
       <button type="submit">Register (0.05 VIN)</button>
     </form>
   `;
 }
 
+// 👉 Gửi đăng ký tài khoản
 async function registerUser() {
   const name = document.getElementById("regName").value.trim();
   const bio = document.getElementById("regBio").value.trim();
@@ -250,19 +260,24 @@ async function registerUser() {
   }
 }
 
+// 👉 Hiển thị form đăng bài
 function showNewPost() {
   if (!isRegistered) return alert("You must register to post.");
   document.getElementById("mainContent").innerHTML = `
     <h2>New Post</h2>
     <form onsubmit="createPost(); return false;">
-      <label>Title</label><input type="text" id="postTitle" maxlength="80"/>
-      <label>What's on your mind?</label><textarea id="postContent" rows="4" maxlength="500"></textarea>
-      <label>Image URL (optional)</label><input type="text" id="postMedia"/>
+      <label>Title</label>
+      <input type="text" id="postTitle" maxlength="80"/>
+      <label>What's on your mind?</label>
+      <textarea id="postContent" rows="4" maxlength="500"></textarea>
+      <label>Image URL (optional)</label>
+      <input type="text" id="postMedia"/>
       <button type="submit">Post</button>
     </form>
   `;
 }
 
+// 👉 Gửi bài viết
 async function createPost() {
   const title = document.getElementById("postTitle").value.trim();
   const content = document.getElementById("postContent").value.trim();
@@ -278,6 +293,7 @@ async function createPost() {
   }
 }
 
+// 👉 Like bài viết
 async function likePost(postId) {
   try {
     const tx = await vinSocialContract.likePost(postId);
@@ -289,17 +305,7 @@ async function likePost(postId) {
   }
 }
 
-async function sharePost(postId) {
-  try {
-    const tx = await vinSocialContract.sharePost(postId);
-    await tx.wait();
-    alert("Post shared!");
-  } catch (err) {
-    alert("Share failed.");
-    console.error(err);
-  }
-}
-
+// 👉 Hiển thị & thêm bình luận
 async function showComments(postId) {
   const el = document.getElementById(`comments-${postId}`);
   if (el.innerHTML) {
@@ -307,7 +313,7 @@ async function showComments(postId) {
     return;
   }
   const comments = await vinSocialReadOnly.getComments(postId);
-  let html = `<div class='comments'><h4>Comments</h4>`;
+  let html = `<div class="comments"><h4>Comments</h4>`;
   comments.forEach(c => {
     html += `<p><strong>${shorten(c.commenter)}:</strong> ${c.message}</p>`;
   });
@@ -337,6 +343,19 @@ async function addComment(postId) {
   }
 }
 
+// 👉 Share bài viết
+async function sharePost(postId) {
+  try {
+    const tx = await vinSocialContract.sharePost(postId);
+    await tx.wait();
+    alert("Post shared!");
+  } catch (err) {
+    alert("Share failed.");
+    console.error(err);
+  }
+}
+
+// 👉 Xem hồ sơ người dùng
 async function viewProfile(addr) {
   try {
     const user = await vinSocialReadOnly.users(addr);
@@ -385,10 +404,12 @@ async function viewProfile(addr) {
   }
 }
 
+// 👉 Hồ sơ chính mình
 async function showProfile() {
   await viewProfile(userAddress);
 }
 
+// 👉 Follow người khác
 async function followUser(addr) {
   try {
     const tx = await vinSocialContract.follow(addr);
@@ -401,6 +422,7 @@ async function followUser(addr) {
   }
 }
 
+// 👉 Unfollow người khác
 async function unfollowUser(addr) {
   try {
     const tx = await vinSocialContract.unfollow(addr);
@@ -413,22 +435,26 @@ async function unfollowUser(addr) {
   }
 }
 
-// 👉 Gợi ý người dùng nổi bật (placeholder, có thể nâng cấp sau)
+// 👉 Gợi ý người dùng nổi bật (đặt nền móng để phát triển thêm)
 async function suggestUsers() {
-  return []; // sau này có thể thêm API: getTopUsers()
+  // Có thể gọi từ smart contract sau này nếu hỗ trợ top-followed
+  // return await vinSocialReadOnly.getTopUsers();
+  return [];
 }
 
-// 👉 Gợi ý bài viết nổi bật (placeholder, có thể nâng cấp sau)
+// 👉 Gợi ý bài viết nổi bật (top view/like, nếu contract có hỗ trợ)
 async function suggestPosts() {
-  return []; // sau này có thể thêm API: getTopPosts()
+  // Có thể gọi từ smart contract sau này nếu hỗ trợ
+  // return await vinSocialReadOnly.getTopPosts();
+  return [];
 }
 
-// 👉 Tìm kiếm theo ví (hoặc từ khoá mở rộng sau này)
+// 👉 Tìm kiếm theo địa chỉ ví (hoặc mở rộng tìm theo từ khóa sau này)
 async function searchByAddressOrKeyword(input) {
   if (ethers.utils.isAddress(input)) {
     await viewProfile(input);
   } else {
     alert("Currently only wallet address search is supported.");
-    // TODO: sau này có thể tìm theo từ khoá title/content
+    // Ý tưởng mở rộng: tìm theo tiêu đề bài viết, nội dung, hashtag...
   }
 }

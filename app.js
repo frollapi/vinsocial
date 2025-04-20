@@ -36,7 +36,7 @@ window.onload = async () => {
   } else {
     provider = new ethers.providers.JsonRpcProvider();
     vinSocialReadOnly = new ethers.Contract(vinSocialAddress, vinSocialAbi, provider);
-    showHome();
+    showHome(true);
   }
 };
 
@@ -85,7 +85,7 @@ async function updateUI() {
 
   isRegistered = await vinSocialContract.isRegistered(userAddress);
   updateMenu();
-  showHome(true); // reset view
+  showHome(true);
 }
 
 function shorten(addr) {
@@ -112,7 +112,7 @@ function updateMenu() {
 document.getElementById("connectBtn").onclick = connectWallet;
 document.getElementById("disconnectBtn").onclick = disconnectWallet;
 
-// 👉 Hiển thị bài viết với "Load More"
+// 👉 Load bài viết theo nhóm 5 bài
 async function showHome(reset = false) {
   if (reset) {
     lastPostId = 0;
@@ -171,13 +171,11 @@ async function showHome(reset = false) {
   }
 }
 
-// 👉 Dịch bài viết
 function translatePost(text) {
   const url = `https://translate.google.com/?sl=auto&tl=en&text=${encodeURIComponent(text)}&op=translate`;
   window.open(url, "_blank");
 }
 
-// 👉 Hiển thị form đăng ký tài khoản
 function showRegister() {
   if (isRegistered) return alert("You are already registered.");
   document.getElementById("mainContent").innerHTML = `
@@ -196,7 +194,6 @@ function showRegister() {
   `;
 }
 
-// 👉 Gửi đăng ký tài khoản
 async function registerUser() {
   const name = document.getElementById("regName").value.trim();
   const bio = document.getElementById("regBio").value.trim();
@@ -219,7 +216,6 @@ async function registerUser() {
   }
 }
 
-// 👉 Hiển thị form đăng bài
 function showNewPost() {
   if (!isRegistered) return alert("You must register to post.");
   document.getElementById("mainContent").innerHTML = `
@@ -236,7 +232,6 @@ function showNewPost() {
   `;
 }
 
-// 👉 Gửi bài viết
 async function createPost() {
   const title = document.getElementById("postTitle").value.trim();
   const content = document.getElementById("postContent").value.trim();
@@ -245,14 +240,13 @@ async function createPost() {
     const tx = await vinSocialContract.createPost(title, content, media);
     await tx.wait();
     alert("Post created!");
-    await showHome(true); // reset và load lại từ đầu
+    await showHome(true);
   } catch (err) {
     alert("Post failed.");
     console.error(err);
   }
 }
 
-// 👉 Like bài viết
 async function likePost(postId) {
   try {
     const tx = await vinSocialContract.likePost(postId);
@@ -264,7 +258,6 @@ async function likePost(postId) {
   }
 }
 
-// 👉 Hiển thị bình luận
 async function showComments(postId) {
   const el = document.getElementById(`comments-${postId}`);
   if (el.innerHTML) {
@@ -289,7 +282,6 @@ async function showComments(postId) {
   el.innerHTML = html;
 }
 
-// 👉 Gửi bình luận
 async function addComment(postId) {
   const msg = document.getElementById(`comment-${postId}`).value.trim();
   try {
@@ -303,7 +295,6 @@ async function addComment(postId) {
   }
 }
 
-// 👉 Chia sẻ bài viết
 async function sharePost(postId) {
   try {
     const tx = await vinSocialContract.sharePost(postId);
@@ -315,7 +306,6 @@ async function sharePost(postId) {
   }
 }
 
-// 👉 Xem hồ sơ người khác
 async function viewProfile(addr) {
   try {
     const user = await vinSocialReadOnly.users(addr);
@@ -352,12 +342,10 @@ async function viewProfile(addr) {
   }
 }
 
-// 👉 Xem hồ sơ chính mình
 async function showProfile() {
   await viewProfile(userAddress);
 }
 
-// 👉 Follow
 async function followUser(addr) {
   try {
     const tx = await vinSocialContract.follow(addr);
@@ -369,7 +357,6 @@ async function followUser(addr) {
   }
 }
 
-// 👉 Unfollow
 async function unfollowUser(addr) {
   try {
     const tx = await vinSocialContract.unfollow(addr);

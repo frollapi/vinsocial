@@ -1,9 +1,11 @@
+// 👉 VinSocial v2 - app.js (Phần 1/5)
+// Hiển thị số ❤️ likes, 🔁 shares, 👁️ views & follower/following
+
 const vinSocialAddress = "0xA86598807da8C76c5273A06d01C521252D5CDd17";
 const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";
 
 let provider, signer, userAddress;
-let vinSocialContract, vinTokenContract;
-let vinSocialReadOnly;
+let vinSocialContract, vinTokenContract, vinSocialReadOnly;
 let isRegistered = false;
 let lastPostId = 0;
 let seen = new Set();
@@ -20,13 +22,19 @@ const vinSocialAbi = [
   "function likePost(uint256) external",
   "function commentOnPost(uint256,string) external",
   "function sharePost(uint256) external",
+  "function viewPost(uint256) external",
   "function follow(address) external",
   "function unfollow(address) external",
   "function getUserPosts(address) view returns (uint256[])",
   "function getComments(uint256) view returns (tuple(address commenter,string message,uint256 timestamp)[])",
   "function posts(uint256) view returns (address,string,string,string,uint256)",
   "function users(address) view returns (string,string,string,string)",
-  "function nextPostId() view returns (uint256)"
+  "function nextPostId() view returns (uint256)",
+  "function likeCount(uint256) view returns (uint256)",
+  "function shareCount(uint256) view returns (uint256)",
+  "function viewCount(uint256) view returns (uint256)",
+  "function getFollowers(address) view returns (address[])",
+  "function getFollowing(address) view returns (address[])"
 ];
 
 window.onload = async () => {
@@ -113,7 +121,7 @@ function updateMenu() {
 document.getElementById("connectBtn").onclick = connectWallet;
 document.getElementById("disconnectBtn").onclick = disconnectWallet;
 
-// 👉 Hiển thị bài viết (đã sửa lỗi chậm)
+// 👉 Hiển thị bài viết mới nhất (có ❤️ likes, 🔁 shares, 👁️ views)
 async function showHome(reset = false) {
   if (reset) {
     lastPostId = 0;
@@ -164,12 +172,25 @@ async function showHome(reset = false) {
       const media = post[3];
       const time = new Date(post[4] * 1000).toLocaleString();
 
+      // Đếm ❤️ likes, 🔁 shares, 👁️ views
+      const [likes, shares, views] = await Promise.all([
+        vinSocialReadOnly.likeCount(i),
+        vinSocialReadOnly.shareCount(i),
+        vinSocialReadOnly.viewCount(i)
+      ]);
+
+      // Gửi tín hiệu đã xem (view)
+      try {
+        await vinSocialContract.viewPost(i);
+      } catch {}
+
       html += `
         <div class="post">
           <div class="title">${title}</div>
           <div class="author">${author} • ${time}</div>
           <div class="content">${content}</div>
           ${media ? `<img src="${media}" alt="media"/>` : ""}
+          <div class="metrics">❤️ ${likes} • 🔁 ${shares} • 👁️ ${views}</div>
           <div class="actions">
             ${isRegistered ? `
               <button onclick="likePost(${i})">👍 Like</button>
@@ -182,7 +203,9 @@ async function showHome(reset = false) {
         </div>
       `;
       loaded++;
-    } catch {}
+    } catch (err) {
+      console.warn("Failed loading post", i, err);
+    }
     i--;
   }
 
@@ -204,8 +227,6 @@ function translatePost(text) {
   window.open(url, "_blank");
 }
 
-// 👉 Tiếp tục các phần còn lại cho file app.js
-
 // 👉 Hiển thị form đăng ký tài khoản
 function showRegister() {
   if (isRegistered) return alert("You are already registered.");
@@ -225,82 +246,7 @@ function showRegister() {
   `;
 }
 
-// 👉 Gửi đăng ký
-async function registerUser() {
-  const name = document.getElementById("regName").value.trim();
-  const bio = document.getElementById("regBio").value.trim();
-  const avatar = document.getElementById("regAvatar").value.trim();
-  const website = document.getElementById("regWebsite").value.trim();
-  const fee = ethers.utils.parseEther("0.05");
-
-  try {
-    const approveTx = await vinTokenContract.approve(vinSocialAddress, fee);
-    await approveTx.wait();
-    const tx = await vinSocialContract.register(name, bio, avatar, website);
-    await tx.wait();
-    alert("Registration successful!");
-    await updateUI();
-  } catch (err) {
-    alert("Registration failed.");
-    console.error(err);
-  }
-}
-
-// 👉 Hiển thị form đăng bài
-function showNewPost() {
-  if (!isRegistered) return alert("You must register to post.");
-  document.getElementById("mainContent").innerHTML = `
-    <h2>New Post</h2>
-    <form onsubmit="createPost(); return false;">
-      <label>Title</label>
-      <input type="text" id="postTitle" maxlength="80"/>
-      <label>What's on your mind?</label>
-      <textarea id="postContent" rows="4" maxlength="500"></textarea>
-      <label>Image URL (optional)</label>
-      <input type="text" id="postMedia"/>
-      <button type="submit">Post</button>
-    </form>
-  `;
-}
-
-// 👉 Gửi bài viết
-async function createPost() {
-  const title = document.getElementById("postTitle").value.trim();
-  const content = document.getElementById("postContent").value.trim();
-  const media = document.getElementById("postMedia").value.trim();
-  try {
-    const tx = await vinSocialContract.createPost(title, content, media);
-    await tx.wait();
-    alert("Post created!");
-    await showHome(true);
-  } catch (err) {
-    alert("Post failed.");
-    console.error(err);
-  }
-}
-
-// 👉 Tiếp tục các phần còn lại cho file app.js
-
-// 👉 Hiển thị form đăng ký tài khoản
-function showRegister() {
-  if (isRegistered) return alert("You are already registered.");
-  document.getElementById("mainContent").innerHTML = `
-    <h2>Register Account</h2>
-    <form onsubmit="registerUser(); return false;">
-      <label>Name*</label>
-      <input type="text" id="regName" maxlength="32" required/>
-      <label>Bio</label>
-      <input type="text" id="regBio" maxlength="160"/>
-      <label>Avatar URL</label>
-      <input type="text" id="regAvatar"/>
-      <label>Website</label>
-      <input type="text" id="regWebsite"/>
-      <button type="submit">Register (0.05 VIN)</button>
-    </form>
-  `;
-}
-
-// 👉 Gửi đăng ký
+// 👉 Gửi đăng ký tài khoản
 async function registerUser() {
   const name = document.getElementById("regName").value.trim();
   const bio = document.getElementById("regBio").value.trim();
@@ -366,7 +312,7 @@ async function likePost(postId) {
   }
 }
 
-// 👉 Hiển thị và thêm bình luận
+// 👉 Hiển thị & thêm bình luận
 async function showComments(postId) {
   const el = document.getElementById(`comments-${postId}`);
   if (el.innerHTML) {
@@ -421,11 +367,16 @@ async function viewProfile(addr) {
   try {
     const user = await vinSocialReadOnly.users(addr);
     const posts = await vinSocialReadOnly.getUserPosts(addr);
+    const [followers, following] = await Promise.all([
+      vinSocialReadOnly.getFollowers(addr),
+      vinSocialReadOnly.getFollowing(addr)
+    ]);
 
     let html = `<h2>${user[0]}'s Profile</h2>
       <p><strong>Bio:</strong> ${user[1]}</p>
       <p><strong>Website:</strong> <a href="${user[3]}" target="_blank">${user[3]}</a></p>
-      <img src="${user[2]}" alt="avatar" style="max-width:100px;border-radius:50%"/>
+      <p>👥 ${followers.length} Followers • ${following.length} Following</p>
+      <img src="${user[2]}" alt="avatar" style="max-width:100px;border-radius:50%;margin:10px 0"/>
       <div class="actions">`;
 
     if (isRegistered && addr.toLowerCase() !== userAddress.toLowerCase()) {
@@ -438,11 +389,18 @@ async function viewProfile(addr) {
 
     for (const id of posts.reverse()) {
       const post = await vinSocialReadOnly.posts(id);
+      const [likes, shares, views] = await Promise.all([
+        vinSocialReadOnly.likeCount(id),
+        vinSocialReadOnly.shareCount(id),
+        vinSocialReadOnly.viewCount(id)
+      ]);
+
       html += `<div class="post">
         <div class="title">${post[1]}</div>
         <div class="author">${shorten(post[0])} • ${new Date(post[4]*1000).toLocaleString()}</div>
         <div class="content">${post[2]}</div>
         ${post[3] ? `<img src="${post[3]}" alt="media"/>` : ""}
+        <div class="metrics">❤️ ${likes} • 🔁 ${shares} • 👁️ ${views}</div>
       </div>`;
     }
 
@@ -458,25 +416,53 @@ async function showProfile() {
   await viewProfile(userAddress);
 }
 
-// 👉 Follow / Unfollow
+// 👉 Follow người khác
 async function followUser(addr) {
   try {
     const tx = await vinSocialContract.follow(addr);
     await tx.wait();
     alert("Now following!");
+    await viewProfile(addr);
   } catch (err) {
     alert("Follow failed.");
     console.error(err);
   }
 }
 
+// 👉 Unfollow người khác
 async function unfollowUser(addr) {
   try {
     const tx = await vinSocialContract.unfollow(addr);
     await tx.wait();
     alert("Unfollowed.");
+    await viewProfile(addr);
   } catch (err) {
     alert("Unfollow failed.");
     console.error(err);
+  }
+}
+
+// 👉 Gợi ý người dùng nổi bật (cấu trúc chờ triển khai)
+async function suggestUsers() {
+  // Ý tưởng sau này: lọc theo người có nhiều follower nhất
+  // const topUsers = await vinSocialReadOnly.getTopUsers();
+  // Hiện tại để trống (backend hoặc contract bổ sung sau)
+  return [];
+}
+
+// 👉 Gợi ý bài viết nổi bật (dựa theo lượt view hoặc like)
+async function suggestPosts() {
+  // Ý tưởng sau này: lấy bài có lượt like hoặc view cao nhất
+  // Cần thêm hàm getTopPosts() trong smart contract nếu cần thiết
+  return [];
+}
+
+// 👉 Tìm kiếm theo ví (hoặc từ khóa khi mở rộng)
+async function searchByAddressOrKeyword(input) {
+  if (ethers.utils.isAddress(input)) {
+    await viewProfile(input);
+  } else {
+    alert("Hiện tại chỉ hỗ trợ tìm kiếm theo địa chỉ ví.");
+    // Trong tương lai: lọc bài theo từ khóa title/content
   }
 }

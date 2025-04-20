@@ -289,6 +289,17 @@ async function likePost(postId) {
   }
 }
 
+async function sharePost(postId) {
+  try {
+    const tx = await vinSocialContract.sharePost(postId);
+    await tx.wait();
+    alert("Post shared!");
+  } catch (err) {
+    alert("Share failed.");
+    console.error(err);
+  }
+}
+
 async function showComments(postId) {
   const el = document.getElementById(`comments-${postId}`);
   if (el.innerHTML) {
@@ -322,17 +333,6 @@ async function addComment(postId) {
     await showComments(postId);
   } catch (err) {
     alert("Failed to comment.");
-    console.error(err);
-  }
-}
-
-async function sharePost(postId) {
-  try {
-    const tx = await vinSocialContract.sharePost(postId);
-    await tx.wait();
-    alert("Post shared!");
-  } catch (err) {
-    alert("Share failed.");
     console.error(err);
   }
 }
@@ -391,4 +391,44 @@ async function showProfile() {
 
 async function followUser(addr) {
   try {
-    const tx = await vin
+    const tx = await vinSocialContract.follow(addr);
+    await tx.wait();
+    alert("Now following!");
+    await viewProfile(addr);
+  } catch (err) {
+    alert("Follow failed.");
+    console.error(err);
+  }
+}
+
+async function unfollowUser(addr) {
+  try {
+    const tx = await vinSocialContract.unfollow(addr);
+    await tx.wait();
+    alert("Unfollowed.");
+    await viewProfile(addr);
+  } catch (err) {
+    alert("Unfollow failed.");
+    console.error(err);
+  }
+}
+
+// 👉 Gợi ý người dùng nổi bật (placeholder, có thể nâng cấp sau)
+async function suggestUsers() {
+  return []; // sau này có thể thêm API: getTopUsers()
+}
+
+// 👉 Gợi ý bài viết nổi bật (placeholder, có thể nâng cấp sau)
+async function suggestPosts() {
+  return []; // sau này có thể thêm API: getTopPosts()
+}
+
+// 👉 Tìm kiếm theo ví (hoặc từ khoá mở rộng sau này)
+async function searchByAddressOrKeyword(input) {
+  if (ethers.utils.isAddress(input)) {
+    await viewProfile(input);
+  } else {
+    alert("Currently only wallet address search is supported.");
+    // TODO: sau này có thể tìm theo từ khoá title/content
+  }
+}

@@ -5,6 +5,7 @@ const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";
 // 👉 Khởi tạo
 let provider, signer, userAddress;
 let vinSocialContract, vinTokenContract;
+let isRegistered = false;
 
 window.onload = async () => {
   await checkWallet();
@@ -22,7 +23,8 @@ async function checkWallet() {
         document.getElementById("connectBtn").style.display = "none";
         document.getElementById("disconnectBtn").style.display = "inline-block";
         await setupContracts();
-        await showHome(); // tự động hiển thị Home khi đã kết nối
+        await checkRegistration();
+        await showHome();
       }
     } catch (err) {
       console.error("Wallet check failed", err);
@@ -40,6 +42,7 @@ async function connectWallet() {
     document.getElementById("connectBtn").style.display = "none";
     document.getElementById("disconnectBtn").style.display = "inline-block";
     await setupContracts();
+    await checkRegistration();
     await showHome();
   } else {
     alert("Please install MetaMask!");
@@ -48,22 +51,24 @@ async function connectWallet() {
 
 function disconnectWallet() {
   userAddress = null;
+  isRegistered = false;
   document.getElementById("walletAddress").innerText = "Not connected";
   document.getElementById("connectBtn").style.display = "inline-block";
   document.getElementById("disconnectBtn").style.display = "none";
   document.getElementById("mainContent").innerHTML = `<p class="tip">Tip: Use VIC chain in MetaMask. On mobile, open in the wallet's browser (e.g. Viction, MetaMask).</p>`;
+  document.querySelector("nav").style.display = "none";
 }
 
 function shorten(address) {
   return address.slice(0, 6) + "..." + address.slice(-4);
 }
 
-// 👉 ABI rút gọn của token VIN (VRC25)
+// 👉 ABI rút gọn của token VIN
 const vinTokenAbi = [
   "function balanceOf(address account) external view returns (uint256)"
 ];
 
-// 👉 ABI đầy đủ cần thiết của VinSocial
+// 👉 ABI cần thiết của VinSocial
 const vinSocialAbi = [
   "function isRegistered(address) view returns (bool)",
   "function register(string name, string bio, string avatarUrl, string website) external",
@@ -83,27 +88,51 @@ const vinSocialAbi = [
   "function users(address) view returns (string name, string bio, string avatarUrl, string website)"
 ];
 
-// 👉 Tạo contract khi đã có signer
+// 👉 Khởi tạo hợp đồng
 async function setupContracts() {
   vinSocialContract = new ethers.Contract(vinSocialAddress, vinSocialAbi, signer);
   vinTokenContract = new ethers.Contract(vinTokenAddress, vinTokenAbi, provider);
   await getBalances();
 }
 
-// 👉 Hiển thị số dư VIN và VIC
+// 👉 Lấy số dư VIN và VIC
 async function getBalances() {
   try {
     const vin = await vinTokenContract.balanceOf(userAddress);
     const vic = await provider.getBalance(userAddress);
     const vinFormatted = ethers.utils.formatEther(vin);
     const vicFormatted = ethers.utils.formatEther(vic);
-    document.getElementById("walletAddress").innerText = `${shorten(userAddress)} | ${parseFloat(vinFormatted).toFixed(2)} VIN | ${parseFloat(vicFormatted).toFixed(4)} VIC`;
+    document.getElementById("walletAddress").innerText =
+      `${shorten(userAddress)} | ${parseFloat(vinFormatted).toFixed(2)} VIN | ${parseFloat(vicFormatted).toFixed(4)} VIC`;
   } catch (err) {
     console.error("Error fetching balances:", err);
   }
 }
 
-// 👉 Hiển thị Home: các bài viết mới nhất
+// 👉 Kiểm tra ví đã đăng ký chưa, cập nhật menu
+async function checkRegistration() {
+  try {
+    isRegistered = await vinSocialContract.isRegistered(userAddress);
+    const nav = document.querySelector("nav");
+    if (isRegistered) {
+      nav.innerHTML = `
+        <button class="nav-btn" onclick="showHome()">🏠 Home</button>
+        <button class="nav-btn" onclick="showProfile()">👤 My Profile</button>
+        <button class="nav-btn" onclick="showNewPost()">✍️ New Post</button>
+      `;
+    } else {
+      nav.innerHTML = `
+        <button class="nav-btn" onclick="showHome()">🏠 Home</button>
+        <button class="nav-btn" onclick="showRegister()">📝 Register</button>
+      `;
+    }
+    nav.style.display = "flex";
+  } catch (err) {
+    console.error("Error checking registration:", err);
+  }
+}
+
+// 👉 Hiển thị danh sách bài viết
 async function showHome() {
   if (!vinSocialContract) return;
   document.getElementById("mainContent").innerHTML = `<h2>Latest Posts</h2>`;
@@ -126,10 +155,11 @@ async function showHome() {
           <div class="content">${post.content}</div>
           ${post.media ? `<img src="${post.media}" alt="media"/>` : ""}
           <div class="actions">
-            <button onclick="likePost(${post.id})">👍 Like</button>
-            <button onclick="showComments(${post.id})">💬 Comment</button>
-            <button onclick="sharePost(${post.id})">🔁 Share</button>
+            ${isRegistered ? `<button onclick="likePost(${post.id})">👍 Like</button>
+                              <button onclick="showComments(${post.id})">💬 Comment</button>
+                              <button onclick="sharePost(${post.id})">🔁 Share</button>` : ""}
             <button onclick="viewProfile('${post.author}')">👤 Profile</button>
+            <button onclick="translatePost('${post.content}')">🌐 Translate</button>
           </div>
           <div id="comments-${post.id}"></div>
         </div>`;
@@ -141,7 +171,13 @@ async function showHome() {
   }
 }
 
-// 👉 Hiển thị form đăng ký
+// 👉 Nút dịch bài viết
+function translatePost(text) {
+  const url = `https://translate.google.com/?sl=auto&tl=en&text=${encodeURIComponent(text)}&op=translate`;
+  window.open(url, '_blank');
+}
+
+// 👉 Form đăng ký
 function showRegister() {
   document.getElementById("mainContent").innerHTML = `
     <h2>Register Account</h2>
@@ -159,7 +195,7 @@ function showRegister() {
   `;
 }
 
-// 👉 Gửi giao dịch đăng ký
+// 👉 Gửi đăng ký
 async function registerUser() {
   const name = document.getElementById("regName").value.trim();
   const bio = document.getElementById("regBio").value.trim();
@@ -169,6 +205,7 @@ async function registerUser() {
     const tx = await vinSocialContract.register(name, bio, avatar, website);
     await tx.wait();
     alert("Registered successfully!");
+    await checkRegistration();
     await showHome();
   } catch (err) {
     alert("Registration failed.");
@@ -176,8 +213,9 @@ async function registerUser() {
   }
 }
 
-// 👉 Hiển thị form đăng bài
+// 👉 Form đăng bài
 function showNewPost() {
+  if (!isRegistered) return alert("You must register to post.");
   document.getElementById("mainContent").innerHTML = `
     <h2>New Post</h2>
     <form onsubmit="createPost(); return false;">
@@ -220,7 +258,7 @@ async function likePost(postId) {
   }
 }
 
-// 👉 Hiển thị bình luận
+// 👉 Hiển thị & bình luận
 async function showComments(postId) {
   const el = document.getElementById(`comments-${postId}`);
   if (el.innerHTML) {
@@ -232,12 +270,12 @@ async function showComments(postId) {
   comments.forEach(c => {
     html += `<p><strong>${shorten(c.commenter)}:</strong> ${c.message}</p>`;
   });
-  html += `
+  html += isRegistered ? `
     <form onsubmit="addComment(${postId}); return false;">
       <input type="text" id="comment-${postId}" placeholder="Add a comment..." required/>
       <button type="submit">Send</button>
-    </form>
-  </div>`;
+    </form>` : `<p>You must register to comment.</p>`;
+  html += `</div>`;
   el.innerHTML = html;
 }
 
@@ -267,7 +305,7 @@ async function sharePost(postId) {
   }
 }
 
-// 👉 Xem hồ sơ người dùng
+// 👉 Xem profile người khác
 async function viewProfile(addr) {
   try {
     const user = await vinSocialContract.users(addr);
@@ -277,8 +315,9 @@ async function viewProfile(addr) {
       <p><strong>Website:</strong> <a href="${user.website}" target="_blank">${user.website}</a></p>
       <img src="${user.avatarUrl}" alt="avatar" style="max-width:100px;border-radius:50%"/>
       <div class="actions">
-        <button onclick="followUser('${addr}')">👤 Follow</button>
-        <button onclick="unfollowUser('${addr}')">🙅‍♂️ Unfollow</button>
+        ${isRegistered ? `
+          <button onclick="followUser('${addr}')">👤 Follow</button>
+          <button onclick="unfollowUser('${addr}')">🙅‍♂️ Unfollow</button>` : ""}
       </div>
       <h3>Posts</h3>`;
     for (const id of posts.reverse()) {
@@ -297,7 +336,7 @@ async function viewProfile(addr) {
   }
 }
 
-// 👉 Theo dõi / bỏ theo dõi
+// 👉 Follow / Unfollow
 async function followUser(addr) {
   try {
     const tx = await vinSocialContract.follow(addr);
@@ -322,4 +361,3 @@ async function unfollowUser(addr) {
 // 👉 Gắn sự kiện
 document.getElementById("connectBtn").onclick = connectWallet;
 document.getElementById("disconnectBtn").onclick = disconnectWallet;
-

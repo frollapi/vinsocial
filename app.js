@@ -1,4 +1,4 @@
-const vinSocialAddress = "0x86632604d9Fb361AAd0f480F6a731E4d88596B9D";
+const vinSocialAddress = "0x78AB99bbB9786E5ddee0cE2a03B5aEbf29770a1F";
 const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";
 
 let provider, signer, userAddress;

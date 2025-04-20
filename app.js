@@ -1,5 +1,4 @@
-// 👉 VinSocial v2 - app.js (Phần 1/5)
-// Hiển thị số ❤️ likes, 🔁 shares, 👁️ views & follower/following
+// 👉 VinSocial v2 (không gọi viewPost tự động) – Phần 1/5
 
 const vinSocialAddress = "0xA86598807da8C76c5273A06d01C521252D5CDd17";
 const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";
@@ -22,7 +21,7 @@ const vinSocialAbi = [
   "function likePost(uint256) external",
   "function commentOnPost(uint256,string) external",
   "function sharePost(uint256) external",
-  "function viewPost(uint256) external",
+  "function viewPost(uint256) external", // vẫn giữ trong ABI nếu sau này muốn dùng
   "function follow(address) external",
   "function unfollow(address) external",
   "function getUserPosts(address) view returns (uint256[])",
@@ -121,7 +120,7 @@ function updateMenu() {
 document.getElementById("connectBtn").onclick = connectWallet;
 document.getElementById("disconnectBtn").onclick = disconnectWallet;
 
-// 👉 Hiển thị bài viết mới nhất (có ❤️ likes, 🔁 shares, 👁️ views)
+// 👉 Hiển thị bài viết mới nhất (có ❤️ likes, 🔁 shares, 👁️ views – không gọi viewPost)
 async function showHome(reset = false) {
   if (reset) {
     lastPostId = 0;
@@ -172,17 +171,11 @@ async function showHome(reset = false) {
       const media = post[3];
       const time = new Date(post[4] * 1000).toLocaleString();
 
-      // Đếm ❤️ likes, 🔁 shares, 👁️ views
       const [likes, shares, views] = await Promise.all([
         vinSocialReadOnly.likeCount(i),
         vinSocialReadOnly.shareCount(i),
         vinSocialReadOnly.viewCount(i)
       ]);
-
-      // Gửi tín hiệu đã xem (view)
-      try {
-        await vinSocialContract.viewPost(i);
-      } catch {}
 
       html += `
         <div class="post">
@@ -442,27 +435,26 @@ async function unfollowUser(addr) {
   }
 }
 
-// 👉 Gợi ý người dùng nổi bật (cấu trúc chờ triển khai)
+// 👉 Gợi ý người dùng nổi bật (đặt nền móng để phát triển thêm)
 async function suggestUsers() {
-  // Ý tưởng sau này: lọc theo người có nhiều follower nhất
-  // const topUsers = await vinSocialReadOnly.getTopUsers();
-  // Hiện tại để trống (backend hoặc contract bổ sung sau)
+  // Có thể gọi từ smart contract sau này nếu hỗ trợ top-followed
+  // return await vinSocialReadOnly.getTopUsers();
   return [];
 }
 
-// 👉 Gợi ý bài viết nổi bật (dựa theo lượt view hoặc like)
+// 👉 Gợi ý bài viết nổi bật (top view/like, nếu contract có hỗ trợ)
 async function suggestPosts() {
-  // Ý tưởng sau này: lấy bài có lượt like hoặc view cao nhất
-  // Cần thêm hàm getTopPosts() trong smart contract nếu cần thiết
+  // Có thể gọi từ smart contract sau này nếu hỗ trợ
+  // return await vinSocialReadOnly.getTopPosts();
   return [];
 }
 
-// 👉 Tìm kiếm theo ví (hoặc từ khóa khi mở rộng)
+// 👉 Tìm kiếm theo địa chỉ ví (hoặc mở rộng tìm theo từ khóa sau này)
 async function searchByAddressOrKeyword(input) {
   if (ethers.utils.isAddress(input)) {
     await viewProfile(input);
   } else {
-    alert("Hiện tại chỉ hỗ trợ tìm kiếm theo địa chỉ ví.");
-    // Trong tương lai: lọc bài theo từ khóa title/content
+    alert("Currently only wallet address search is supported.");
+    // Ý tưởng mở rộng: tìm theo tiêu đề bài viết, nội dung, hashtag...
   }
 }

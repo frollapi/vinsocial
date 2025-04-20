@@ -6,6 +6,7 @@ let vinSocialContract, vinTokenContract;
 let vinSocialReadOnly;
 let isRegistered = false;
 let lastPostId = 0;
+let seen = new Set();
 
 const vinTokenAbi = [
   "function balanceOf(address account) view returns (uint256)",
@@ -112,10 +113,11 @@ function updateMenu() {
 document.getElementById("connectBtn").onclick = connectWallet;
 document.getElementById("disconnectBtn").onclick = disconnectWallet;
 
-// 👉 Load bài viết theo nhóm 5 bài
+// 👉 Hiển thị bài viết (đã fix lỗi lặp)
 async function showHome(reset = false) {
   if (reset) {
     lastPostId = 0;
+    seen.clear();
     document.getElementById("mainContent").innerHTML = `<h2>Latest Posts</h2>`;
   }
 
@@ -124,12 +126,30 @@ async function showHome(reset = false) {
   let loaded = 0;
 
   while (i > 0 && loaded < 5) {
+    if (seen.has(i)) {
+      i--;
+      continue;
+    }
+
     try {
       const post = await vinSocialReadOnly.posts(i);
-      if (post[0] === "0x0000000000000000000000000000000000000000" || post[4] === 0) {
+      if (
+        post[0] === "0x0000000000000000000000000000000000000000" ||
+        post[4] === 0
+      ) {
+        seen.add(i);
         i--;
         continue;
       }
+
+      const key = `${post[1]}|${post[2]}|${post[4]}`;
+      if (seen.has(key)) {
+        i--;
+        continue;
+      }
+
+      seen.add(i);
+      seen.add(key);
 
       const author = shorten(post[0]);
       const title = post[1];
@@ -171,11 +191,13 @@ async function showHome(reset = false) {
   }
 }
 
+// 👉 Dịch bài viết
 function translatePost(text) {
   const url = `https://translate.google.com/?sl=auto&tl=en&text=${encodeURIComponent(text)}&op=translate`;
   window.open(url, "_blank");
 }
 
+// 👉 Hiển thị form đăng ký tài khoản
 function showRegister() {
   if (isRegistered) return alert("You are already registered.");
   document.getElementById("mainContent").innerHTML = `
@@ -194,6 +216,7 @@ function showRegister() {
   `;
 }
 
+// 👉 Gửi đăng ký
 async function registerUser() {
   const name = document.getElementById("regName").value.trim();
   const bio = document.getElementById("regBio").value.trim();
@@ -216,6 +239,7 @@ async function registerUser() {
   }
 }
 
+// 👉 Hiển thị form đăng bài
 function showNewPost() {
   if (!isRegistered) return alert("You must register to post.");
   document.getElementById("mainContent").innerHTML = `
@@ -232,6 +256,7 @@ function showNewPost() {
   `;
 }
 
+// 👉 Gửi bài viết
 async function createPost() {
   const title = document.getElementById("postTitle").value.trim();
   const content = document.getElementById("postContent").value.trim();
@@ -247,6 +272,7 @@ async function createPost() {
   }
 }
 
+// 👉 Like bài viết
 async function likePost(postId) {
   try {
     const tx = await vinSocialContract.likePost(postId);
@@ -258,6 +284,7 @@ async function likePost(postId) {
   }
 }
 
+// 👉 Hiển thị và thêm bình luận
 async function showComments(postId) {
   const el = document.getElementById(`comments-${postId}`);
   if (el.innerHTML) {
@@ -295,6 +322,7 @@ async function addComment(postId) {
   }
 }
 
+// 👉 Share bài viết
 async function sharePost(postId) {
   try {
     const tx = await vinSocialContract.sharePost(postId);
@@ -306,6 +334,7 @@ async function sharePost(postId) {
   }
 }
 
+// 👉 Xem hồ sơ người dùng
 async function viewProfile(addr) {
   try {
     const user = await vinSocialReadOnly.users(addr);
@@ -342,10 +371,12 @@ async function viewProfile(addr) {
   }
 }
 
+// 👉 Hồ sơ chính mình
 async function showProfile() {
   await viewProfile(userAddress);
 }
 
+// 👉 Follow / Unfollow
 async function followUser(addr) {
   try {
     const tx = await vinSocialContract.follow(addr);

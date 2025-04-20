@@ -30,7 +30,12 @@ window.onload = async () => {
   if (window.ethereum) {
     provider = new ethers.providers.Web3Provider(window.ethereum);
     signer = provider.getSigner();
+    vinSocialReadOnly = new ethers.Contract(vinSocialAddress, vinSocialAbi, provider);
     await tryAutoConnect();
+  } else {
+    provider = new ethers.providers.JsonRpcProvider();
+    vinSocialReadOnly = new ethers.Contract(vinSocialAddress, vinSocialAbi, provider);
+    showHome();
   }
 };
 
@@ -54,7 +59,6 @@ function disconnectWallet() {
 
 async function setupContracts() {
   vinSocialContract = new ethers.Contract(vinSocialAddress, vinSocialAbi, signer);
-  vinSocialReadOnly = new ethers.Contract(vinSocialAddress, vinSocialAbi, provider);
   vinTokenContract = new ethers.Contract(vinTokenAddress, vinTokenAbi, signer);
 }
 
@@ -106,7 +110,7 @@ function updateMenu() {
 document.getElementById("connectBtn").onclick = connectWallet;
 document.getElementById("disconnectBtn").onclick = disconnectWallet;
 
-// 👉 Hiển thị danh sách bài viết
+// Hiển thị bài viết
 async function showHome() {
   document.getElementById("mainContent").innerHTML = `<h2>Latest Posts</h2>`;
   let html = "";
@@ -144,210 +148,3 @@ async function showHome() {
   document.getElementById("mainContent").innerHTML += html;
 }
 
-// 👉 Nút dịch
-function translatePost(text) {
-  const url = `https://translate.google.com/?sl=auto&tl=en&text=${encodeURIComponent(text)}&op=translate`;
-  window.open(url, "_blank");
-}
-
-// 👉 Hiển thị form đăng ký
-function showRegister() {
-  if (isRegistered) return alert("You are already registered.");
-  document.getElementById("mainContent").innerHTML = `
-    <h2>Register Account</h2>
-    <form onsubmit="registerUser(); return false;">
-      <label>Name*</label>
-      <input type="text" id="regName" maxlength="32" required/>
-      <label>Bio</label>
-      <input type="text" id="regBio" maxlength="160"/>
-      <label>Avatar URL</label>
-      <input type="text" id="regAvatar"/>
-      <label>Website</label>
-      <input type="text" id="regWebsite"/>
-      <button type="submit">Register (0.05 VIN)</button>
-    </form>
-  `;
-}
-
-// 👉 Đăng ký tài khoản
-async function registerUser() {
-  const name = document.getElementById("regName").value.trim();
-  const bio = document.getElementById("regBio").value.trim();
-  const avatar = document.getElementById("regAvatar").value.trim();
-  const website = document.getElementById("regWebsite").value.trim();
-  const fee = ethers.utils.parseEther("0.05");
-
-  try {
-    const approveTx = await vinTokenContract.approve(vinSocialAddress, fee);
-    await approveTx.wait();
-
-    const tx = await vinSocialContract.register(name, bio, avatar, website);
-    await tx.wait();
-
-    alert("Registration successful!");
-    await updateUI();
-  } catch (err) {
-    alert("Registration failed.");
-    console.error(err);
-  }
-}
-
-// 👉 Hiển thị form đăng bài
-function showNewPost() {
-  if (!isRegistered) return alert("You must register to post.");
-  document.getElementById("mainContent").innerHTML = `
-    <h2>New Post</h2>
-    <form onsubmit="createPost(); return false;">
-      <label>Title</label>
-      <input type="text" id="postTitle" maxlength="80"/>
-      <label>What's on your mind?</label>
-      <textarea id="postContent" rows="4" maxlength="500"></textarea>
-      <label>Image URL (optional)</label>
-      <input type="text" id="postMedia"/>
-      <button type="submit">Post</button>
-    </form>
-  `;
-}
-
-// 👉 Gửi bài viết
-async function createPost() {
-  const title = document.getElementById("postTitle").value.trim();
-  const content = document.getElementById("postContent").value.trim();
-  const media = document.getElementById("postMedia").value.trim();
-  try {
-    const tx = await vinSocialContract.createPost(title, content, media);
-    await tx.wait();
-    alert("Post created!");
-    await showHome();
-  } catch (err) {
-    alert("Post failed.");
-    console.error(err);
-  }
-}
-
-// 👉 Thích bài viết
-async function likePost(postId) {
-  try {
-    const tx = await vinSocialContract.likePost(postId);
-    await tx.wait();
-    alert("Liked!");
-  } catch (err) {
-    alert("Failed to like.");
-    console.error(err);
-  }
-}
-
-// 👉 Hiển thị và thêm bình luận
-async function showComments(postId) {
-  const el = document.getElementById(`comments-${postId}`);
-  if (el.innerHTML) {
-    el.innerHTML = "";
-    return;
-  }
-  const comments = await vinSocialReadOnly.getComments(postId);
-  let html = `<div class="comments"><h4>Comments</h4>`;
-  comments.forEach(c => {
-    html += `<p><strong>${shorten(c.commenter)}:</strong> ${c.message}</p>`;
-  });
-  if (isRegistered) {
-    html += `
-      <form onsubmit="addComment(${postId}); return false;">
-        <input type="text" id="comment-${postId}" placeholder="Add a comment..." required/>
-        <button type="submit">Send</button>
-      </form>`;
-  } else {
-    html += `<p>You must register to comment.</p>`;
-  }
-  html += `</div>`;
-  el.innerHTML = html;
-}
-
-async function addComment(postId) {
-  const msg = document.getElementById(`comment-${postId}`).value.trim();
-  try {
-    const tx = await vinSocialContract.commentOnPost(postId, msg);
-    await tx.wait();
-    alert("Comment added!");
-    await showComments(postId);
-  } catch (err) {
-    alert("Failed to comment.");
-    console.error(err);
-  }
-}
-
-// 👉 Chia sẻ bài viết
-async function sharePost(postId) {
-  try {
-    const tx = await vinSocialContract.sharePost(postId);
-    await tx.wait();
-    alert("Post shared!");
-  } catch (err) {
-    alert("Share failed.");
-    console.error(err);
-  }
-}
-
-// 👉 Xem hồ sơ người khác
-async function viewProfile(addr) {
-  try {
-    const user = await vinSocialReadOnly.users(addr);
-    const posts = await vinSocialReadOnly.getUserPosts(addr);
-
-    let html = `<h2>${user[0]}'s Profile</h2>
-      <p><strong>Bio:</strong> ${user[1]}</p>
-      <p><strong>Website:</strong> <a href="${user[3]}" target="_blank">${user[3]}</a></p>
-      <img src="${user[2]}" alt="avatar" style="max-width:100px;border-radius:50%"/>
-      <div class="actions">`;
-
-    if (isRegistered && addr.toLowerCase() !== userAddress.toLowerCase()) {
-      html += `
-        <button onclick="followUser('${addr}')">👤 Follow</button>
-        <button onclick="unfollowUser('${addr}')">🙅‍♂️ Unfollow</button>`;
-    }
-
-    html += `</div><h3>Posts</h3>`;
-
-    for (const id of posts.reverse()) {
-      const post = await vinSocialReadOnly.posts(id);
-      html += `<div class="post">
-        <div class="title">${post[1]}</div>
-        <div class="author">${shorten(post[0])} • ${new Date(post[4]*1000).toLocaleString()}</div>
-        <div class="content">${post[2]}</div>
-        ${post[3] ? `<img src="${post[3]}" alt="media"/>` : ""}
-      </div>`;
-    }
-
-    document.getElementById("mainContent").innerHTML = html;
-  } catch (err) {
-    alert("Profile not available.");
-    console.error(err);
-  }
-}
-
-// 👉 Theo dõi / bỏ theo dõi
-async function followUser(addr) {
-  try {
-    const tx = await vinSocialContract.follow(addr);
-    await tx.wait();
-    alert("Now following!");
-  } catch (err) {
-    alert("Follow failed.");
-    console.error(err);
-  }
-}
-
-async function unfollowUser(addr) {
-  try {
-    const tx = await vinSocialContract.unfollow(addr);
-    await tx.wait();
-    alert("Unfollowed.");
-  } catch (err) {
-    alert("Unfollow failed.");
-    console.error(err);
-  }
-}
-
-// 👉 Hồ sơ cá nhân
-async function showProfile() {
-  await viewProfile(userAddress);
-}

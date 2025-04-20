@@ -126,8 +126,9 @@ async function showHome() {
   document.getElementById("mainContent").innerHTML = `<h2>Latest Posts</h2>`;
   let html = "";
   for (let i = 1; i <= 1000; i++) {
-    try {
+  try {
       const post = await vinSocialContract.posts(i);
+      if (post[0] === "0x0000000000000000000000000000000000000000" || post[4] === 0) continue;
       const author = shorten(post[0]);
       const title = post[1];
       const content = post[2];

@@ -25,7 +25,8 @@ const vinSocialAbi = [
   "function getUserPosts(address) view returns (uint256[])",
   "function getComments(uint256) view returns (tuple(address commenter,string message,uint256 timestamp)[])",
   "function posts(uint256) view returns (address,string,string,string,uint256)",
-  "function users(address) view returns (string,string,string,string)"
+  "function users(address) view returns (string,string,string,string)",
+  "function nextPostId() view returns (uint256)"
 ];
 
 window.onload = async () => {
@@ -83,7 +84,6 @@ async function updateUI() {
   document.getElementById("walletAddress").innerText = `${shorten(userAddress)} | ${vin} VIN | ${vic} VIC`;
   document.getElementById("connectBtn").style.display = "none";
   document.getElementById("disconnectBtn").style.display = "inline-block";
-
   isRegistered = await vinSocialContract.isRegistered(userAddress);
   updateMenu();
   showHome(true);
@@ -113,7 +113,7 @@ function updateMenu() {
 document.getElementById("connectBtn").onclick = connectWallet;
 document.getElementById("disconnectBtn").onclick = disconnectWallet;
 
-// 👉 Hiển thị bài viết (đã fix lỗi lặp)
+// 👉 Hiển thị bài viết (đã sửa lỗi chậm)
 async function showHome(reset = false) {
   if (reset) {
     lastPostId = 0;
@@ -122,7 +122,17 @@ async function showHome(reset = false) {
   }
 
   let html = "";
-  let i = lastPostId ? lastPostId - 1 : 1000;
+  if (lastPostId === 0) {
+    try {
+      const next = await vinSocialReadOnly.nextPostId();
+      lastPostId = next.toNumber();
+    } catch (e) {
+      console.error("Cannot fetch nextPostId", e);
+      return;
+    }
+  }
+
+  let i = lastPostId - 1;
   let loaded = 0;
 
   while (i > 0 && loaded < 5) {
@@ -133,10 +143,7 @@ async function showHome(reset = false) {
 
     try {
       const post = await vinSocialReadOnly.posts(i);
-      if (
-        post[0] === "0x0000000000000000000000000000000000000000" ||
-        post[4] === 0
-      ) {
+      if (post[0] === "0x0000000000000000000000000000000000000000" || post[4] === 0) {
         seen.add(i);
         i--;
         continue;
@@ -169,7 +176,7 @@ async function showHome(reset = false) {
               <button onclick="showComments(${i})">💬 Comment</button>
               <button onclick="sharePost(${i})">🔁 Share</button>` : ""}
             <button onclick="viewProfile('${post[0]}')">👤 Profile</button>
-            <button onclick="translatePost('${content}')">🌐 Translate</button>
+            <button onclick="translatePost(\`${content}\`)">🌐 Translate</button>
           </div>
           <div id="comments-${i}"></div>
         </div>
@@ -196,6 +203,8 @@ function translatePost(text) {
   const url = `https://translate.google.com/?sl=auto&tl=en&text=${encodeURIComponent(text)}&op=translate`;
   window.open(url, "_blank");
 }
+
+// 👉 Tiếp tục các phần còn lại cho file app.js
 
 // 👉 Hiển thị form đăng ký tài khoản
 function showRegister() {
@@ -227,10 +236,83 @@ async function registerUser() {
   try {
     const approveTx = await vinTokenContract.approve(vinSocialAddress, fee);
     await approveTx.wait();
-
     const tx = await vinSocialContract.register(name, bio, avatar, website);
     await tx.wait();
+    alert("Registration successful!");
+    await updateUI();
+  } catch (err) {
+    alert("Registration failed.");
+    console.error(err);
+  }
+}
 
+// 👉 Hiển thị form đăng bài
+function showNewPost() {
+  if (!isRegistered) return alert("You must register to post.");
+  document.getElementById("mainContent").innerHTML = `
+    <h2>New Post</h2>
+    <form onsubmit="createPost(); return false;">
+      <label>Title</label>
+      <input type="text" id="postTitle" maxlength="80"/>
+      <label>What's on your mind?</label>
+      <textarea id="postContent" rows="4" maxlength="500"></textarea>
+      <label>Image URL (optional)</label>
+      <input type="text" id="postMedia"/>
+      <button type="submit">Post</button>
+    </form>
+  `;
+}
+
+// 👉 Gửi bài viết
+async function createPost() {
+  const title = document.getElementById("postTitle").value.trim();
+  const content = document.getElementById("postContent").value.trim();
+  const media = document.getElementById("postMedia").value.trim();
+  try {
+    const tx = await vinSocialContract.createPost(title, content, media);
+    await tx.wait();
+    alert("Post created!");
+    await showHome(true);
+  } catch (err) {
+    alert("Post failed.");
+    console.error(err);
+  }
+}
+
+// 👉 Tiếp tục các phần còn lại cho file app.js
+
+// 👉 Hiển thị form đăng ký tài khoản
+function showRegister() {
+  if (isRegistered) return alert("You are already registered.");
+  document.getElementById("mainContent").innerHTML = `
+    <h2>Register Account</h2>
+    <form onsubmit="registerUser(); return false;">
+      <label>Name*</label>
+      <input type="text" id="regName" maxlength="32" required/>
+      <label>Bio</label>
+      <input type="text" id="regBio" maxlength="160"/>
+      <label>Avatar URL</label>
+      <input type="text" id="regAvatar"/>
+      <label>Website</label>
+      <input type="text" id="regWebsite"/>
+      <button type="submit">Register (0.05 VIN)</button>
+    </form>
+  `;
+}
+
+// 👉 Gửi đăng ký
+async function registerUser() {
+  const name = document.getElementById("regName").value.trim();
+  const bio = document.getElementById("regBio").value.trim();
+  const avatar = document.getElementById("regAvatar").value.trim();
+  const website = document.getElementById("regWebsite").value.trim();
+  const fee = ethers.utils.parseEther("0.05");
+
+  try {
+    const approveTx = await vinTokenContract.approve(vinSocialAddress, fee);
+    await approveTx.wait();
+    const tx = await vinSocialContract.register(name, bio, avatar, website);
+    await tx.wait();
     alert("Registration successful!");
     await updateUI();
   } catch (err) {

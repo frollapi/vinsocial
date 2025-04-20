@@ -2,76 +2,64 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>VinSocial.vin</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="icon" href="logo.png" type="image/png">
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <script defer src="app.js"></script>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="icon" type="image/png" href="favicon.png"/>
 </head>
 <body>
   <header>
-    <img src="logo.png" alt="VinSocial Logo" class="logo" />
-    <h1>VinSocial.vin</h1>
-    <p class="slogan">Decentralized. Uncensored. Free Speech.</p>
-    <p class="price">Need VIN? <a href="https://VinSwap.vin" target="_blank">Trade VIN/VIC</a></p>
+    <div class="logo-area">
+      <img src="logo.png" alt="VinSocial Logo" class="logo"/>
+      <div class="tagline">
+        <h1>VinSocial.vin</h1>
+        <p>Decentralized. Uncensored. Free Speech.</p>
+      </div>
+    </div>
+    <div class="wallet-area">
+      <span id="walletAddress">Not connected</span>
+      <button id="connectBtn">Connect Wallet</button>
+      <button id="disconnectBtn" style="display:none;">Disconnect</button>
+    </div>
   </header>
 
-  <div id="walletSection">
-    <button id="connectBtn">Connect Wallet</button>
-    <div id="walletDetails" style="display: none">
-      <p id="walletAddress"></p>
-      <p><span id="vinBalance">-- VIN</span> | <span id="vicBalance">-- VIC</span></p>
-      <button id="disconnectBtn">Disconnect</button>
-    </div>
-  </div>
+  <section class="info-bar">
+    <div id="vinPrice">1 VIN ≈ $-- USD</div>
+    <a href="https://vinswap.vin" target="_blank" class="trade-link">Trade VIN/VIC</a>
+  </section>
 
   <nav>
-    <button id="homeBtn">🏠 Home</button>
-    <button id="myProfileBtn">👤 My Profile</button>
-    <button id="registerBtn" class="hidden">📝 Register</button>
-    <button id="postBtn" class="hidden">✍️ New Post</button>
+    <button class="nav-btn" onclick="showHome()">🏠 Home</button>
+    <button class="nav-btn" onclick="showProfile()">👤 My Profile</button>
+    <button class="nav-btn" onclick="showRegister()">📝 Register</button>
+    <button class="nav-btn" onclick="showNewPost()">✍️ New Post</button>
   </nav>
 
-  <section id="registrationForm" class="hidden">
-    <h2>Register Account</h2>
-    <form id="regForm">
-      <input type="text" id="name" placeholder="Name*" required maxlength="50" />
-      <input type="text" id="bio" placeholder="Bio" maxlength="160" />
-      <input type="url" id="avatarUrl" placeholder="Avatar URL" />
-      <input type="url" id="website" placeholder="Website" />
-      <button type="submit">Register (0.05 VIN)</button>
-    </form>
-  </section>
-
-  <section id="newPostForm" class="hidden">
-    <h2>New Post</h2>
-    <form id="postForm">
-      <input type="text" id="postTitle" placeholder="Title*" required maxlength="100" />
-      <textarea id="postContent" placeholder="What's on your mind?" required maxlength="500"></textarea>
-      <input type="url" id="postMedia" placeholder="Image URL (optional)" />
-      <button type="submit">Post</button>
-    </form>
-  </section>
-
-  <section id="feed">
-    <h2>Latest Posts</h2>
-    <!-- Bài viết sẽ được render tại đây -->
-  </section>
-
-  <section id="profileView" class="hidden">
-    <div id="profileInfo"></div>
-    <div id="profilePosts"></div>
-  </section>
-
-  <section id="userProfileView" class="hidden">
-    <div id="userProfileInfo"></div>
-    <div id="userProfilePosts"></div>
-  </section>
+  <main id="mainContent">
+    <p class="tip">Tip: Use VIC chain in MetaMask. On mobile, open in the wallet's browser (e.g. Viction, MetaMask).</p>
+  </main>
 
   <footer>
-    <p>Tip: Use VIC chain in MetaMask. On mobile, open in the wallet's browser (e.g. Viction, MetaMask).</p>
     <p>Made with ❤️ on the VIC blockchain</p>
   </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script src="app.js"></script>
+<script>
+  async function fetchVinPrice() {
+    try {
+      const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=VICUSDT');
+      const data = await res.json();
+      const vicPrice = parseFloat(data.price);
+      const vinPrice = (vicPrice * 100).toFixed(2);
+      document.getElementById("vinPrice").innerText = `1 VIN ≈ $${vinPrice} USD`;
+    } catch (err) {
+      document.getElementById("vinPrice").innerText = "1 VIN ≈ $-- USD";
+    }
+  }
+  fetchVinPrice();
+  setInterval(fetchVinPrice, 60000); // cập nhật mỗi phút
+</script>
+
 </body>
 </html>

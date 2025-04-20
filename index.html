@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>VinSocial.vin</title>
   <link rel="stylesheet" href="style.css"/>
-  <link rel="icon" type="image/png" href="logo.png"/>
+  <link rel="icon" type="image/png" href="favicon.png"/>
 </head>
 <body>
   <header>
     <div class="logo-area">
-      <img src="logo.png" alt="VinSocial Logo" class="logo"/>
-      <div class="tagline">
+      <img src="logo.png" alt="VinSocial" class="logo"/>
+      <div>
         <h1>VinSocial.vin</h1>
         <p>Decentralized. Uncensored. Free Speech.</p>
       </div>
@@ -25,15 +25,10 @@
 
   <section class="info-bar">
     <div id="vinPrice">1 VIN ≈ $-- USD</div>
-    <a href="https://vinswap.vin" target="_blank" class="trade-link">Trade VIN/VIC</a>
+    <a href="https://vinswap.vin" class="trade-link" target="_blank">Trade VIN/VIC</a>
   </section>
 
-  <nav>
-    <button class="nav-btn" onclick="showHome()">🏠 Home</button>
-    <button class="nav-btn" onclick="showProfile()">👤 My Profile</button>
-    <button class="nav-btn" onclick="showRegister()">📝 Register</button>
-    <button class="nav-btn" onclick="showNewPost()">✍️ New Post</button>
-  </nav>
+  <nav id="mainNav" style="display: none;"></nav>
 
   <main id="mainContent">
     <p class="tip">Tip: Use VIC chain in MetaMask. On mobile, open in the wallet's browser (e.g. Viction, MetaMask).</p>
@@ -45,21 +40,20 @@
 
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script src="app.js"></script>
-<script>
-  async function fetchVinPrice() {
-    try {
-      const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=VICUSDT');
-      const data = await res.json();
-      const vicPrice = parseFloat(data.price);
-      const vinPrice = (vicPrice * 100).toFixed(2);
-      document.getElementById("vinPrice").innerText = `1 VIN ≈ $${vinPrice} USD`;
-    } catch (err) {
-      document.getElementById("vinPrice").innerText = "1 VIN ≈ $-- USD";
-    }
-  }
-  fetchVinPrice();
-  setInterval(fetchVinPrice, 60000); // cập nhật mỗi phút
-</script>
 
+  <script>
+    async function fetchVinPrice() {
+      try {
+        const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=VICUSDT');
+        const data = await res.json();
+        const vinUsd = (parseFloat(data.price) * 100).toFixed(2);
+        document.getElementById("vinPrice").innerText = `1 VIN ≈ $${vinUsd} USD`;
+      } catch {
+        document.getElementById("vinPrice").innerText = "1 VIN ≈ $-- USD";
+      }
+    }
+    fetchVinPrice();
+    setInterval(fetchVinPrice, 60000);
+  </script>
 </body>
 </html>

@@ -110,25 +110,29 @@ async function getBalances() {
 }
 
 // 👉 Kiểm tra ví đã đăng ký chưa, cập nhật menu
-async function checkRegistration() {
+async function registerUser() {
+  const name = document.getElementById("regName").value.trim();
+  const bio = document.getElementById("regBio").value.trim();
+  const avatar = document.getElementById("regAvatar").value.trim();
+  const website = document.getElementById("regWebsite").value.trim();
+
+  const REGISTRATION_FEE = ethers.utils.parseEther("0.05");
+
   try {
-    isRegistered = await vinSocialContract.isRegistered(userAddress);
-    const nav = document.querySelector("nav");
-    if (isRegistered) {
-      nav.innerHTML = `
-        <button class="nav-btn" onclick="showHome()">🏠 Home</button>
-        <button class="nav-btn" onclick="showProfile()">👤 My Profile</button>
-        <button class="nav-btn" onclick="showNewPost()">✍️ New Post</button>
-      `;
-    } else {
-      nav.innerHTML = `
-        <button class="nav-btn" onclick="showHome()">🏠 Home</button>
-        <button class="nav-btn" onclick="showRegister()">📝 Register</button>
-      `;
-    }
-    nav.style.display = "flex";
+    // B1: Approve token VIN cho VinSocial được quyền rút 0.05 VIN
+    const approveTx = await vinTokenContract.connect(signer).approve(vinSocialAddress, REGISTRATION_FEE);
+    await approveTx.wait();
+
+    // B2: Gọi hàm register sau khi approve
+    const tx = await vinSocialContract.register(name, bio, avatar, website);
+    await tx.wait();
+
+    alert("Registered successfully!");
+    await checkRegistration();
+    await showHome();
   } catch (err) {
-    console.error("Error checking registration:", err);
+    alert("Registration failed.");
+    console.error(err);
   }
 }
 

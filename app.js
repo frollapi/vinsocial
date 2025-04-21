@@ -1,4 +1,4 @@
-// 👉 VinSocial.vin - Tương thích đầy đủ với index.html
+// 👉 VinSocial.vin - Giao diện chuẩn, tương thích với index.html
 const vinSocialAddress = "0xA86598807da8C76c5273A06d01C521252D5CDd17";
 const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";
 
@@ -42,7 +42,7 @@ window.onload = async () => {
   } else {
     provider = new ethers.providers.JsonRpcProvider("https://rpc.viction.xyz");
     vinSocialReadOnly = new ethers.Contract(vinSocialAddress, vinSocialAbi, provider);
-    showHome(true); // Cho phép xem bài khi không có ví
+    showHome(true);
   }
 };
 
@@ -52,6 +52,16 @@ async function connectWallet() {
   userAddress = await signer.getAddress();
   await setupContracts();
   await updateUI();
+}
+
+function disconnectWallet() {
+  userAddress = null;
+  isRegistered = false;
+  document.getElementById("walletAddress").innerText = "Not connected";
+  document.getElementById("connectBtn").style.display = "inline-block";
+  document.getElementById("disconnectBtn").style.display = "none";
+  document.getElementById("mainNav").style.display = "none";
+  document.getElementById("mainContent").innerHTML = `<p class="tip">Tip: Use VIC chain in MetaMask. On mobile, open in the wallet's browser (e.g. Viction, MetaMask).</p>`;
 }
 
 async function setupContracts() {
@@ -67,7 +77,7 @@ async function tryAutoConnect() {
     await setupContracts();
     await updateUI();
   } else {
-    showHome(true); // vẫn hiển thị bài viết công khai
+    showHome(true);
   }
 }
 
@@ -127,9 +137,8 @@ function searchByAddress() {
 }
 
 document.getElementById("connectBtn").onclick = connectWallet;
-document.getElementById("disconnectBtn").onclick = () => location.reload();
-
-// 👉 Hiển thị bài viết mới nhất (5 bài mỗi lần)
+document.getElementById("disconnectBtn").onclick = disconnectWallet;
+// 👉 Hiển thị bài viết mới nhất (5 bài/lần)
 async function showHome(reset = false) {
   if (reset) {
     lastPostId = 0;
@@ -210,13 +219,13 @@ async function showHome(reset = false) {
   }
 }
 
-// 👉 Dịch bài viết qua Google Translate
+// 👉 Dịch bài viết
 function translatePost(text) {
   const url = `https://translate.google.com/?sl=auto&tl=en&text=${encodeURIComponent(text)}&op=translate`;
   window.open(url, "_blank");
 }
 
-// 👉 Hiển thị form đăng ký tài khoản
+// 👉 Form đăng ký tài khoản
 function showRegister() {
   if (isRegistered) return alert("You are already registered.");
   document.getElementById("mainContent").innerHTML = `
@@ -235,7 +244,7 @@ function showRegister() {
   `;
 }
 
-// 👉 Gửi yêu cầu đăng ký tài khoản
+// 👉 Gửi đăng ký tài khoản
 async function registerUser() {
   const name = document.getElementById("regName").value.trim();
   const bio = document.getElementById("regBio").value.trim();
@@ -256,7 +265,7 @@ async function registerUser() {
   }
 }
 
-// 👉 Hiển thị form đăng bài
+// 👉 Form đăng bài viết
 function showNewPost() {
   if (!isRegistered) return alert("You must register to post.");
   document.getElementById("mainContent").innerHTML = `
@@ -289,12 +298,11 @@ async function createPost() {
   }
 }
 
-// 👉 Tự động giãn chiều cao textarea
+// 👉 Tự động giãn textarea
 function autoResize(textarea) {
   textarea.style.height = 'auto';
   textarea.style.height = textarea.scrollHeight + 'px';
 }
-
 // 👉 Like bài viết
 async function likePost(postId) {
   try {
@@ -371,11 +379,11 @@ function shorten(addr) {
   return addr.slice(0, 6) + "..." + addr.slice(-4);
 }
 
-// 👉 Xem hồ sơ người dùng (hoặc chính mình nếu truyền địa chỉ ví mình)
+// 👉 Xem hồ sơ người dùng
 async function viewProfile(addr) {
   try {
     const user = await vinSocialReadOnly.users(addr);
-    const posts = Array.from(await vinSocialReadOnly.getUserPosts(addr));
+    const posts = await vinSocialReadOnly.getUserPosts(addr);
     const [followers, following] = await Promise.all([
       vinSocialReadOnly.getFollowers(addr),
       vinSocialReadOnly.getFollowing(addr)
@@ -423,7 +431,7 @@ async function viewProfile(addr) {
   }
 }
 
-// 👉 Xem hồ sơ chính mình
+// 👉 Xem hồ sơ của chính mình
 async function showProfile() {
   if (!userAddress) return alert("Wallet not connected");
   await viewProfile(userAddress);
@@ -452,14 +460,5 @@ async function unfollowUser(addr) {
   } catch (err) {
     alert("Unfollow failed.");
     console.error(err);
-  }
-}
-
-// 👉 Tìm kiếm mở rộng (ý tưởng tương lai)
-async function searchByAddressOrKeyword(input) {
-  if (ethers.utils.isAddress(input)) {
-    await viewProfile(input);
-  } else {
-    alert("Currently only wallet address search is supported.");
   }
 }

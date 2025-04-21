@@ -208,17 +208,19 @@ main {
 }
 
 .post .actions button {
-  padding: 6px 10px;
-  font-size: 13px;
+  background: none;
   border: none;
-  background: #f0f0f0;
-  border-radius: 6px;
+  font-weight: bold;
+  font-size: 14px;
+  color: #007bff;
   cursor: pointer;
-  transition: background 0.2s ease;
+  padding: 4px 8px;
+  transition: color 0.2s ease;
 }
 
 .post .actions button:hover {
-  background: #ddd;
+  color: #0056b3;
+  text-decoration: underline;
 }
 
 /* 📝 Form (đăng ký, đăng bài, comment) */

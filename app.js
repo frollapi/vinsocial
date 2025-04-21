@@ -44,7 +44,7 @@ window.onload = async () => {
     vinSocialReadOnly = new ethers.Contract(vinSocialAddress, vinSocialAbi, provider);
     await tryAutoConnect();
   } else {
-    provider = new ethers.providers.JsonRpcProvider();
+    provider = new ethers.providers.JsonRpcProvider("https://rpc.viction.xyz");
     vinSocialReadOnly = new ethers.Contract(vinSocialAddress, vinSocialAbi, provider);
     showHome(true); // vẫn cho xem bài khi chưa có ví
   }

@@ -137,18 +137,21 @@ nav {
 }
 
 .nav-btn {
-  background: #e0e0e0;
+  background: none;
   border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
+  padding: 6px 10px;
+  font-weight: bold;
+  font-size: 15px;
+  color: #007bff;
   cursor: pointer;
-  font-size: 14px;
-  transition: background 0.2s ease;
+  transition: color 0.2s ease;
 }
 
 .nav-btn:hover {
-  background: #ccc;
+  color: #0056b3;
+  text-decoration: underline;
 }
+
 
 /* 📰 Khu vực nội dung chính */
 main {

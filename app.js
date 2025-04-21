@@ -1,4 +1,4 @@
-// 👉 VinSocial v2 (không gọi viewPost tự động) – Phần 1/5
+// 👉 VinSocial.v3 – hỗ trợ xem bài khi chưa kết nối ví, copy ví, tìm kiếm
 
 const vinSocialAddress = "0xA86598807da8C76c5273A06d01C521252D5CDd17";
 const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";
@@ -21,7 +21,7 @@ const vinSocialAbi = [
   "function likePost(uint256) external",
   "function commentOnPost(uint256,string) external",
   "function sharePost(uint256) external",
-  "function viewPost(uint256) external", // vẫn giữ trong ABI nếu sau này muốn dùng
+  "function viewPost(uint256) external",
   "function follow(address) external",
   "function unfollow(address) external",
   "function getUserPosts(address) view returns (uint256[])",
@@ -36,6 +36,7 @@ const vinSocialAbi = [
   "function getFollowing(address) view returns (address[])"
 ];
 
+// 👉 Load giao diện
 window.onload = async () => {
   if (window.ethereum) {
     provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -45,7 +46,7 @@ window.onload = async () => {
   } else {
     provider = new ethers.providers.JsonRpcProvider();
     vinSocialReadOnly = new ethers.Contract(vinSocialAddress, vinSocialAbi, provider);
-    showHome(true);
+    showHome(true); // vẫn cho xem bài khi chưa có ví
   }
 };
 
@@ -80,6 +81,8 @@ async function tryAutoConnect() {
     signer = provider.getSigner();
     await setupContracts();
     await updateUI();
+  } else {
+    showHome(true); // vẫn hiển thị bài nếu không có tài khoản
   }
 }
 
@@ -88,12 +91,24 @@ async function updateUI() {
   const vicBal = await provider.getBalance(userAddress);
   const vin = parseFloat(ethers.utils.formatEther(vinBal)).toFixed(2);
   const vic = parseFloat(ethers.utils.formatEther(vicBal)).toFixed(4);
-  document.getElementById("walletAddress").innerText = `${shorten(userAddress)} | ${vin} VIN | ${vic} VIC`;
+
+  document.getElementById("walletAddress").innerHTML = `
+    <span style="font-family: monospace;">${userAddress}</span>
+    <button onclick="copyToClipboard('${userAddress}')" title="Copy address">📋</button>
+    <span style="margin-left: 10px;">| ${vin} VIN | ${vic} VIC</span>
+  `;
+
   document.getElementById("connectBtn").style.display = "none";
   document.getElementById("disconnectBtn").style.display = "inline-block";
   isRegistered = await vinSocialContract.isRegistered(userAddress);
   updateMenu();
   showHome(true);
+}
+
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    alert("Address copied to clipboard!");
+  });
 }
 
 function shorten(addr) {
@@ -108,6 +123,10 @@ function updateMenu() {
       <button class="nav-btn" onclick="showHome(true)">🏠 Home</button>
       <button class="nav-btn" onclick="showProfile()">👤 My Profile</button>
       <button class="nav-btn" onclick="showNewPost()">✍️ New Post</button>
+      <form onsubmit="searchByAddress(); return false;" style="margin-left: 10px;">
+        <input type="text" id="searchInput" placeholder="Search wallet..." style="padding:4px; font-size:13px; border-radius:6px; border:1px solid #ccc;" />
+        <button type="submit" style="padding:4px 8px; margin-left:5px; border-radius:6px; background:#007bff; color:white; border:none;">🔍</button>
+      </form>
     `;
   } else {
     nav.innerHTML = `
@@ -115,6 +134,15 @@ function updateMenu() {
       <button class="nav-btn" onclick="showRegister()">📝 Register</button>
     `;
   }
+}
+
+function searchByAddress() {
+  const input = document.getElementById("searchInput").value.trim();
+  if (!ethers.utils.isAddress(input)) {
+    alert("Please enter a valid wallet address.");
+    return;
+  }
+  viewProfile(input);
 }
 
 document.getElementById("connectBtn").onclick = connectWallet;
@@ -355,6 +383,12 @@ async function sharePost(postId) {
   }
 }
 
+// 👉 Tự động giãn chiều cao textarea khi nhập
+function autoResize(textarea) {
+  textarea.style.height = 'auto';
+  textarea.style.height = textarea.scrollHeight + 'px';
+}
+
 // 👉 Xem hồ sơ người dùng
 async function viewProfile(addr) {
   try {
@@ -435,31 +469,23 @@ async function unfollowUser(addr) {
   }
 }
 
-function autoResize(textarea) {
-  textarea.style.height = 'auto'; // Reset chiều cao
-  textarea.style.height = textarea.scrollHeight + 'px'; // Set chiều cao mới theo nội dung
-}
-
-// 👉 Gợi ý người dùng nổi bật (đặt nền móng để phát triển thêm)
+// 👉 Gợi ý người dùng nổi bật (nền tảng cho tương lai)
 async function suggestUsers() {
-  // Có thể gọi từ smart contract sau này nếu hỗ trợ top-followed
-  // return await vinSocialReadOnly.getTopUsers();
+  // Có thể mở rộng bằng contract mới
   return [];
 }
 
-// 👉 Gợi ý bài viết nổi bật (top view/like, nếu contract có hỗ trợ)
+// 👉 Gợi ý bài viết nổi bật (nền tảng cho tương lai)
 async function suggestPosts() {
-  // Có thể gọi từ smart contract sau này nếu hỗ trợ
-  // return await vinSocialReadOnly.getTopPosts();
   return [];
 }
 
-// 👉 Tìm kiếm theo địa chỉ ví (hoặc mở rộng tìm theo từ khóa sau này)
+// 👉 Tìm kiếm nâng cao (ý tưởng mở rộng)
 async function searchByAddressOrKeyword(input) {
   if (ethers.utils.isAddress(input)) {
     await viewProfile(input);
   } else {
     alert("Currently only wallet address search is supported.");
-    // Ý tưởng mở rộng: tìm theo tiêu đề bài viết, nội dung, hashtag...
+    // Có thể mở rộng tìm theo tiêu đề, nội dung, tag...
   }
 }

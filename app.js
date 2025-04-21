@@ -397,7 +397,7 @@ function autoResize(textarea) {
 async function viewProfile(addr) {
   try {
     const user = await vinSocialReadOnly.users(addr);
-    const posts = await vinSocialReadOnly.getUserPosts(addr);
+    const posts = Array.from(await vinSocialReadOnly.getUserPosts(addr));
     const [followers, following] = await Promise.all([
       vinSocialReadOnly.getFollowers(addr),
       vinSocialReadOnly.getFollowing(addr)

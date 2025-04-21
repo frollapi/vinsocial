@@ -137,7 +137,7 @@ nav {
 }
 
 .nav-btn {
-  background: none;
+  background: transparent;
   border: none;
   padding: 6px 10px;
   font-weight: bold;
@@ -151,6 +151,7 @@ nav {
   color: #0056b3;
   text-decoration: underline;
 }
+
 
 
 /* 📰 Khu vực nội dung chính */

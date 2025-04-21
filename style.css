@@ -1,4 +1,4 @@
-/* Reset */
+/* 🌐 Reset và cấu trúc chung */
 * {
   margin: 0;
   padding: 0;
@@ -10,8 +10,35 @@ body {
   background-color: #f5f8fa;
   color: #222;
   line-height: 1.6;
+  font-size: 15px;
 }
 
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* 🧾 Thông điệp đầu trang (tip + made) */
+.top-message {
+  text-align: center;
+  padding: 8px 12px;
+  background-color: #eaf6ff;
+  border-bottom: 1px solid #ccc;
+}
+
+.top-message .tip {
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 4px;
+}
+
+.top-message .made {
+  font-size: 12px;
+  color: #888;
+  font-style: italic;
+}
+
+/* 🎯 Header */
 header {
   background: #ffffff;
   display: flex;
@@ -46,14 +73,16 @@ header p {
   color: #666;
 }
 
+/* 👛 Khu vực ví */
 .wallet-area {
   display: flex;
   align-items: center;
   gap: 10px;
   font-size: 14px;
+  flex-wrap: wrap;
 }
 
-button {
+.wallet-area button {
   padding: 6px 12px;
   background: #007bff;
   color: white;
@@ -64,32 +93,47 @@ button {
   transition: background 0.2s ease;
 }
 
-button:hover {
+.wallet-area button:hover {
   background: #0056b3;
 }
 
-.info-bar {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 20px;
-  font-size: 14px;
-  background: #fff3cd;
-  border-bottom: 1px solid #ffeeba;
+.wallet-area span {
+  font-family: monospace;
 }
 
-.trade-link {
-  text-decoration: none;
+/* 💰 Thanh thông tin giá VIN + liên kết */
+.info-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 20px;
+  font-size: 14px;
+  background: #fffbe6;
+  border-bottom: 1px solid #ffe58f;
+}
+
+.trade-link,
+.guide-link {
   color: #d35400;
   font-weight: bold;
 }
 
+.trade-link:hover,
+.guide-link:hover {
+  text-decoration: underline;
+}
+
+/* 📂 Thanh menu chính */
 nav {
   display: flex;
   gap: 10px;
   justify-content: center;
-  background: #fff;
+  background: #ffffff;
   padding: 10px;
   border-bottom: 1px solid #eee;
+  flex-wrap: wrap;
 }
 
 .nav-btn {
@@ -99,25 +143,81 @@ nav {
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
+  transition: background 0.2s ease;
 }
 
 .nav-btn:hover {
   background: #ccc;
 }
 
+/* 📰 Khu vực nội dung chính */
 main {
   max-width: 720px;
   margin: 20px auto;
   padding: 0 15px;
 }
 
-footer {
-  text-align: center;
-  padding: 20px;
-  font-size: 13px;
-  color: #888;
+/* 🧾 Bài viết */
+.post {
+  background: #fff;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
 }
 
+.post .title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.post .author {
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 10px;
+  word-break: break-word;
+}
+
+.post .content {
+  margin-bottom: 10px;
+}
+
+.post img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.post .metrics {
+  font-size: 13px;
+  color: #777;
+  margin-top: 5px;
+}
+
+/* 🎯 Hành động */
+.post .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.post .actions button {
+  padding: 6px 10px;
+  font-size: 13px;
+  border: none;
+  background: #f0f0f0;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.post .actions button:hover {
+  background: #ddd;
+}
+
+/* 📝 Form (đăng ký, đăng bài, comment) */
 form {
   background: white;
   padding: 15px;
@@ -139,6 +239,7 @@ form textarea {
 
 form textarea {
   resize: vertical;
+  min-height: 80px;
 }
 
 form label {
@@ -146,50 +247,22 @@ form label {
   font-size: 14px;
 }
 
-.post {
-  background: #fff;
-  padding: 15px;
-  border-radius: 12px;
-  margin-bottom: 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+form button {
+  padding: 8px 16px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s ease;
 }
 
-.post .title {
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 5px;
+form button:hover {
+  background: #1e7e34;
 }
 
-.post .author {
-  font-size: 13px;
-  color: #555;
-  margin-bottom: 10px;
-}
-
-.post .content {
-  margin-bottom: 10px;
-}
-
-.post img {
-  max-width: 100%;
-  border-radius: 8px;
-  margin-top: 10px;
-}
-
-.post .actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.tip {
-  text-align: center;
-  font-size: 13px;
-  color: #777;
-  margin: 20px;
-}
-
+/* 💬 Bình luận */
 .comments {
   background: #f9f9f9;
   padding: 10px;
@@ -197,33 +270,127 @@ form label {
   margin-top: 10px;
 }
 
-.guide-link {
-  text-decoration: none;
-  color: #28a745;
-  font-weight: bold;
-  margin-left: 15px;
+.comments h4 {
+  margin-bottom: 10px;
+  font-size: 14px;
 }
 
-.guide-link:hover {
-  text-decoration: underline;
+.comments p {
+  margin: 6px 0;
+  font-size: 14px;
 }
 
-/* Phần thông báo đầu trang (tip + made) */
-.top-message {
+/* 💡 Gợi ý & tip */
+.tip {
   text-align: center;
-  padding: 10px 12px;
-  background-color: #eaf6ff;
-  border-bottom: 1px solid #ccc;
-}
-
-.top-message .tip {
   font-size: 13px;
-  color: #555;
-  margin-bottom: 4px;
+  color: #777;
+  margin: 20px;
 }
 
-.top-message .made {
-  font-size: 12px;
+/* ⬇️ Nút tải thêm bài */
+main button {
+  padding: 8px 16px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s ease;
+}
+
+main button:hover {
+  background: #0056b3;
+}
+
+/* 📍 Footer */
+footer {
+  text-align: center;
+  padding: 20px;
+  font-size: 13px;
   color: #888;
-  font-style: italic;
+}
+
+/* ✅ Responsive cho điện thoại */
+@media (max-width: 600px) {
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .wallet-area {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .info-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  nav {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .nav-btn,
+  .wallet-area button,
+  form button,
+  main button {
+    width: 100%;
+    text-align: center;
+  }
+
+  form input,
+  form textarea {
+    font-size: 15px;
+  }
+}
+
+/* 📋 Nút copy địa chỉ ví */
+.wallet-area button[title="Copy"],
+.post .author button {
+  padding: 2px 6px;
+  background: #ddd;
+  color: #333;
+  font-size: 12px;
+  margin-left: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s ease;
+}
+
+.wallet-area button[title="Copy"]:hover,
+.post .author button:hover {
+  background: #bbb;
+}
+
+/* 🔍 Ô tìm kiếm ví */
+#searchInput {
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 13px;
+  min-width: 180px;
+}
+
+/* 🔘 Nút tìm kiếm */
+nav form button {
+  padding: 6px 10px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  margin-left: 6px;
+}
+
+nav form button:hover {
+  background: #0056b3;
 }

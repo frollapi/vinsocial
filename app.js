@@ -490,3 +490,7 @@ async function searchByAddressOrKeyword(input) {
     // Có thể mở rộng: tìm theo tiêu đề, nội dung, hashtag,...
   }
 }
+
+// 👉 Gắn sự kiện cho nút kết nối / ngắt kết nối ví
+document.getElementById("connectBtn").onclick = connectWallet;
+document.getElementById("disconnectBtn").onclick = disconnectWallet;

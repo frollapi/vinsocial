@@ -232,7 +232,7 @@ async function showHome(reset = false) {
               <button onclick="sharePost(${i})">🔁 Share</button>
             ` : ""}
             <button onclick="viewProfile('${post[0]}')">👤 Profile</button>
-            <button onclick="translatePost('${content}')">🌐 Translate</button>
+            <button onclick="translatePost(decodeURIComponent('${encodeURIComponent(content)}'))">🌐 Translate</button>
           </div>
           <div id="comments-${i}"></div>
         </div>

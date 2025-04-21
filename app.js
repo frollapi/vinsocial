@@ -1,4 +1,4 @@
-// 👉 VinSocial.v3 – hỗ trợ xem bài khi chưa kết nối ví, copy ví, tìm kiếm
+// 👉 VinSocial – app.js hoàn chỉnh (v3), đã sửa lỗi My Profile
 
 const vinSocialAddress = "0xA86598807da8C76c5273A06d01C521252D5CDd17";
 const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";
@@ -36,7 +36,6 @@ const vinSocialAbi = [
   "function getFollowing(address) view returns (address[])"
 ];
 
-// 👉 Load giao diện
 window.onload = async () => {
   if (window.ethereum) {
     provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -46,7 +45,7 @@ window.onload = async () => {
   } else {
     provider = new ethers.providers.JsonRpcProvider("https://rpc.viction.xyz");
     vinSocialReadOnly = new ethers.Contract(vinSocialAddress, vinSocialAbi, provider);
-    showHome(true); // vẫn cho xem bài khi chưa có ví
+    showHome(true); // xem được bài khi chưa có ví
   }
 };
 
@@ -82,7 +81,7 @@ async function tryAutoConnect() {
     await setupContracts();
     await updateUI();
   } else {
-    showHome(true); // vẫn hiển thị bài nếu không có tài khoản
+    showHome(true);
   }
 }
 
@@ -145,10 +144,7 @@ function searchByAddress() {
   viewProfile(input);
 }
 
-document.getElementById("connectBtn").onclick = connectWallet;
-document.getElementById("disconnectBtn").onclick = disconnectWallet;
-
-// 👉 Hiển thị bài viết mới nhất (có ❤️ likes, 🔁 shares, 👁️ views – không gọi viewPost)
+// 👉 Hiển thị bài viết mới nhất (5 bài mỗi lần)
 async function showHome(reset = false) {
   if (reset) {
     lastPostId = 0;
@@ -197,7 +193,7 @@ async function showHome(reset = false) {
       const author = `
         <span style="font-family: monospace;">${fullAddress}</span>
         <button onclick="copyToClipboard('${fullAddress}')" title="Copy" style="margin-left: 4px;">📋</button>
-`       ;
+      `;
       const title = post[1];
       const content = post[2];
       const media = post[3];
@@ -397,7 +393,7 @@ function autoResize(textarea) {
 async function viewProfile(addr) {
   try {
     const user = await vinSocialReadOnly.users(addr);
-    const posts = Array.from(await vinSocialReadOnly.getUserPosts(addr));
+    const posts = Array.from(await vinSocialReadOnly.getUserPosts(addr)); // ✅ sửa lỗi reverse()
     const [followers, following] = await Promise.all([
       vinSocialReadOnly.getFollowers(addr),
       vinSocialReadOnly.getFollowing(addr)
@@ -473,23 +469,24 @@ async function unfollowUser(addr) {
   }
 }
 
-// 👉 Gợi ý người dùng nổi bật (nền tảng cho tương lai)
+// 👉 Gợi ý người dùng nổi bật (có thể mở rộng sau này)
 async function suggestUsers() {
-  // Có thể mở rộng bằng contract mới
+  // Ví dụ tương lai: return await vinSocialReadOnly.getTopUsers();
   return [];
 }
 
-// 👉 Gợi ý bài viết nổi bật (nền tảng cho tương lai)
+// 👉 Gợi ý bài viết nổi bật (có thể mở rộng sau này)
 async function suggestPosts() {
+  // Ví dụ tương lai: return await vinSocialReadOnly.getTopPosts();
   return [];
 }
 
-// 👉 Tìm kiếm nâng cao (ý tưởng mở rộng)
+// 👉 Tìm kiếm nâng cao (bằng địa chỉ hoặc từ khóa)
 async function searchByAddressOrKeyword(input) {
   if (ethers.utils.isAddress(input)) {
     await viewProfile(input);
   } else {
     alert("Currently only wallet address search is supported.");
-    // Có thể mở rộng tìm theo tiêu đề, nội dung, tag...
+    // Có thể mở rộng: tìm theo tiêu đề, nội dung, hashtag,...
   }
 }

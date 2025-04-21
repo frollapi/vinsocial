@@ -269,7 +269,7 @@ function showNewPost() {
       <label>Title</label>
       <input type="text" id="postTitle" maxlength="80"/>
       <label>What's on your mind?</label>
-      <textarea id="postContent" rows="4" maxlength="500"></textarea>
+      <textarea id="postContent" maxlength="1500" oninput="autoResize(this)" style="overflow:hidden; resize:none;"></textarea>
       <label>Image URL (optional)</label>
       <input type="text" id="postMedia"/>
       <button type="submit">Post</button>
@@ -433,6 +433,11 @@ async function unfollowUser(addr) {
     alert("Unfollow failed.");
     console.error(err);
   }
+}
+
+function autoResize(textarea) {
+  textarea.style.height = 'auto'; // Reset chiều cao
+  textarea.style.height = textarea.scrollHeight + 'px'; // Set chiều cao mới theo nội dung
 }
 
 // 👉 Gợi ý người dùng nổi bật (đặt nền móng để phát triển thêm)

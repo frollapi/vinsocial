@@ -439,7 +439,7 @@ async function viewProfile(addr) {
 
     html += `</div><h3>Posts</h3>`;
 
-    for (const id of posts.reverse()) {
+    for (const id of [...posts].reverse()) {
       const post = await vinSocialReadOnly.posts(id);
       const [likes, shares, views] = await Promise.all([
         vinSocialReadOnly.likeCount(id),

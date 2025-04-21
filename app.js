@@ -1,4 +1,4 @@
-// 👉 VinSocial - Khởi tạo và kết nối ví
+// 👉 VinSocial.vin - Tương thích đầy đủ với index.html
 const vinSocialAddress = "0xA86598807da8C76c5273A06d01C521252D5CDd17";
 const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";
 
@@ -9,7 +9,8 @@ let lastPostId = 0;
 let seen = new Set();
 
 const vinTokenAbi = [
-  "function balanceOf(address account) view returns (uint256)"
+  "function balanceOf(address account) view returns (uint256)",
+  "function approve(address spender, uint256 amount) external returns (bool)"
 ];
 
 const vinSocialAbi = [
@@ -41,7 +42,7 @@ window.onload = async () => {
   } else {
     provider = new ethers.providers.JsonRpcProvider("https://rpc.viction.xyz");
     vinSocialReadOnly = new ethers.Contract(vinSocialAddress, vinSocialAbi, provider);
-    showHome(true); // Cho phép xem bài viết khi chưa kết nối ví
+    showHome(true); // Cho phép xem bài khi không có ví
   }
 };
 
@@ -66,7 +67,7 @@ async function tryAutoConnect() {
     await setupContracts();
     await updateUI();
   } else {
-    showHome(true); // vẫn hiển thị bài nếu không có tài khoản
+    showHome(true); // vẫn hiển thị bài viết công khai
   }
 }
 
@@ -128,6 +129,7 @@ function searchByAddress() {
 document.getElementById("connectBtn").onclick = connectWallet;
 document.getElementById("disconnectBtn").onclick = () => location.reload();
 
+// 👉 Hiển thị bài viết mới nhất (5 bài mỗi lần)
 async function showHome(reset = false) {
   if (reset) {
     lastPostId = 0;
@@ -208,6 +210,7 @@ async function showHome(reset = false) {
   }
 }
 
+// 👉 Dịch bài viết qua Google Translate
 function translatePost(text) {
   const url = `https://translate.google.com/?sl=auto&tl=en&text=${encodeURIComponent(text)}&op=translate`;
   window.open(url, "_blank");
@@ -253,7 +256,7 @@ async function registerUser() {
   }
 }
 
-// 👉 Hiển thị form đăng bài viết
+// 👉 Hiển thị form đăng bài
 function showNewPost() {
   if (!isRegistered) return alert("You must register to post.");
   document.getElementById("mainContent").innerHTML = `
@@ -270,7 +273,7 @@ function showNewPost() {
   `;
 }
 
-// 👉 Gửi bài viết mới
+// 👉 Gửi bài viết
 async function createPost() {
   const title = document.getElementById("postTitle").value.trim();
   const content = document.getElementById("postContent").value.trim();
@@ -286,7 +289,7 @@ async function createPost() {
   }
 }
 
-// 👉 Tự động giãn textarea
+// 👉 Tự động giãn chiều cao textarea
 function autoResize(textarea) {
   textarea.style.height = 'auto';
   textarea.style.height = textarea.scrollHeight + 'px';
@@ -304,7 +307,7 @@ async function likePost(postId) {
   }
 }
 
-// 👉 Hiển thị và thêm bình luận
+// 👉 Hiển thị & gửi bình luận
 async function showComments(postId) {
   const el = document.getElementById(`comments-${postId}`);
   if (el.innerHTML) {
@@ -344,7 +347,7 @@ async function addComment(postId) {
     const tx = await vinSocialContract.commentOnPost(postId, msg);
     await tx.wait();
     alert("Comment added!");
-    await showComments(postId); // refresh comments
+    await showComments(postId); // refresh
   } catch (err) {
     alert("Failed to comment.");
     console.error(err);
@@ -368,7 +371,7 @@ function shorten(addr) {
   return addr.slice(0, 6) + "..." + addr.slice(-4);
 }
 
-// 👉 Xem hồ sơ người dùng
+// 👉 Xem hồ sơ người dùng (hoặc chính mình nếu truyền địa chỉ ví mình)
 async function viewProfile(addr) {
   try {
     const user = await vinSocialReadOnly.users(addr);
@@ -400,8 +403,8 @@ async function viewProfile(addr) {
         vinSocialReadOnly.likeCount(id),
         vinSocialReadOnly.shareCount(id)
       ]);
-
       const time = new Date(post[4] * 1000).toLocaleString();
+
       html += `
         <div class="post">
           <div class="title">${post[1]}</div>
@@ -420,8 +423,9 @@ async function viewProfile(addr) {
   }
 }
 
-// 👉 Xem hồ sơ của chính mình
+// 👉 Xem hồ sơ chính mình
 async function showProfile() {
+  if (!userAddress) return alert("Wallet not connected");
   await viewProfile(userAddress);
 }
 
@@ -451,7 +455,7 @@ async function unfollowUser(addr) {
   }
 }
 
-// 👉 Ý tưởng mở rộng: tìm theo từ khóa
+// 👉 Tìm kiếm mở rộng (ý tưởng tương lai)
 async function searchByAddressOrKeyword(input) {
   if (ethers.utils.isAddress(input)) {
     await viewProfile(input);

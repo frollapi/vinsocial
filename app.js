@@ -193,7 +193,11 @@ async function showHome(reset = false) {
       seen.add(i);
       seen.add(key);
 
-      const author = shorten(post[0]);
+      const fullAddress = post[0];
+      const author = `
+        <span style="font-family: monospace;">${fullAddress}</span>
+        <button onclick="copyToClipboard('${fullAddress}')" title="Copy" style="margin-left: 4px;">📋</button>
+`       ;
       const title = post[1];
       const content = post[2];
       const media = post[3];

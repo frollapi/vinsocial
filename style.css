@@ -196,3 +196,14 @@ form label {
   border-radius: 8px;
   margin-top: 10px;
 }
+
+.guide-link {
+  text-decoration: none;
+  color: #28a745;
+  font-weight: bold;
+  margin-left: 15px;
+}
+
+.guide-link:hover {
+  text-decoration: underline;
+}

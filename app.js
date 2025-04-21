@@ -1,4 +1,4 @@
-// 👉 VinSocial.vin - Giao diện chuẩn, tương thích với index.html
+// 👉 VinSocial.v3 – hỗ trợ xem bài khi chưa kết nối ví, copy ví, tìm kiếm
 const vinSocialAddress = "0xA86598807da8C76c5273A06d01C521252D5CDd17";
 const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";
 
@@ -20,19 +20,22 @@ const vinSocialAbi = [
   "function likePost(uint256) external",
   "function commentOnPost(uint256,string) external",
   "function sharePost(uint256) external",
+  "function viewPost(uint256) external",
+  "function follow(address) external",
+  "function unfollow(address) external",
+  "function getUserPosts(address) view returns (uint256[])",
   "function getComments(uint256) view returns (tuple(address commenter,string message,uint256 timestamp)[])",
   "function posts(uint256) view returns (address,string,string,string,uint256)",
   "function users(address) view returns (string,string,string,string)",
   "function nextPostId() view returns (uint256)",
   "function likeCount(uint256) view returns (uint256)",
   "function shareCount(uint256) view returns (uint256)",
-  "function getUserPosts(address) view returns (uint256[])",
+  "function viewCount(uint256) view returns (uint256)",
   "function getFollowers(address) view returns (address[])",
-  "function getFollowing(address) view returns (address[])",
-  "function follow(address) external",
-  "function unfollow(address) external"
+  "function getFollowing(address) view returns (address[])"
 ];
 
+// 👉 Load giao diện khi mở trang
 window.onload = async () => {
   if (window.ethereum) {
     provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -42,18 +45,21 @@ window.onload = async () => {
   } else {
     provider = new ethers.providers.JsonRpcProvider("https://rpc.viction.xyz");
     vinSocialReadOnly = new ethers.Contract(vinSocialAddress, vinSocialAbi, provider);
-    showHome(true);
+    showHome(true); // vẫn cho xem bài khi chưa có ví
   }
 };
 
+// 👉 Kết nối ví
 async function connectWallet() {
   await provider.send("eth_requestAccounts", []);
   signer = provider.getSigner();
   userAddress = await signer.getAddress();
   await setupContracts();
+  vinSocialReadOnly = new ethers.Contract(vinSocialAddress, vinSocialAbi, provider);
   await updateUI();
 }
 
+// 👉 Ngắt kết nối ví
 function disconnectWallet() {
   userAddress = null;
   isRegistered = false;
@@ -64,11 +70,13 @@ function disconnectWallet() {
   document.getElementById("mainContent").innerHTML = `<p class="tip">Tip: Use VIC chain in MetaMask. On mobile, open in the wallet's browser (e.g. Viction, MetaMask).</p>`;
 }
 
+// 👉 Gọi hợp đồng khi đã kết nối
 async function setupContracts() {
   vinSocialContract = new ethers.Contract(vinSocialAddress, vinSocialAbi, signer);
   vinTokenContract = new ethers.Contract(vinTokenAddress, vinTokenAbi, signer);
 }
 
+// 👉 Tự kết nối lại nếu đã từng kết nối
 async function tryAutoConnect() {
   const accounts = await provider.send("eth_accounts", []);
   if (accounts.length > 0) {
@@ -81,6 +89,7 @@ async function tryAutoConnect() {
   }
 }
 
+// 👉 Hiển thị số dư ví và cập nhật menu
 async function updateUI() {
   const vinBal = await vinTokenContract.balanceOf(userAddress);
   const vicBal = await provider.getBalance(userAddress);
@@ -100,12 +109,19 @@ async function updateUI() {
   showHome(true);
 }
 
+// 👉 Nút copy ví
 function copyToClipboard(text) {
   navigator.clipboard.writeText(text).then(() => {
     alert("Address copied to clipboard!");
   });
 }
 
+// 👉 Rút gọn ví (dùng cho hồ sơ, comment, v.v.)
+function shorten(addr) {
+  return addr.slice(0, 6) + "..." + addr.slice(-4);
+}
+
+// 👉 Hiển thị menu điều hướng
 function updateMenu() {
   const nav = document.getElementById("mainNav");
   nav.style.display = "flex";
@@ -115,8 +131,8 @@ function updateMenu() {
       <button class="nav-btn" onclick="showProfile()">👤 My Profile</button>
       <button class="nav-btn" onclick="showNewPost()">✍️ New Post</button>
       <form onsubmit="searchByAddress(); return false;" style="margin-left: 10px;">
-        <input type="text" id="searchInput" placeholder="Search wallet..." />
-        <button type="submit">🔍</button>
+        <input type="text" id="searchInput" placeholder="Search wallet..." style="padding:4px; font-size:13px; border-radius:6px; border:1px solid #ccc;" />
+        <button type="submit" style="padding:4px 8px; margin-left:5px; border-radius:6px; background:#007bff; color:white; border:none;">🔍</button>
       </form>
     `;
   } else {
@@ -127,6 +143,7 @@ function updateMenu() {
   }
 }
 
+// 👉 Tìm kiếm theo địa chỉ ví
 function searchByAddress() {
   const input = document.getElementById("searchInput").value.trim();
   if (!ethers.utils.isAddress(input)) {
@@ -136,28 +153,32 @@ function searchByAddress() {
   viewProfile(input);
 }
 
+// 👉 Gán sự kiện kết nối / ngắt kết nối
 document.getElementById("connectBtn").onclick = connectWallet;
 document.getElementById("disconnectBtn").onclick = disconnectWallet;
-// 👉 Hiển thị bài viết mới nhất (5 bài/lần)
+
+// 👉 Hiển thị bài viết mới nhất (gồm ❤️, 🔁, 👁️ – không gọi viewPost để tiết kiệm gas)
 async function showHome(reset = false) {
   if (reset) {
     lastPostId = 0;
     seen.clear();
-    document.getElementById("mainContent").innerHTML = "<h2>Latest Posts</h2>";
+    document.getElementById("mainContent").innerHTML = `<h2>Latest Posts</h2>`;
   }
 
+  let html = "";
   if (lastPostId === 0) {
     try {
       const next = await vinSocialReadOnly.nextPostId();
       lastPostId = next.toNumber();
     } catch (e) {
-      console.error("Cannot fetch posts", e);
+      console.error("Cannot fetch nextPostId", e);
       return;
     }
   }
 
   let i = lastPostId - 1;
   let loaded = 0;
+
   while (i > 0 && loaded < 5) {
     if (seen.has(i)) {
       i--;
@@ -166,41 +187,56 @@ async function showHome(reset = false) {
 
     try {
       const post = await vinSocialReadOnly.posts(i);
-      if (post[0] === "0x0000000000000000000000000000000000000000") {
+      if (post[0] === "0x0000000000000000000000000000000000000000" || post[4] === 0) {
         seen.add(i);
         i--;
         continue;
       }
 
-      const [likes, shares] = await Promise.all([
+      const key = `${post[1]}|${post[2]}|${post[4]}`;
+      if (seen.has(key)) {
+        i--;
+        continue;
+      }
+
+      seen.add(i);
+      seen.add(key);
+
+      const fullAddress = post[0];
+      const title = post[1];
+      const content = post[2];
+      const media = post[3];
+      const time = new Date(post[4] * 1000).toLocaleString();
+
+      const [likes, shares, views] = await Promise.all([
         vinSocialReadOnly.likeCount(i),
-        vinSocialReadOnly.shareCount(i)
+        vinSocialReadOnly.shareCount(i),
+        vinSocialReadOnly.viewCount(i)
       ]);
 
-      const time = new Date(post[4] * 1000).toLocaleString();
-      const html = `
+      html += `
         <div class="post">
-          <div class="title">${post[1]}</div>
+          <div class="title">${title}</div>
           <div class="author">
-            ${post[0]} • ${time}
-            <button onclick="copyToClipboard('${post[0]}')" title="Copy">📋</button>
+            <span style="font-family: monospace;">${fullAddress}</span>
+            <button onclick="copyToClipboard('${fullAddress}')" title="Copy" style="margin-left: 4px;">📋</button>
+            • ${time}
           </div>
-          <div class="content">${post[2]}</div>
-          ${post[3] ? `<img src="${post[3]}" alt="media"/>` : ""}
-          <div class="metrics">❤️ ${likes} • 🔁 ${shares}</div>
+          <div class="content">${content}</div>
+          ${media ? `<img src="${media}" alt="media"/>` : ""}
+          <div class="metrics">❤️ ${likes} • 🔁 ${shares} • 👁️ ${views}</div>
           <div class="actions">
             ${isRegistered ? `
               <button onclick="likePost(${i})">👍 Like</button>
               <button onclick="showComments(${i})">💬 Comment</button>
-              <button onclick="sharePost(${i})">🔁 Share</button>` : ""}
+              <button onclick="sharePost(${i})">🔁 Share</button>
+            ` : ""}
             <button onclick="viewProfile('${post[0]}')">👤 Profile</button>
-            <button onclick="translatePost('${post[2]}')">🌐 Translate</button>
+            <button onclick="translatePost('${content}')">🌐 Translate</button>
           </div>
           <div id="comments-${i}"></div>
         </div>
       `;
-      document.getElementById("mainContent").innerHTML += html;
-      seen.add(i);
       loaded++;
     } catch (err) {
       console.warn("Failed loading post", i, err);
@@ -209,6 +245,7 @@ async function showHome(reset = false) {
   }
 
   lastPostId = i + 1;
+  document.getElementById("mainContent").innerHTML += html;
 
   if (lastPostId > 1) {
     document.getElementById("mainContent").innerHTML += `
@@ -219,13 +256,13 @@ async function showHome(reset = false) {
   }
 }
 
-// 👉 Dịch bài viết
+// 👉 Dịch bài viết qua Google Translate
 function translatePost(text) {
   const url = `https://translate.google.com/?sl=auto&tl=en&text=${encodeURIComponent(text)}&op=translate`;
   window.open(url, "_blank");
 }
 
-// 👉 Form đăng ký tài khoản
+// 👉 Hiển thị form đăng ký tài khoản
 function showRegister() {
   if (isRegistered) return alert("You are already registered.");
   document.getElementById("mainContent").innerHTML = `
@@ -244,7 +281,7 @@ function showRegister() {
   `;
 }
 
-// 👉 Gửi đăng ký tài khoản
+// 👉 Gửi yêu cầu đăng ký tài khoản
 async function registerUser() {
   const name = document.getElementById("regName").value.trim();
   const bio = document.getElementById("regBio").value.trim();
@@ -265,7 +302,7 @@ async function registerUser() {
   }
 }
 
-// 👉 Form đăng bài viết
+// 👉 Hiển thị form đăng bài
 function showNewPost() {
   if (!isRegistered) return alert("You must register to post.");
   document.getElementById("mainContent").innerHTML = `
@@ -298,11 +335,12 @@ async function createPost() {
   }
 }
 
-// 👉 Tự động giãn textarea
+// 👉 Tự động giãn chiều cao textarea
 function autoResize(textarea) {
   textarea.style.height = 'auto';
   textarea.style.height = textarea.scrollHeight + 'px';
 }
+
 // 👉 Like bài viết
 async function likePost(postId) {
   try {
@@ -349,6 +387,7 @@ async function showComments(postId) {
   }
 }
 
+// 👉 Gửi bình luận
 async function addComment(postId) {
   const msg = document.getElementById(`comment-${postId}`).value.trim();
   try {
@@ -372,11 +411,6 @@ async function sharePost(postId) {
     alert("Share failed.");
     console.error(err);
   }
-}
-
-// 👉 Rút gọn địa chỉ ví
-function shorten(addr) {
-  return addr.slice(0, 6) + "..." + addr.slice(-4);
 }
 
 // 👉 Xem hồ sơ người dùng
@@ -407,9 +441,10 @@ async function viewProfile(addr) {
 
     for (const id of posts.reverse()) {
       const post = await vinSocialReadOnly.posts(id);
-      const [likes, shares] = await Promise.all([
+      const [likes, shares, views] = await Promise.all([
         vinSocialReadOnly.likeCount(id),
-        vinSocialReadOnly.shareCount(id)
+        vinSocialReadOnly.shareCount(id),
+        vinSocialReadOnly.viewCount(id)
       ]);
       const time = new Date(post[4] * 1000).toLocaleString();
 
@@ -419,7 +454,7 @@ async function viewProfile(addr) {
           <div class="author">${shorten(post[0])} • ${time}</div>
           <div class="content">${post[2]}</div>
           ${post[3] ? `<img src="${post[3]}" alt="media"/>` : ""}
-          <div class="metrics">❤️ ${likes} • 🔁 ${shares}</div>
+          <div class="metrics">❤️ ${likes} • 🔁 ${shares} • 👁️ ${views}</div>
         </div>
       `;
     }
@@ -431,13 +466,13 @@ async function viewProfile(addr) {
   }
 }
 
-// 👉 Xem hồ sơ của chính mình
+// 👉 Xem hồ sơ chính mình
 async function showProfile() {
   if (!userAddress) return alert("Wallet not connected");
   await viewProfile(userAddress);
 }
 
-// 👉 Follow người khác
+// 👉 Follow người dùng khác
 async function followUser(addr) {
   try {
     const tx = await vinSocialContract.follow(addr);
@@ -450,7 +485,7 @@ async function followUser(addr) {
   }
 }
 
-// 👉 Unfollow người khác
+// 👉 Unfollow người dùng khác
 async function unfollowUser(addr) {
   try {
     const tx = await vinSocialContract.unfollow(addr);
@@ -460,5 +495,24 @@ async function unfollowUser(addr) {
   } catch (err) {
     alert("Unfollow failed.");
     console.error(err);
+  }
+}
+
+// 👉 (Chuẩn bị tương lai) Gợi ý người dùng nổi bật
+async function suggestUsers() {
+  return [];
+}
+
+// 👉 (Chuẩn bị tương lai) Gợi ý bài viết nổi bật
+async function suggestPosts() {
+  return [];
+}
+
+// 👉 Tìm kiếm mở rộng (ý tưởng tương lai)
+async function searchByAddressOrKeyword(input) {
+  if (ethers.utils.isAddress(input)) {
+    await viewProfile(input);
+  } else {
+    alert("Currently only wallet address search is supported.");
   }
 }

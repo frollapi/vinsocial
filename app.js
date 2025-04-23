@@ -269,7 +269,7 @@ function showRegister() {
     <h2>Register Account</h2>
     <form onsubmit="registerUser(); return false;">
       <label>Name*</label>
-      <input type="text" id="regName" maxlength="32" required/>
+      <input type="text" id="regName" maxlength="160" required/>
       <label>Bio</label>
       <input type="text" id="regBio" maxlength="160"/>
       <label>Avatar URL</label>

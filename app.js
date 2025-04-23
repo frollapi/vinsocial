@@ -309,7 +309,7 @@ function showNewPost() {
     <h2>New Post</h2>
     <form onsubmit="createPost(); return false;">
       <label>Title</label>
-      <input type="text" id="postTitle" maxlength="80"/>
+      <input type="text" id="postTitle" maxlength="160"/>
       <label>What's on your mind?</label>
       <textarea id="postContent" maxlength="1500" oninput="autoResize(this)" style="overflow:hidden; resize:none;"></textarea>
       <label>Image URL (optional)</label>

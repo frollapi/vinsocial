@@ -611,21 +611,25 @@ async function unfollowUser(addr) {
   }
 }
 
-// 👉 (Chuẩn bị tương lai) Gợi ý người dùng nổi bật
-async function suggestUsers() {
-  return [];
+// 👉 Tự động giãn chiều cao của textarea khi nhập liệu hoặc dán vào
+function autoResize(textarea) {
+  // Đặt chiều cao ban đầu là tự động để nó không bị cố định
+  textarea.style.height = 'auto';
+  // Điều chỉnh chiều cao textarea theo độ cao của nội dung
+  textarea.style.height = `${textarea.scrollHeight}px`;
 }
 
-// 👉 (Chuẩn bị tương lai) Gợi ý bài viết nổi bật
-async function suggestPosts() {
-  return [];
-}
+// 👉 Đảm bảo nội dung dán vào ô nhập liệu không mất định dạng
+document.getElementById('postContent').addEventListener('input', function(event) {
+  autoResize(event.target);
+});
 
-// 👉 Tìm kiếm mở rộng (ý tưởng tương lai)
-async function searchByAddressOrKeyword(input) {
-  if (ethers.utils.isAddress(input)) {
-    await viewProfile(input);
-  } else {
-    alert("Currently only wallet address search is supported.");
+// CSS thêm vào để giữ định dạng khi dán bài viết
+const style = document.createElement('style');
+style.innerHTML = `
+  #postContent {
+    white-space: pre-wrap;  /* Giữ nguyên dấu cách và dòng xuống */
+    word-wrap: break-word;  /* Gói từ khi có dấu cách để đảm bảo không tràn */
   }
-}
+`;
+document.head.appendChild(style);

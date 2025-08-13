@@ -138,3 +138,83 @@ function initContracts() {
   vinSocial = new ethers.Contract(VIN_SOCIAL_ADDR, VIN_SOCIAL_ABI, signer || provider);
 }
 
+/* ---------- UI ---------- */
+async function renderApp() {
+  const main = $("mainContent");
+  main.innerHTML = "";
+
+  initContracts();
+
+  // Nếu đã kết nối, kiểm tra đã đăng ký chưa
+  let reg = false;
+  if (userAddress) {
+    try {
+      reg = await vinSocial.isRegistered(userAddress);
+    } catch {}
+  }
+
+  // Composer (nếu đã đăng ký)
+  if (userAddress && reg) {
+    const composer = document.createElement("section");
+    composer.className = "composer";
+    composer.innerHTML = `
+      <h3>Create Post</h3>
+      <form id="postForm">
+        <input id="postTitle" type="text" placeholder="Title (optional)" maxlength="256"/>
+        <textarea id="postContent" placeholder="Write something... (max 20,000 chars)" maxlength="20000" rows="4"></textarea>
+        <input id="postMedia" type="url" placeholder="Media URL (optional)"/>
+        <div class="row">
+          <span id="charCount">0 / 20000</span>
+          <button type="submit">Post</button>
+        </div>
+      </form>
+    `;
+    main.appendChild(composer);
+
+    const ta = $("postContent");
+    ta.addEventListener("input", () => {
+      $("charCount").innerText = `${ta.value.length} / 20000`;
+      autoResize(ta);
+    });
+    // Auto-size khi load
+    setTimeout(()=>autoResize(ta), 0);
+
+    $("postForm").addEventListener("submit", onCreatePost);
+  }
+
+  // Nếu chưa đăng ký nhưng đã có ví → hiển thị form đăng ký
+  if (userAddress && !reg) {
+    const regBox = document.createElement("section");
+    regBox.className = "register";
+    regBox.innerHTML = `
+      <h3>Register (one-time fee: 0.001 VIN)</h3>
+      <form id="regForm">
+        <input id="rgName" type="text" placeholder="Name" maxlength="64" required/>
+        <input id="rgAvatar" type="url" placeholder="Avatar URL (optional)"/>
+        <input id="rgWebsite" type="url" placeholder="Website (optional)"/>
+        <textarea id="rgBio" rows="3" maxlength="512" placeholder="Bio (optional)"></textarea>
+        <button type="submit">Register (0.001 VIN)</button>
+      </form>
+      <p class="hint">Registration requires you to approve 0.001 VIN then call register().</p>
+    `;
+    main.appendChild(regBox);
+
+    const bioTA = $("rgBio");
+    bioTA.addEventListener("input", ()=>autoResize(bioTA));
+    setTimeout(()=>autoResize(bioTA), 0);
+
+    $("regForm").addEventListener("submit", onRegister);
+  }
+
+  // Feed
+  const feed = document.createElement("section");
+  feed.className = "feed";
+  feed.innerHTML = `<h3>Latest Posts</h3><div id="feedList"></div>`;
+  main.appendChild(feed);
+
+  await loadFeed();
+
+  // Bind top buttons
+  $("mainNav").style.display = "none"; // nếu bạn có nav động, có thể bật lại
+}
+

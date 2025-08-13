@@ -218,3 +218,114 @@ async function renderApp() {
   $("mainNav").style.display = "none"; // nếu bạn có nav động, có thể bật lại
 }
 
+/* ---------- Actions ---------- */
+
+// Đăng ký tài khoản
+async function onRegister(e) {
+  e.preventDefault();
+  const name    = $("rgName").value.trim();
+  const bio     = $("rgBio").value;            // giữ nguyên \n
+  const avatar  = $("rgAvatar").value.trim();
+  const website = $("rgWebsite").value.trim();
+
+  if (!signer) return alert("Connect wallet first.");
+
+  try {
+    // Approve 0.001 VIN cho VinSocial contract
+    const fee = ethers.utils.parseEther("0.001");
+    const allowance = await vinToken.allowance(userAddress, VIN_SOCIAL_ADDR);
+    if (allowance.lt(fee)) {
+      const tx1 = await vinToken.connect(signer).approve(VIN_SOCIAL_ADDR, fee);
+      await tx1.wait();
+    }
+
+    const tx2 = await vinSocial.connect(signer).register(name, bio, avatar, website);
+    await tx2.wait();
+
+    alert("Registered successfully!");
+    await renderApp();
+  } catch (err) {
+    console.error(err);
+    alert("Register failed.");
+  }
+}
+
+// Đăng bài mới
+async function onCreatePost(e) {
+  e.preventDefault();
+  if (!signer) return alert("Connect wallet first.");
+  const title = $("postTitle").value.trim();
+  const content = $("postContent").value; // KHÔNG .trim() → giữ \n + khoảng trắng
+  const media = $("postMedia").value.trim();
+
+  if (content.length === 0) return alert("Content is empty.");
+  if (content.length > 20000) return alert("Content exceeds 20,000 characters.");
+
+  try {
+    const tx = await vinSocial.connect(signer).createPost(title, content, media);
+    await tx.wait();
+    $("postTitle").value = "";
+    $("postContent").value = "";
+    $("postMedia").value = "";
+    $("charCount").innerText = "0 / 20000";
+    alert("Posted!");
+    await loadFeed(true);
+  } catch (err) {
+    console.error(err);
+    alert("Post failed.");
+  }
+}
+
+// Like bài viết
+async function onLike(postId) {
+  try {
+    const tx = await vinSocial.connect(signer).likePost(postId);
+    await tx.wait();
+    await loadFeed(true);
+  } catch (e) {
+    console.error(e);
+    alert("Like failed.");
+  }
+}
+
+// Chia sẻ bài viết (tweet lại)
+async function onShare(postId) {
+  try {
+    const tx = await vinSocial.connect(signer).sharePost(postId);
+    await tx.wait();
+    await loadFeed(true);
+  } catch (e) {
+    console.error(e);
+    alert("Share failed.");
+  }
+}
+
+// Xem bài viết
+async function onView(postId) {
+  try {
+    const tx = await vinSocial.connect(signer).viewPost(postId);
+    await tx.wait();
+    await loadFeed(true);
+  } catch (e) {
+    console.error(e);
+    alert("View failed.");
+  }
+}
+
+// Gửi bình luận
+async function onSendComment(postId) {
+  const ta = $(`cmt-${postId}`);
+  const msg = ta.value;
+  if (!msg) return;
+  try {
+    const tx = await vinSocial.connect(signer).commentOnPost(postId, msg);
+    await tx.wait();
+    ta.value = "";
+    autoResize(ta);
+    await loadFeed(true);
+  } catch (e) {
+    console.error(e);
+    alert("Comment failed.");
+  }
+}
+

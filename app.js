@@ -1,5 +1,5 @@
-// VinSocial.vin — app.js
-const vinSocialAddress = "0xAdd06EcD128004bFd35057d7a765562feeB77798";
+// 👉 VinSocial.v3 – hỗ trợ xem bài khi chưa kết nối ví, copy ví, tìm kiếm
+const vinSocialAddress = "0xA86598807da8C76c5273A06d01C521252D5CDd17";
 const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";
 
 let provider, signer, userAddress;
@@ -13,12 +13,26 @@ const vinTokenAbi = [
   "function approve(address spender, uint256 amount) external returns (bool)"
 ];
 
-const tokenAbi = [
-  "function balanceOf(address account) view returns (uint256)",
-  "function transfer(address recipient, uint256 amount) external returns (bool)",
-  "function transferFrom(address sender, address recipient, uint256 amount) external returns (bool)",
-  "function approve(address spender, uint256 amount) external returns (bool)",
-  "function allowance(address owner, address spender) view returns (uint256)"
+const vinSocialAbi = [
+  "function isRegistered(address) view returns (bool)",
+  "function register(string,string,string,string) external",
+  "function createPost(string,string,string) external",
+  "function likePost(uint256) external",
+  "function commentOnPost(uint256,string) external",
+  "function sharePost(uint256) external",
+  "function viewPost(uint256) external",
+  "function follow(address) external",
+  "function unfollow(address) external",
+  "function getUserPosts(address) view returns (uint256[])",
+  "function getComments(uint256) view returns (tuple(address commenter,string message,uint256 timestamp)[])",
+  "function posts(uint256) view returns (address,string,string,string,uint256)",
+  "function users(address) view returns (string,string,string,string)",
+  "function nextPostId() view returns (uint256)",
+  "function likeCount(uint256) view returns (uint256)",
+  "function shareCount(uint256) view returns (uint256)",
+  "function viewCount(uint256) view returns (uint256)",
+  "function getFollowers(address) view returns (address[])",
+  "function getFollowing(address) view returns (address[])"
 ];
 
 // 👉 Load giao diện khi mở trang
@@ -484,3 +498,21 @@ async function unfollowUser(addr) {
   }
 }
 
+// 👉 (Chuẩn bị tương lai) Gợi ý người dùng nổi bật
+async function suggestUsers() {
+  return [];
+}
+
+// 👉 (Chuẩn bị tương lai) Gợi ý bài viết nổi bật
+async function suggestPosts() {
+  return [];
+}
+
+// 👉 Tìm kiếm mở rộng (ý tưởng tương lai)
+async function searchByAddressOrKeyword(input) {
+  if (ethers.utils.isAddress(input)) {
+    await viewProfile(input);
+  } else {
+    alert("Currently only wallet address search is supported.");
+  }
+}

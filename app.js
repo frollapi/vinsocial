@@ -2,8 +2,9 @@
    VinSocial.vin — app.js
    ========================= */
 
-const vinSocialAddress = "0xAdd06EcD128004bFd35057d7a765562feeB77798";
-const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";
+/* ---------- Network & Addresses ---------- */
+const vinSocialAddress = "0xAdd06EcD128004bFd35057d7a765562feeB77798"; // Địa chỉ hợp đồng mới
+const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";  // Địa chỉ token VIN (VIC mainnet)
 
 let provider, signer, userAddress;
 let vinSocialContract, vinTokenContract, vinSocialReadOnly;
@@ -11,6 +12,7 @@ let isRegistered = false;
 let lastPostId = 0;
 let seen = new Set();
 
+/* ABI cho hợp đồng VIN và VinSocial */
 const vinTokenAbi = [
   "function balanceOf(address account) view returns (uint256)",
   "function approve(address spender, uint256 amount) external returns (bool)"
@@ -149,21 +151,7 @@ const vinSocialAbi = [
   }
 ];
 
-// 👉 Load giao diện khi mở trang
-window.onload = async () => {
-  if (window.ethereum) {
-    provider = new ethers.providers.Web3Provider(window.ethereum);
-    signer = provider.getSigner();
-    vinSocialReadOnly = new ethers.Contract(vinSocialAddress, vinSocialAbi, provider);
-    await tryAutoConnect();
-  } else {
-    provider = new ethers.providers.JsonRpcProvider("https://rpc.viction.xyz");
-    vinSocialReadOnly = new ethers.Contract(vinSocialAddress, vinSocialAbi, provider);
-    showHome(true); // vẫn cho xem bài khi chưa có ví
-  }
-};
-
-// 👉 Kết nối ví
+/* ---------- Wallet and UI ---------- */
 async function connectWallet() {
   await provider.send("eth_requestAccounts", []);
   signer = provider.getSigner();
@@ -173,7 +161,6 @@ async function connectWallet() {
   await updateUI();
 }
 
-// 👉 Ngắt kết nối ví
 function disconnectWallet() {
   userAddress = null;
   isRegistered = false;
@@ -184,26 +171,11 @@ function disconnectWallet() {
   document.getElementById("mainContent").innerHTML = `<p class="tip">Tip: Use VIC chain in MetaMask. On mobile, open in the wallet's browser (e.g. Viction, MetaMask).</p>`;
 }
 
-// 👉 Gọi hợp đồng khi đã kết nối
 async function setupContracts() {
   vinSocialContract = new ethers.Contract(vinSocialAddress, vinSocialAbi, signer);
   vinTokenContract = new ethers.Contract(vinTokenAddress, vinTokenAbi, signer);
 }
 
-// 👉 Tự kết nối lại nếu đã từng kết nối
-async function tryAutoConnect() {
-  const accounts = await provider.send("eth_accounts", []);
-  if (accounts.length > 0) {
-    userAddress = accounts[0];
-    signer = provider.getSigner();
-    await setupContracts();
-    await updateUI();
-  } else {
-    showHome(true);
-  }
-}
-
-// 👉 Hiển thị số dư ví và cập nhật menu
 async function updateUI() {
   const vinBal = await vinTokenContract.balanceOf(userAddress);
   const vicBal = await provider.getBalance(userAddress);
@@ -221,18 +193,6 @@ async function updateUI() {
   isRegistered = await vinSocialContract.isRegistered(userAddress);
   updateMenu();
   showHome(true);
-}
-
-// 👉 Nút copy ví
-function copyToClipboard(text) {
-  navigator.clipboard.writeText(text).then(() => {
-    alert("Address copied to clipboard!");
-  });
-}
-
-// 👉 Rút gọn ví (dùng cho hồ sơ, comment, v.v.)
-function shorten(addr) {
-  return addr.slice(0, 6) + "..." + addr.slice(-4);
 }
 
 // 👉 Hiển thị menu điều hướng
@@ -322,7 +282,7 @@ async function showHome(reset = false) {
       const media = post[3];
       const time = new Date(post[4] * 1000).toLocaleString();
 
-      const [likes, shares, views] = await Promise.all([
+      const [likes, shares, views] = await Promise.all([ 
         vinSocialReadOnly.likeCount(i),
         vinSocialReadOnly.shareCount(i),
         vinSocialReadOnly.viewCount(i)
@@ -367,85 +327,6 @@ async function showHome(reset = false) {
         <button onclick="showHome()">⬇️ Load More</button>
       </div>
     `;
-  }
-}
-
-// 👉 Dịch bài viết qua Google Translate
-function translatePost(text) {
-  const url = `https://translate.google.com/?sl=auto&tl=en&text=${encodeURIComponent(text)}&op=translate`;
-  window.open(url, "_blank");
-}
-
-// 👉 Hiển thị form đăng ký tài khoản
-function showRegister() {
-  if (isRegistered) return alert("You are already registered.");
-  document.getElementById("mainContent").innerHTML = `
-    <h2>Register Account</h2>
-    <form onsubmit="registerUser(); return false;">
-      <label>Name*</label>
-      <input type="text" id="regName" maxlength="32" required/>
-      <label>Bio</label>
-      <input type="text" id="regBio" maxlength="160"/>
-      <label>Avatar URL</label>
-      <input type="text" id="regAvatar"/>
-      <label>Website</label>
-      <input type="text" id="regWebsite"/>
-      <button type="submit">Register (0.05 VIN)</button>
-    </form>
-  `;
-}
-
-// 👉 Gửi yêu cầu đăng ký tài khoản
-async function registerUser() {
-  const name = document.getElementById("regName").value.trim();
-  const bio = document.getElementById("regBio").value.trim();
-  const avatar = document.getElementById("regAvatar").value.trim();
-  const website = document.getElementById("regWebsite").value.trim();
-  const fee = ethers.utils.parseEther("0.05");
-
-  try {
-    const approveTx = await vinTokenContract.approve(vinSocialAddress, fee);
-    await approveTx.wait();
-    const tx = await vinSocialContract.register(name, bio, avatar, website);
-    await tx.wait();
-    alert("Registration successful!");
-    await updateUI();
-  } catch (err) {
-    alert("Registration failed.");
-    console.error(err);
-  }
-}
-
-// 👉 Hiển thị form đăng bài
-function showNewPost() {
-  if (!isRegistered) return alert("You must register to post.");
-  document.getElementById("mainContent").innerHTML = `
-    <h2>New Post</h2>
-    <form onsubmit="createPost(); return false;">
-      <label>Title</label>
-      <input type="text" id="postTitle" maxlength="80"/>
-      <label>What's on your mind?</label>
-      <textarea id="postContent" maxlength="1500" oninput="autoResize(this)" style="overflow:hidden; resize:none;"></textarea>
-      <label>Image URL (optional)</label>
-      <input type="text" id="postMedia"/>
-      <button type="submit">Post</button>
-    </form>
-  `;
-}
-
-// 👉 Gửi bài viết
-async function createPost() {
-  const title = document.getElementById("postTitle").value.trim();
-  const content = document.getElementById("postContent").value.trim();
-  const media = document.getElementById("postMedia").value.trim();
-  try {
-    const tx = await vinSocialContract.createPost(title, content, media);
-    await tx.wait();
-    alert("Post created!");
-    await showHome(true);
-  } catch (err) {
-    alert("Post failed.");
-    console.error(err);
   }
 }
 
@@ -501,7 +382,6 @@ async function showComments(postId) {
   }
 }
 
-// 👉 Gửi bình luận
 async function addComment(postId) {
   const msg = document.getElementById(`comment-${postId}`).value.trim();
   try {

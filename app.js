@@ -2,9 +2,8 @@
    VinSocial.vin — app.js
    ========================= */
 
-/* ---------- Network & Addresses ---------- */
-const vinSocialAddress = "0xAdd06EcD128004bFd35057d7a765562feeB77798"; // Địa chỉ hợp đồng mới
-const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";  // Địa chỉ token VIN (VIC mainnet)
+const vinSocialAddress = "0xA86598807da8C76c5273A06d01C521252D5CDd17";
+const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";
 
 let provider, signer, userAddress;
 let vinSocialContract, vinTokenContract, vinSocialReadOnly;
@@ -12,7 +11,11 @@ let isRegistered = false;
 let lastPostId = 0;
 let seen = new Set();
 
-/* ABI cho hợp đồng VIN và VinSocial */
+const vinTokenAbi = [
+  "function balanceOf(address account) view returns (uint256)",
+  "function approve(address spender, uint256 amount) external returns (bool)"
+];
+
 const vinSocialAbi = [
   // Constructor
   {

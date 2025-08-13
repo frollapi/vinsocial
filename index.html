@@ -9,7 +9,7 @@
 </head>
 <body>
 
-  <!-- 🔼 Tip + Made with ❤️ -->
+  <!-- 🔼 Tip + Made with ❤️ chuyển lên đầu -->
   <div class="top-message">
     <p class="tip">
       Tip: Use VIC chain in MetaMask. On mobile, open in the wallet's browser (e.g. Viction, MetaMask).
@@ -38,24 +38,30 @@
     <a href="https://docs.google.com/document/d/1OxPMY35kBH3VyEJ3HHtqfD18LZcUdZht/edit?usp=sharing" class="guide-link" target="_blank">📘 Guide</a>
   </section>
 
-  <nav id="mainNav" style="display: none;"></nav>
+  <nav id="mainNav" style="display: none;">
+    <ul>
+      <li><a href="#" onclick="renderApp()">🏠 Home</a></li>
+      <li><a href="profile.html" onclick="renderApp()">👤 My Profile</a></li>
+      <li><a href="#" onclick="renderApp()">✍️ New Post</a></li>
+      <li><input type="text" id="walletSearch" placeholder="Search wallet..." /></li>
+      <li><button id="searchBtn">🔍</button></li>
+    </ul>
+  </nav>
 
   <main id="mainContent"></main>
 
   <footer></footer>
 
-  <!-- Ethers v5 (giữ nguyên như bản cũ) -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <!-- Ứng dụng -->
   <script src="app.js"></script>
 
-  <!-- Giá VIN theo USD (VIC/USDT * 100) -->
   <script>
+    // Fetch the current VIN price in USD from Binance
     async function fetchVinPrice() {
       try {
         const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=VICUSDT');
         const data = await res.json();
-        const vinUsd = (parseFloat(data.price) * 100).toFixed(2);
+        const vinUsd = (parseFloat(data.price) * 100).toFixed(2); // Giá FROLL theo USD
         document.getElementById("vinPrice").innerText = `1 VIN ≈ $${vinUsd} USD`;
       } catch {
         document.getElementById("vinPrice").innerText = "1 VIN ≈ $-- USD";

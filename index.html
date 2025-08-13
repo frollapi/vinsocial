@@ -1,67 +1,70 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>VinSocial.vin</title>
-  <link rel="stylesheet" href="style.css"/>
-  <link rel="icon" type="image/png" href="logo.png"/>
-</head>
-<body>
+/* =========================
+   VinSocial.vin — app.js
+   ========================= */
 
-  <!-- 🔼 Tip + Made with ❤️ chuyển lên đầu -->
-  <div class="top-message">
-    <p class="tip">
-      Tip: Use VIC chain in MetaMask. On mobile, open in the wallet's browser (e.g. Viction, MetaMask).
-    </p>
-    <p class="made">Made with ❤️ on the VIC blockchain</p>
-  </div>
-  
-  <header>
-    <div class="logo-area">
-      <img src="logo.png" alt="VinSocial" class="logo"/>
-      <div>
-        <h1>VinSocial.vin</h1>
-        <p>Decentralized. Uncensored. Free Speech.</p>
-      </div>
-    </div>
-    <div class="wallet-area">
-      <span id="walletAddress">Not connected</span> |
-      <span id="walletVIN"></span> |
-      <span id="walletVIC"></span>
-      <button id="connectBtn">Connect Wallet</button>
-      <button id="disconnectBtn" style="display:none;">Disconnect</button>
-    </div>
-  </header>
-  
-  <section class="info-bar">
-    <div id="vinPrice">1 VIN ≈ $-- USD</div>
-    <a href="https://vinswap.vin" class="trade-link" target="_blank">Trade VIN/VIC</a>
-    <a href="https://docs.google.com/document/d/1OxPMY35kBH3VyEJ3HHtqfD18LZcUdZht/edit?usp=sharing" class="guide-link" target="_blank">📘 Guide</a>
-  </section>
+/* ---------- Network & Addresses ---------- */
+const vinSocialAddress = "0xAdd06EcD128004bFd35057d7a765562feeB77798"; // Địa chỉ hợp đồng mới
+const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";  // Địa chỉ token VIN (VIC mainnet)
 
-  <nav id="mainNav" style="display: none;"></nav>
+let provider, signer, userAddress;
+let vinSocialContract, vinTokenContract, vinSocialReadOnly;
+let isRegistered = false;
+let lastPostId = 0;
+let seen = new Set();
 
-  <main id="mainContent"></main>
+/* ABI cho hợp đồng VIN và VinSocial */
+const vinTokenAbi = [
+  "function balanceOf(address account) view returns (uint256)",
+  "function approve(address spender, uint256 amount) external returns (bool)"
+];
 
-  <footer></footer>
+const vinSocialAbi = [
+  {"inputs":[{"internalType":"address","name":"_vinToken","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},
+  {"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"postId","type":"uint256"},{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"string","name":"message","type":"string"}],"name":"Commented","type":"event"},
+  {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"}],"name":"Followed","type":"event"},
+  // ... (Thêm các ABI khác vào đây theo hợp đồng của bạn)
+];
 
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <script src="app.js"></script>
+/* ---------- Wallet and UI ---------- */
+async function connectWallet() {
+  await provider.send("eth_requestAccounts", []);
+  signer = provider.getSigner();
+  userAddress = await signer.getAddress();
+  await setupContracts();
+  vinSocialReadOnly = new ethers.Contract(vinSocialAddress, vinSocialAbi, provider);
+  await updateUI();
+}
 
-  <script>
-    async function fetchVinPrice() {
-      try {
-        const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=VICUSDT');
-        const data = await res.json();
-        const vinUsd = (parseFloat(data.price) * 100).toFixed(2);
-        document.getElementById("vinPrice").innerText = `1 VIN ≈ $${vinUsd} USD`;
-      } catch {
-        document.getElementById("vinPrice").innerText = "1 VIN ≈ $-- USD";
-      }
-    }
-    fetchVinPrice();
-    setInterval(fetchVinPrice, 60000);
-  </script>
-</body>
-</html>
+function disconnectWallet() {
+  userAddress = null;
+  isRegistered = false;
+  document.getElementById("walletAddress").innerText = "Not connected";
+  document.getElementById("connectBtn").style.display = "inline-block";
+  document.getElementById("disconnectBtn").style.display = "none";
+  document.getElementById("mainNav").style.display = "none";
+  document.getElementById("mainContent").innerHTML = `<p class="tip">Tip: Use VIC chain in MetaMask. On mobile, open in the wallet's browser (e.g. Viction, MetaMask).</p>`;
+}
+
+async function setupContracts() {
+  vinSocialContract = new ethers.Contract(vinSocialAddress, vinSocialAbi, signer);
+  vinTokenContract = new ethers.Contract(vinTokenAddress, vinTokenAbi, signer);
+}
+
+async function updateUI() {
+  const vinBal = await vinTokenContract.balanceOf(userAddress);
+  const vicBal = await provider.getBalance(userAddress);
+  const vin = parseFloat(ethers.utils.formatEther(vinBal)).toFixed(2);
+  const vic = parseFloat(ethers.utils.formatEther(vicBal)).toFixed(4);
+
+  document.getElementById("walletAddress").innerHTML = `
+    <span style="font-family: monospace;">${userAddress}</span>
+    <button onclick="copyToClipboard('${userAddress}')" title="Copy address">📋</button>
+    <span style="margin-left: 10px;">| ${vin} VIN | ${vic} VIC</span>
+  `;
+
+  document.getElementById("connectBtn").style.display = "none";
+  document.getElementById("disconnectBtn").style.display = "inline-block";
+  isRegistered = await vinSocialContract.isRegistered(userAddress);
+  updateMenu();
+  showHome(true);
+}

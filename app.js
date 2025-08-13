@@ -2,7 +2,7 @@
    VinSocial.vin — app.js
    ========================= */
 
-const vinSocialAddress = "0xA86598807da8C76c5273A06d01C521252D5CDd17";
+const vinSocialAddress = "0xAdd06EcD128004bFd35057d7a765562feeB77798";
 const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";
 
 let provider, signer, userAddress;

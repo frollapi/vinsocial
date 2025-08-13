@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>VinSocial.vin</title>
   <link rel="stylesheet" href="style.css"/>
-  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <link rel="icon" type="image/png" href="logo.png"/>
 </head>
 <body>
 
@@ -26,9 +26,7 @@
       </div>
     </div>
     <div class="wallet-area">
-      <span id="walletAddress">Not connected</span> |
-      <span id="walletVIN"></span> |
-      <span id="walletVIC"></span>
+      <span id="walletAddress">Not connected</span>
       <button id="connectBtn">Connect Wallet</button>
       <button id="disconnectBtn" style="display:none;">Disconnect</button>
     </div>
@@ -46,6 +44,7 @@
 
   <footer></footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script src="app.js"></script>
 
   <script>
@@ -62,6 +61,5 @@
     fetchVinPrice();
     setInterval(fetchVinPrice, 60000);
   </script>
-
 </body>
 </html>

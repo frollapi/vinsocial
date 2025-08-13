@@ -1,37 +1,24 @@
 /* =========================
-   VinSocial.vin — app.js
-   - Ethers v5 (theo index.html)
-   - Hợp đồng VinSocial mới
-   - Tối đa 20,000 ký tự + giữ xuống dòng
-   - Textarea auto-resize
-   - Phí đăng ký: 0.001 VIN (approve + register)
+   VinSocial.vin — app.js (Cập nhật)
    ========================= */
 
 /* ---------- Network & Addresses ---------- */
-const VIC_CHAIN = {
-  chainId: "0x58", // 88 dec
-  chainName: "Viction Mainnet",
-  nativeCurrency: { name: "VIC", symbol: "VIC", decimals: 18 },
-  rpcUrls: ["https://rpc.viction.xyz"],
-  blockExplorerUrls: ["https://vicscan.xyz"],
-};
+const vinSocialAddress = "0xAdd06EcD128004bFd35057d7a765562feeB77798"; // Địa chỉ hợp đồng mới
+const vinTokenAddress = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";  // Địa chỉ token VIN (VIC mainnet)
 
-// ✅ Địa chỉ triển khai mới bạn vừa deploy
-const VIN_SOCIAL_ADDR = "0xAdd06EcD128004bFd35057d7a765562feeB77798";
-// ✅ Địa chỉ token VIN (VIC mainnet) bạn cung cấp
-const VIN_TOKEN_ADDR  = "0x941F63807401efCE8afe3C9d88d368bAA287Fac4";
+let provider, signer, userAddress;
+let vinSocialContract, vinTokenContract, vinSocialReadOnly;
+let isRegistered = false;
+let lastPostId = 0;
+let seen = new Set();
 
-/* ---------- ABIs ---------- */
-// ERC20 tối giản cho approve/balance
-const ERC20_ABI = [
-  "function approve(address spender, uint256 value) public returns (bool)",
-  "function allowance(address owner, address spender) public view returns (uint256)",
-  "function balanceOf(address account) public view returns (uint256)",
-  "function decimals() public view returns (uint8)"
+/* ABI cho hợp đồng VIN và VinSocial */
+const vinTokenAbi = [
+  "function balanceOf(address account) view returns (uint256)",
+  "function approve(address spender, uint256 amount) external returns (bool)"
 ];
 
-// ABI VinSocial mới (bản bạn vừa xuất)
-const VIN_SOCIAL_ABI = [
+const vinSocialAbi = [
   {"inputs":[{"internalType":"address","name":"_vinToken","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},
   {"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"postId","type":"uint256"},{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":false,"internalType":"string","name":"message","type":"string"}],"name":"Commented","type":"event"},
   {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"}],"name":"Followed","type":"event"},
@@ -71,350 +58,122 @@ const VIN_SOCIAL_ABI = [
   {"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"viewCount","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},
   {"inputs":[{"internalType":"uint256","name":"postId","type":"uint256"}],"name":"viewPost","outputs":[],"stateMutability":"nonpayable","type":"function"},
   {"inputs":[],"name":"vinToken","outputs":[{"internalType":"contract IVIN","name":"","type":"address"}],"stateMutability":"view","type":"function"}
-];
+]
 
-/* =========================
-   VinSocial.vin — app.js (Tiếp theo)
-   ========================= */
-
-/* ---------- State ---------- */
-let provider, signer, userAddress;
-let vinToken, vinSocial;
-
-/* ---------- Helpers ---------- */
-const $ = (id) => document.getElementById(id);
-function shortAddr(a) { return a ? a.slice(0,6)+"..."+a.slice(-4) : ""; }
-
-/* Auto-resize textarea up to a max height (optional clamp) */
-function autoResize(el) {
-  el.style.height = "auto";
-  el.style.height = Math.min(el.scrollHeight, 1200) + "px"; // 1200px trần an toàn
-}
-
-/* ---------- Wallet ---------- */
-async function ensureVIC() {
-  const eth = window.ethereum;
-  if (!eth) throw new Error("No wallet found");
-  const chainId = await eth.request({ method: "eth_chainId" });
-  if (chainId !== VIC_CHAIN.chainId) {
-    try {
-      await eth.request({ method: "wallet_switchEthereumChain", params: [{ chainId: VIC_CHAIN.chainId }] });
-    } catch (e) {
-      if (e && e.code === 4902) {
-        await eth.request({ method: "wallet_addEthereumChain", params: [VIC_CHAIN] });
-      } else {
-        throw e;
-      }
-    }
-  }
-}
-
-async function connectWallet() {
-  try {
-    await ensureVIC();
+// 👉 Load giao diện khi mở trang
+window.onload = async () => {
+  if (window.ethereum) {
     provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
     signer = provider.getSigner();
-    userAddress = await signer.getAddress();
-    $("walletAddress").innerText = shortAddr(userAddress);
-    $("connectBtn").style.display = "none";
-    $("disconnectBtn").style.display = "inline-block";
-    initContracts();
-    await renderApp();
-    fetchBalances(); // Đảm bảo gọi để lấy số dư khi kết nối ví
-  } catch (err) {
-    alert("Connect failed. Please approve wallet requests and ensure VIC network is selected.");
-    console.error(err);
-  }
-}
-
-function disconnectWallet() {
-  provider = undefined;
-  signer = undefined;
-  userAddress = undefined;
-  $("walletAddress").innerText = "Not connected";
-  $("walletVIN").innerText = "0 VIN";
-  $("walletVIC").innerText = "0 VIC";
-  $("connectBtn").style.display = "inline-block";
-  $("disconnectBtn").style.display = "none";
-  renderApp(); // render chế độ xem công khai
-}
-
-/* ---------- Contracts ---------- */
-function initContracts() {
-  vinToken  = new ethers.Contract(VIN_TOKEN_ADDR, ERC20_ABI, signer || provider);
-  vinSocial = new ethers.Contract(VIN_SOCIAL_ADDR, VIN_SOCIAL_ABI, signer || provider);
-}
-
-/* ---------- Fetch Balances ---------- */
-async function fetchBalances() {
-  if (!userAddress) return;
-
-  try {
-    // Lấy số dư VIN
-    const vinBalance = await vinToken.balanceOf(userAddress);
-    const vinDecimal = await vinToken.decimals();
-    const vinAmount = ethers.utils.formatUnits(vinBalance, vinDecimal);
-    $("walletVIN").innerText = `${vinAmount} VIN`;
-
-    // Lấy số dư VIC (VIC token balance)
-    const vicBalance = await provider.getBalance(userAddress);
-    const vicAmount = ethers.utils.formatUnits(vicBalance, 18); // VIC luôn có 18 chữ số thập phân
-    $("walletVIC").innerText = `${vicAmount} VIC`;
-  } catch (err) {
-    console.error("Failed to fetch balances", err);
-    alert("Error fetching balances.");
-  }
-}
-
-/* ---------- UI ---------- */
-async function renderApp() {
-  const main = $("mainContent");
-  main.innerHTML = "";
-
-  // Các thao tác nếu đã kết nối ví
-  if (userAddress) {
-    await fetchBalances();
-    let reg = false;
-    try {
-      reg = await vinSocial.isRegistered(userAddress);
-    } catch {}
-
-    if (reg) {
-      // Nếu đã đăng ký, hiển thị composer (viết bài)
-      const composer = document.createElement("section");
-      composer.className = "composer";
-      composer.innerHTML = `
-        <h3>Create Post</h3>
-        <form id="postForm">
-          <input id="postTitle" type="text" placeholder="Title (optional)" maxlength="256"/>
-          <textarea id="postContent" placeholder="Write something... (max 20,000 chars)" maxlength="20000" rows="4"></textarea>
-          <input id="postMedia" type="url" placeholder="Media URL (optional)"/>
-          <div class="row">
-            <span id="charCount">0 / 20000</span>
-            <button type="submit">Post</button>
-          </div>
-        </form>
-      `;
-      main.appendChild(composer);
-
-      const ta = $("postContent");
-      ta.addEventListener("input", () => {
-        $("charCount").innerText = `${ta.value.length} / 20000`;
-        autoResize(ta);
-      });
-      setTimeout(() => autoResize(ta), 0);
-
-      $("postForm").addEventListener("submit", onCreatePost);
-    } else {
-      // Nếu chưa đăng ký nhưng có ví → hiển thị form đăng ký
-      const regBox = document.createElement("section");
-      regBox.className = "register";
-      regBox.innerHTML = `
-        <h3>Register (one-time fee: 0.001 VIN)</h3>
-        <form id="regForm">
-          <input id="rgName" type="text" placeholder="Name" maxlength="64" required/>
-          <input id="rgAvatar" type="url" placeholder="Avatar URL (optional)"/>
-          <input id="rgWebsite" type="url" placeholder="Website (optional)"/>
-          <textarea id="rgBio" rows="3" maxlength="512" placeholder="Bio (optional)"></textarea>
-          <button type="submit">Register (0.001 VIN)</button>
-        </form>
-        <p class="hint">Registration requires you to approve 0.001 VIN then call register().</p>
-      `;
-      main.appendChild(regBox);
-
-      const bioTA = $("rgBio");
-      bioTA.addEventListener("input", () => autoResize(bioTA));
-      setTimeout(() => autoResize(bioTA), 0);
-
-      $("regForm").addEventListener("submit", onRegister);
-    }
+    vinSocialReadOnly = new ethers.Contract(vinSocialAddress, vinSocialAbi, provider);
+    await tryAutoConnect();
   } else {
-    renderLogin(); // Chưa kết nối ví, chỉ hiển thị đăng nhập
+    provider = new ethers.providers.JsonRpcProvider("https://rpc.viction.xyz");
+    vinSocialReadOnly = new ethers.Contract(vinSocialAddress, vinSocialAbi, provider);
+    showHome(true); // vẫn cho xem bài khi chưa có ví
+  }
+};
+
+// 👉 Kết nối ví
+async function connectWallet() {
+  await provider.send("eth_requestAccounts", []);
+  signer = provider.getSigner();
+  userAddress = await signer.getAddress();
+  await setupContracts();
+  vinSocialReadOnly = new ethers.Contract(vinSocialAddress, vinSocialAbi, provider);
+  await updateUI();
+}
+
+// 👉 Ngắt kết nối ví
+function disconnectWallet() {
+  userAddress = null;
+  isRegistered = false;
+  document.getElementById("walletAddress").innerText = "Not connected";
+  document.getElementById("connectBtn").style.display = "inline-block";
+  document.getElementById("disconnectBtn").style.display = "none";
+  document.getElementById("mainNav").style.display = "none";
+  document.getElementById("mainContent").innerHTML = `<p class="tip">Tip: Use VIC chain in MetaMask. On mobile, open in the wallet's browser (e.g. Viction, MetaMask).</p>`;
+}
+
+// 👉 Gọi hợp đồng khi đã kết nối
+async function setupContracts() {
+  vinSocialContract = new ethers.Contract(vinSocialAddress, vinSocialAbi, signer);
+  vinTokenContract = new ethers.Contract(vinTokenAddress, vinTokenAbi, signer);
+}
+
+// 👉 Tự kết nối lại nếu đã từng kết nối
+async function tryAutoConnect() {
+  const accounts = await provider.send("eth_accounts", []);
+  if (accounts.length > 0) {
+    userAddress = accounts[0];
+    signer = provider.getSigner();
+    await setupContracts();
+    await updateUI();
+  } else {
+    showHome(true);
   }
 }
 
-/* ---------- Actions ---------- */
+// 👉 Hiển thị số dư ví và cập nhật menu
+async function updateUI() {
+  const vinBal = await vinTokenContract.balanceOf(userAddress);
+  const vicBal = await provider.getBalance(userAddress);
+  const vin = parseFloat(ethers.utils.formatEther(vinBal)).toFixed(2);
+  const vic = parseFloat(ethers.utils.formatEther(vicBal)).toFixed(4);
 
-// Đăng ký tài khoản
-async function onRegister(e) {
-  e.preventDefault();
-  const name    = $("rgName").value.trim();
-  const bio     = $("rgBio").value;            // giữ nguyên \n
-  const avatar  = $("rgAvatar").value.trim();
-  const website = $("rgWebsite").value.trim();
+  document.getElementById("walletAddress").innerHTML = `
+    <span style="font-family: monospace;">${userAddress}</span>
+    <button onclick="copyToClipboard('${userAddress}')" title="Copy address">📋</button>
+    <span style="margin-left: 10px;">| ${vin} VIN | ${vic} VIC</span>
+  `;
 
-  if (!signer) return alert("Connect wallet first.");
-
-  try {
-    // Approve 0.001 VIN cho VinSocial contract
-    const fee = ethers.utils.parseEther("0.001");
-    const allowance = await vinToken.allowance(userAddress, VIN_SOCIAL_ADDR);
-    if (allowance.lt(fee)) {
-      const tx1 = await vinToken.connect(signer).approve(VIN_SOCIAL_ADDR, fee);
-      await tx1.wait();
-    }
-
-    const tx2 = await vinSocial.connect(signer).register(name, bio, avatar, website);
-    await tx2.wait();
-
-    alert("Registered successfully!");
-    await renderApp();
-  } catch (err) {
-    console.error(err);
-    alert("Register failed.");
-  }
+  document.getElementById("connectBtn").style.display = "none";
+  document.getElementById("disconnectBtn").style.display = "inline-block";
+  isRegistered = await vinSocialContract.isRegistered(userAddress);
+  updateMenu();
+  showHome(true);
 }
 
-/* =========================
-   VinSocial.vin — app.js (Tiếp theo)
-   ========================= */
-
-/* ---------- Actions ---------- */
-
-// Đăng bài mới
-async function onCreatePost(e) {
-  e.preventDefault();
-  if (!signer) return alert("Connect wallet first.");
-  const title = $("postTitle").value.trim();
-  const content = $("postContent").value; // KHÔNG .trim() → giữ \n + khoảng trắng
-  const media = $("postMedia").value.trim();
-
-  if (content.length === 0) return alert("Content is empty.");
-  if (content.length > 20000) return alert("Content exceeds 20,000 characters.");
-
-  try {
-    const tx = await vinSocial.connect(signer).createPost(title, content, media);
-    await tx.wait();
-    $("postTitle").value = "";
-    $("postContent").value = "";
-    $("postMedia").value = "";
-    $("charCount").innerText = "0 / 20000";
-    alert("Posted!");
-    await loadFeed(true);
-  } catch (err) {
-    console.error(err);
-    alert("Post failed.");
-  }
-}
-
-// Like bài viết
-async function onLike(postId) {
-  try {
-    const tx = await vinSocial.connect(signer).likePost(postId);
-    await tx.wait();
-    await loadFeed(true);
-  } catch (e) {
-    console.error(e);
-    alert("Like failed.");
-  }
-}
-
-// Chia sẻ bài viết (tweet lại)
-async function onShare(postId) {
-  try {
-    const tx = await vinSocial.connect(signer).sharePost(postId);
-    await tx.wait();
-    await loadFeed(true);
-  } catch (e) {
-    console.error(e);
-    alert("Share failed.");
-  }
-}
-
-// Xem bài viết
-async function onView(postId) {
-  try {
-    const tx = await vinSocial.connect(signer).viewPost(postId);
-    await tx.wait();
-    await loadFeed(true);
-  } catch (e) {
-    console.error(e);
-    alert("View failed.");
-  }
-}
-
-// Gửi bình luận
-async function onSendComment(postId) {
-  const ta = $(`cmt-${postId}`);
-  const msg = ta.value;
-  if (!msg) return;
-  try {
-    const tx = await vinSocial.connect(signer).commentOnPost(postId, msg);
-    await tx.wait();
-    ta.value = "";
-    autoResize(ta);
-    await loadFeed(true);
-  } catch (e) {
-    console.error(e);
-    alert("Comment failed.");
-  }
-}
-
-/* ---------- Feed loader ---------- */
-async function loadFeed(refreshOnly = false) {
-  const list = $("feedList");
-  if (!refreshOnly) list.innerHTML = `<div class="loading">Loading...</div>`;
-
-  try {
-    const nextId = await vinSocial.nextPostId();
-    const latest = nextId.toNumber ? nextId.toNumber() : parseInt(nextId);
-    const start = Math.max(1, latest - 19); // lấy tối đa 20 bài gần nhất
-    const items = [];
-
-    for (let id = latest - 1; id >= start - 1; id--) {
-      if (id < 1) break;
-      const p = await vinSocial.posts(id);
-      if (!p || p.author === ethers.constants.AddressZero) continue;
-      items.push({
-        id,
-        author: p.author,
-        title: p.title,
-        content: p.content,
-        media: p.media,
-        timestamp: (p.timestamp.toNumber ? p.timestamp.toNumber() : parseInt(p.timestamp)) || 0
-      });
-    }
-
-    list.innerHTML = "";
-    if (items.length === 0) {
-      list.innerHTML = `<div class="empty">No posts yet.</div>`;
-    } else {
-      items.forEach((p) => list.appendChild(renderPostCard(p)));
-      bindPostActionButtons();
-    }
-  } catch (e) {
-    console.error(e);
-    list.innerHTML = `<div class="error">Failed to load feed.</div>`;
-  }
-}
-
-function bindPostActionButtons() {
-  [...document.querySelectorAll(".likeBtn")].forEach(btn => {
-    btn.addEventListener("click", () => onLike(parseInt(btn.dataset.id)));
-  });
-  [...document.querySelectorAll(".shareBtn")].forEach(btn => {
-    btn.addEventListener("click", () => onShare(parseInt(btn.dataset.id)));
-  });
-  [...document.querySelectorAll(".viewBtn")].forEach(btn => {
-    btn.addEventListener("click", () => onView(parseInt(btn.dataset.id)));
-  });
-  [...document.querySelectorAll(".commentBtn")].forEach(btn => {
-    btn.addEventListener("click", () => {
-      const id = parseInt(btn.dataset.id);
-      const box = $(`cbox-${id}`);
-      if (box) box.style.display = box.style.display === "none" ? "block" : "none";
-    });
-  });
-  [...document.querySelectorAll(".sendComment")].forEach(btn => {
-    btn.addEventListener("click", () => onSendComment(parseInt(btn.dataset.id)));
+// 👉 Nút copy ví
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    alert("Address copied to clipboard!");
   });
 }
 
-/* ---------- Boot ---------- */
-window.addEventListener("load", () => {
-  $("connectBtn").addEventListener("click", connectWallet);
-  $("disconnectBtn").addEventListener("click", disconnectWallet);
-  renderApp();
-});
+// 👉 Rút gọn ví (dùng cho hồ sơ, comment, v.v.)
+function shorten(addr) {
+  return addr.slice(0, 6) + "..." + addr.slice(-4);
+}
 
+// 👉 Hiển thị menu điều hướng
+function updateMenu() {
+  const nav = document.getElementById("mainNav");
+  nav.style.display = "flex";
+  if (isRegistered) {
+    nav.innerHTML = `
+      <button class="nav-btn" onclick="showHome(true)">🏠 Home</button>
+      <button class="nav-btn" onclick="showProfile()">👤 My Profile</button>
+      <button class="nav-btn" onclick="showNewPost()">✍️ New Post</button>
+      <form onsubmit="searchByAddress(); return false;" style="margin-left: 10px;">
+        <input type="text" id="searchInput" placeholder="Search wallet..." style="padding:4px; font-size:13px; border-radius:6px; border:1px solid #ccc;" />
+        <button type="submit" style="padding:4px 8px; margin-left:5px; border-radius:6px; background:#007bff; color:white; border:none;">🔍</button>
+      </form>
+    `;
+  } else {
+    nav.innerHTML = `
+      <button class="nav-btn" onclick="showHome(true)">🏠 Home</button>
+      <button class="nav-btn" onclick="showRegister()">📝 Register</button>
+    `;
+  }
+}
+
+// 👉 Tìm kiếm theo địa chỉ ví
+function searchByAddress() {
+  const input = document.getElementById("searchInput").value.trim();
+  if (!ethers.utils.isAddress(input)) {
+    alert("Please enter a valid wallet address.");
+    return;
+  }
+  viewProfile(input);
+}

@@ -86,3 +86,55 @@ function autoResize(el) {
   el.style.height = "auto";
   el.style.height = Math.min(el.scrollHeight, 1200) + "px"; // 1200px trần an toàn
 }
+
+/* ---------- Wallet ---------- */
+async function ensureVIC() {
+  const eth = window.ethereum;
+  if (!eth) throw new Error("No wallet found");
+  const chainId = await eth.request({ method: "eth_chainId" });
+  if (chainId !== VIC_CHAIN.chainId) {
+    try {
+      await eth.request({ method: "wallet_switchEthereumChain", params: [{ chainId: VIC_CHAIN.chainId }] });
+    } catch (e) {
+      if (e && e.code === 4902) {
+        await eth.request({ method: "wallet_addEthereumChain", params: [VIC_CHAIN] });
+      } else {
+        throw e;
+      }
+    }
+  }
+}
+
+async function connectWallet() {
+  try {
+    await ensureVIC();
+    provider = new ethers.providers.Web3Provider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
+    signer = provider.getSigner();
+    userAddress = await signer.getAddress();
+    $("walletAddress").innerText = shortAddr(userAddress);
+    $("connectBtn").style.display = "none";
+    $("disconnectBtn").style.display = "inline-block";
+    initContracts();
+    await renderApp();
+  } catch (err) {
+    alert("Connect failed. Please approve wallet requests and ensure VIC network is selected.");
+    console.error(err);
+  }
+}
+
+function disconnectWallet() {
+  provider = undefined;
+  signer = undefined;
+  userAddress = undefined;
+  $("walletAddress").innerText = "Not connected";
+  $("connectBtn").style.display = "inline-block";
+  $("disconnectBtn").style.display = "none";
+  renderApp(); // render chế độ xem công khai
+}
+
+function initContracts() {
+  vinToken  = new ethers.Contract(VIN_TOKEN_ADDR, ERC20_ABI, signer || provider);
+  vinSocial = new ethers.Contract(VIN_SOCIAL_ADDR, VIN_SOCIAL_ABI, signer || provider);
+}
+

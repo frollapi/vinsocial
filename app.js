@@ -329,3 +329,70 @@ async function onSendComment(postId) {
   }
 }
 
+/* ---------- Feed loader ---------- */
+async function loadFeed(refreshOnly = false) {
+  const list = $("feedList");
+  if (!refreshOnly) list.innerHTML = `<div class="loading">Loading...</div>`;
+
+  try {
+    const nextId = await vinSocial.nextPostId();
+    const latest = nextId.toNumber ? nextId.toNumber() : parseInt(nextId);
+    const start = Math.max(1, latest - 19); // lấy tối đa 20 bài gần nhất
+    const items = [];
+
+    for (let id = latest - 1; id >= start - 1; id--) {
+      if (id < 1) break;
+      const p = await vinSocial.posts(id);
+      if (!p || p.author === ethers.constants.AddressZero) continue;
+      items.push({
+        id,
+        author: p.author,
+        title: p.title,
+        content: p.content,
+        media: p.media,
+        timestamp: (p.timestamp.toNumber ? p.timestamp.toNumber() : parseInt(p.timestamp)) || 0
+      });
+    }
+
+    list.innerHTML = "";
+    if (items.length === 0) {
+      list.innerHTML = `<div class="empty">No posts yet.</div>`;
+    } else {
+      items.forEach((p) => list.appendChild(renderPostCard(p)));
+      bindPostActionButtons();
+    }
+  } catch (e) {
+    console.error(e);
+    list.innerHTML = `<div class="error">Failed to load feed.</div>`;
+  }
+}
+
+function bindPostActionButtons() {
+  [...document.querySelectorAll(".likeBtn")].forEach(btn => {
+    btn.addEventListener("click", () => onLike(parseInt(btn.dataset.id)));
+  });
+  [...document.querySelectorAll(".shareBtn")].forEach(btn => {
+    btn.addEventListener("click", () => onShare(parseInt(btn.dataset.id)));
+  });
+  [...document.querySelectorAll(".viewBtn")].forEach(btn => {
+    btn.addEventListener("click", () => onView(parseInt(btn.dataset.id)));
+  });
+  [...document.querySelectorAll(".commentBtn")].forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = parseInt(btn.dataset.id);
+      const box = $(`cbox-${id}`);
+      if (box) box.style.display = box.style.display === "none" ? "block" : "none";
+    });
+  });
+  [...document.querySelectorAll(".sendComment")].forEach(btn => {
+    btn.addEventListener("click", () => onSendComment(parseInt(btn.dataset.id)));
+  });
+}
+
+/* ---------- Boot ---------- */
+window.addEventListener("load", () => {
+  $("connectBtn").addEventListener("click", connectWallet);
+  $("disconnectBtn").addEventListener("click", disconnectWallet);
+  renderApp();
+});
+

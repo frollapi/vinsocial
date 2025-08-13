@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>VinSocial.vin</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css"/>
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
 </head>
-
 <body>
 
+  <!-- 🔼 Tip + Made with ❤️ chuyển lên đầu -->
   <div class="top-message">
     <p class="tip">
       Tip: Use VIC chain in MetaMask. On mobile, open in the wallet's browser (e.g. Viction, MetaMask).
@@ -20,7 +19,7 @@
 
   <header>
     <div class="logo-area">
-      <img src="logo.png" alt="VinSocial" class="logo" />
+      <img src="logo.png" alt="VinSocial" class="logo"/>
       <div>
         <h1>VinSocial.vin</h1>
         <p>Decentralized. Uncensored. Free Speech.</p>
@@ -28,8 +27,8 @@
     </div>
     <div class="wallet-area">
       <span id="walletAddress">Not connected</span> |
-      <span id="walletVIN"></span> |
-      <span id="walletVIC"></span>
+      <span id="walletVIN">0 VIN</span> |
+      <span id="walletVIC">0 VIC</span>
       <button id="connectBtn">Connect Wallet</button>
       <button id="disconnectBtn" style="display:none;">Disconnect</button>
     </div>
@@ -41,15 +40,7 @@
     <a href="https://docs.google.com/document/d/1OxPMY35kBH3VyEJ3HHtqfD18LZcUdZht/edit?usp=sharing" class="guide-link" target="_blank">📘 Guide</a>
   </section>
 
-  <nav id="mainNav" style="display: none;">
-    <ul>
-      <li><a href="#" onclick="renderApp()">🏠 Home</a></li>
-      <li><a href="profile.html" onclick="renderApp()">👤 My Profile</a></li>
-      <li><a href="#" onclick="renderApp()">✍️ New Post</a></li>
-      <li><input type="text" id="walletSearch" placeholder="Search wallet..." /></li>
-      <li><button id="searchBtn">🔍</button></li>
-    </ul>
-  </nav>
+  <nav id="mainNav" style="display: none;"></nav>
 
   <main id="mainContent"></main>
 
@@ -58,12 +49,11 @@
   <script src="app.js"></script>
 
   <script>
-    // Fetch the current VIN price in USD from Binance
     async function fetchVinPrice() {
       try {
         const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=VICUSDT');
         const data = await res.json();
-        const vinUsd = (parseFloat(data.price) * 100).toFixed(2); // Giá FROLL theo USD
+        const vinUsd = (parseFloat(data.price) * 100).toFixed(2);
         document.getElementById("vinPrice").innerText = `1 VIN ≈ $${vinUsd} USD`;
       } catch {
         document.getElementById("vinPrice").innerText = "1 VIN ≈ $-- USD";
@@ -72,6 +62,6 @@
     fetchVinPrice();
     setInterval(fetchVinPrice, 60000);
   </script>
-</body>
 
+</body>
 </html>

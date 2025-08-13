@@ -266,3 +266,155 @@ async function onRegister(e) {
   }
 }
 
+/* =========================
+   VinSocial.vin — app.js (Tiếp theo)
+   ========================= */
+
+/* ---------- Actions ---------- */
+
+// Đăng bài mới
+async function onCreatePost(e) {
+  e.preventDefault();
+  if (!signer) return alert("Connect wallet first.");
+  const title = $("postTitle").value.trim();
+  const content = $("postContent").value; // KHÔNG .trim() → giữ \n + khoảng trắng
+  const media = $("postMedia").value.trim();
+
+  if (content.length === 0) return alert("Content is empty.");
+  if (content.length > 20000) return alert("Content exceeds 20,000 characters.");
+
+  try {
+    const tx = await vinSocial.connect(signer).createPost(title, content, media);
+    await tx.wait();
+    $("postTitle").value = "";
+    $("postContent").value = "";
+    $("postMedia").value = "";
+    $("charCount").innerText = "0 / 20000";
+    alert("Posted!");
+    await loadFeed(true);
+  } catch (err) {
+    console.error(err);
+    alert("Post failed.");
+  }
+}
+
+// Like bài viết
+async function onLike(postId) {
+  try {
+    const tx = await vinSocial.connect(signer).likePost(postId);
+    await tx.wait();
+    await loadFeed(true);
+  } catch (e) {
+    console.error(e);
+    alert("Like failed.");
+  }
+}
+
+// Chia sẻ bài viết (tweet lại)
+async function onShare(postId) {
+  try {
+    const tx = await vinSocial.connect(signer).sharePost(postId);
+    await tx.wait();
+    await loadFeed(true);
+  } catch (e) {
+    console.error(e);
+    alert("Share failed.");
+  }
+}
+
+// Xem bài viết
+async function onView(postId) {
+  try {
+    const tx = await vinSocial.connect(signer).viewPost(postId);
+    await tx.wait();
+    await loadFeed(true);
+  } catch (e) {
+    console.error(e);
+    alert("View failed.");
+  }
+}
+
+// Gửi bình luận
+async function onSendComment(postId) {
+  const ta = $(`cmt-${postId}`);
+  const msg = ta.value;
+  if (!msg) return;
+  try {
+    const tx = await vinSocial.connect(signer).commentOnPost(postId, msg);
+    await tx.wait();
+    ta.value = "";
+    autoResize(ta);
+    await loadFeed(true);
+  } catch (e) {
+    console.error(e);
+    alert("Comment failed.");
+  }
+}
+
+/* ---------- Feed loader ---------- */
+async function loadFeed(refreshOnly = false) {
+  const list = $("feedList");
+  if (!refreshOnly) list.innerHTML = `<div class="loading">Loading...</div>`;
+
+  try {
+    const nextId = await vinSocial.nextPostId();
+    const latest = nextId.toNumber ? nextId.toNumber() : parseInt(nextId);
+    const start = Math.max(1, latest - 19); // lấy tối đa 20 bài gần nhất
+    const items = [];
+
+    for (let id = latest - 1; id >= start - 1; id--) {
+      if (id < 1) break;
+      const p = await vinSocial.posts(id);
+      if (!p || p.author === ethers.constants.AddressZero) continue;
+      items.push({
+        id,
+        author: p.author,
+        title: p.title,
+        content: p.content,
+        media: p.media,
+        timestamp: (p.timestamp.toNumber ? p.timestamp.toNumber() : parseInt(p.timestamp)) || 0
+      });
+    }
+
+    list.innerHTML = "";
+    if (items.length === 0) {
+      list.innerHTML = `<div class="empty">No posts yet.</div>`;
+    } else {
+      items.forEach((p) => list.appendChild(renderPostCard(p)));
+      bindPostActionButtons();
+    }
+  } catch (e) {
+    console.error(e);
+    list.innerHTML = `<div class="error">Failed to load feed.</div>`;
+  }
+}
+
+function bindPostActionButtons() {
+  [...document.querySelectorAll(".likeBtn")].forEach(btn => {
+    btn.addEventListener("click", () => onLike(parseInt(btn.dataset.id)));
+  });
+  [...document.querySelectorAll(".shareBtn")].forEach(btn => {
+    btn.addEventListener("click", () => onShare(parseInt(btn.dataset.id)));
+  });
+  [...document.querySelectorAll(".viewBtn")].forEach(btn => {
+    btn.addEventListener("click", () => onView(parseInt(btn.dataset.id)));
+  });
+  [...document.querySelectorAll(".commentBtn")].forEach(btn => {
+    btn.addEventListener("click", () => {
+      const id = parseInt(btn.dataset.id);
+      const box = $(`cbox-${id}`);
+      if (box) box.style.display = box.style.display === "none" ? "block" : "none";
+    });
+  });
+  [...document.querySelectorAll(".sendComment")].forEach(btn => {
+    btn.addEventListener("click", () => onSendComment(parseInt(btn.dataset.id)));
+  });
+}
+
+/* ---------- Boot ---------- */
+window.addEventListener("load", () => {
+  $("connectBtn").addEventListener("click", connectWallet);
+  $("disconnectBtn").addEventListener("click", disconnectWallet);
+  renderApp();
+});
+

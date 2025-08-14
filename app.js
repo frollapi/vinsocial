@@ -1290,3 +1290,73 @@ async function searchByAddressOrKeyword(input) {
     alert("Currently only wallet address search is supported.");
   }
 }
+
+<!-- ▼▼▼ PASTE VÀO CUỐI app.js ▼▼▼ -->
+// === Patch: Long posts + xuống dòng + auto-resize (UI-only) ===
+(function () {
+  // 1) Tiêm CSS để giữ xuống dòng khi HIỂN THỊ bài & comment
+  const id = 'vin-patch-prewrap';
+  if (!document.getElementById(id)) {
+    const s = document.createElement('style');
+    s.id = id;
+    s.textContent = `
+      .post .content { white-space: pre-wrap; word-break: break-word; }
+      .comments p { white-space: pre-wrap; }
+      textarea#postContent { overflow: hidden; resize: none; }
+    `;
+    document.head.appendChild(s);
+  }
+
+  // 2) Fallback autoResize nếu file cũ chưa có
+  if (typeof window.autoResize !== 'function') {
+    window.autoResize = function (ta) {
+      ta.style.height = 'auto';
+      ta.style.height = ta.scrollHeight + 'px';
+    };
+  }
+
+  // 3) Override showNewPost: đặt maxlength=20000 + gắn auto-resize & giữ Enter
+  window.showNewPost = function () {
+    document.getElementById("mainContent").innerHTML = `
+      <h2>New Post</h2>
+      <form onsubmit="createPost(); return false;">
+        <label>Title</label>
+        <input type="text" id="postTitle" maxlength="80"/>
+        <label>What's on your mind?</label>
+        <textarea id="postContent" maxlength="20000" placeholder="Write here... (max 20,000 characters)"></textarea>
+        <label>Image URL (optional)</label>
+        <input type="text" id="postMedia" placeholder="https://..."/>
+        <button type="submit">Post</button>
+      </form>
+    `;
+    const ta = document.getElementById('postContent');
+    const onChange = () => window.autoResize(ta);
+    ['input','keyup','change'].forEach(evt => ta.addEventListener(evt, onChange));
+    ta.addEventListener('paste', () => setTimeout(onChange, 0)); // sau khi dán mới đo scrollHeight
+    onChange(); // set height lần đầu
+  };
+
+  // 4) Override createPost: không làm mất xuống dòng + chặn >20000
+  window.createPost = async function () {
+    const title = document.getElementById("postTitle").value.trim();
+    const contentEl = document.getElementById("postContent");
+    const content = contentEl.value; // GIỮ nguyên \n, không .trim() để tránh mất xuống dòng cuối
+    const media = (document.getElementById("postMedia").value || '').trim();
+
+    if (content.length > 20000) {
+      alert(`Your post is ${content.length} characters. The maximum is 20,000.`);
+      return;
+    }
+
+    try {
+      const tx = await vinSocialContract.createPost(title, content, media);
+      await tx.wait();
+      alert("Post created!");
+      await showHome(true);
+    } catch (err) {
+      alert("Post failed.");
+      console.error(err);
+    }
+  };
+})();
+<!-- ▲▲▲ HẾT PATCH ▲▲▲ -->

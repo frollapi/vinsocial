@@ -400,3 +400,89 @@ nav form button {
 nav form button:hover {
   background: #0056b3;
 }
+
+/* ==== Sticky Bottom Nav (VinSocial) ==== */
+:root {
+  --bn-bg: #ffffff;         /* nền thanh điều hướng */
+  --bn-text: #1161ff;       /* chữ xanh */
+  --bn-text-hover: #0a49bf; /* chữ khi hover */
+  --bn-shadow: 0 -6px 20px rgba(0,0,0,0.06);
+  --bn-border: rgba(0,0,0,0.06);
+}
+
+body {
+  /* chừa khoảng trống cho thanh điều hướng để nội dung không bị che */
+  padding-bottom: 76px; /* chỉnh nếu bạn thêm/bớt chiều cao nav */
+}
+
+/* Vùng bao thanh điều hướng */
+.bottom-nav {
+  position: sticky;
+  position: -webkit-sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: var(--bn-bg);
+  border-top: 1px solid var(--bn-border);
+  box-shadow: var(--bn-shadow);
+  padding: 10px env(safe-area-inset-right) calc(10px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
+}
+
+/* Container các nút */
+.bn-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;              /* tự xuống dòng trên màn hình nhỏ */
+  gap: 10px;
+  align-items: center;
+  justify-content: center;      /* căn giữa đẹp trên cả mobile/desktop */
+}
+
+/* Nút/link */
+.bn-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  min-height: 40px;
+  border-radius: 10px;
+  background: #fff;             /* nền trắng */
+  color: var(--bn-text);        /* chữ xanh */
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1;
+  text-decoration: none;
+  border: 1px solid var(--bn-border);
+  transition: transform .06s ease, box-shadow .2s ease, color .2s ease;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+  white-space: nowrap;          /* tránh vỡ chữ */
+}
+
+.bn-link:hover,
+.bn-link:focus-visible {
+  color: var(--bn-text-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(17,97,255,0.12);
+  outline: none;
+}
+
+/* Điều chỉnh nhỏ cho màn hình rất nhỏ */
+@media (max-width: 360px) {
+  .bn-link {
+    padding: 9px 12px;
+    font-size: 13px;
+  }
+}
+
+/* Desktop: tăng nhẹ kích thước và giãn cách */
+@media (min-width: 992px) {
+  .bn-container {
+    gap: 12px;
+  }
+  .bn-link {
+    padding: 10px 16px;
+    font-size: 15px;
+  }
+}

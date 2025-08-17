@@ -1050,7 +1050,7 @@ function showRegister() {
       <input type="text" id="regAvatar"/>
       <label>Website</label>
       <input type="text" id="regWebsite"/>
-      <button type="submit">Register (0.05 VIN)</button>
+      <button type="submit">Register (0.001 VIN)</button>
     </form>
   `;
 }
@@ -1061,7 +1061,7 @@ async function registerUser() {
   const bio = document.getElementById("regBio").value.trim();
   const avatar = document.getElementById("regAvatar").value.trim();
   const website = document.getElementById("regWebsite").value.trim();
-  const fee = ethers.utils.parseEther("0.05");
+  const fee = ethers.utils.parseEther("0.001");
 
   try {
     const approveTx = await vinTokenContract.approve(vinSocialAddress, fee);
